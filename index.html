@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>لوحة تسيير الاشتراكات</title>
+<title>لوحة تسيير الاشتراكات 2</title>
 
 <style>
 :root{
@@ -870,6 +870,17 @@ const $ = (id)=>document.getElementById(id);
 const FIREBASE_URL  = "https://dattta-6f497-default-rtdb.firebaseio.com";
 const FIREBASE_PATH = "subscriptions"; // مسار التخزين المشترك في Firebase
 
+// ===== Auth token helper for REST requests =====
+async function requireIdToken(){
+  // تأكد أن Auth مفعّل
+  try{ if(!authReady) initAuth(); }catch{}
+  if(!currentUser){
+    throw new Error("لا يمكنك المزامنة قبل تسجيل الدخول (الحساب).");
+  }
+  return await currentUser.getIdToken(/*forceRefresh*/ false);
+}
+
+
 const LOCAL_BACKUP_KEY   = "subs_local_backup_v3";
 const PENDING_SYNC_KEY   = "subs_pending_sync_v1";
 
@@ -937,7 +948,8 @@ function loadLocalBackup(){
 }
 
 async function firebasePull(){
-  const url = `${FIREBASE_URL}/${FIREBASE_PATH}.json`;
+  const token = await requireIdToken();
+  const url = `${FIREBASE_URL}/${FIREBASE_PATH}.json?auth=${encodeURIComponent(token)}`;
   const res = await fetchWithTimeout(url, {}, 25000);
   if(!res.ok){
     const txt = await res.text().catch(()=> "");
@@ -949,7 +961,8 @@ async function firebasePull(){
 }
 
 async function firebasePushOnce(){
-  const url = `${FIREBASE_URL}/${FIREBASE_PATH}.json`;
+  const token = await requireIdToken();
+  const url = `${FIREBASE_URL}/${FIREBASE_PATH}.json?auth=${encodeURIComponent(token)}`;
   const res = await fetchWithTimeout(url, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -958,9 +971,14 @@ async function firebasePushOnce(){
 
   if(!res.ok){
     const txt = await res.text().catch(()=> "");
+    // رسالة أوضح إذا كان المستخدم ليس Admin
+    if(res.status === 401 || res.status === 403){
+      throw new Error(`ممنوع: ليس لديك صلاحية التعديل (Admin فقط). (${res.status}) ${txt}`.trim());
+    }
     throw new Error(`Firebase push failed (${res.status}) ${txt}`.trim());
   }
 }
+
 
 // محاولة دفع مع إعادة محاولة بسيطة
 async function firebasePushRetry(maxTries=3){
@@ -1915,8 +1933,17 @@ function render(){
 
 /* init */
 (async ()=>{
+  // تهيئة تسجيل الدخول (إن وُجدت مكتبات Firebase)
+  try{ initAuth(); }catch{}
+
   await load();
   render();
+
+  // إذا لم يتم تسجيل الدخول: افتح نافذة الحساب تلقائياً حتى تعمل المزامنة والقراءة
+  if(!currentUser){
+    try{ openModal("authModal"); }catch{}
+    try{ showToast("سجّل الدخول لتفعيل المزامنة", "بدون تسجيل الدخول سيظهر Permission denied", "warn"); }catch{}
+  }
 })();
 </script>
 
