@@ -3,9 +3,10 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>لوحة تسيير الاشتراكات 3.0</title>
+<title>لوحة تسيير الاشتراكات 4.0</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
 
 <style>
 :root{
@@ -13,14 +14,11 @@
   --bg1:#0b1020;
   --card: rgba(255,255,255,.06);
   --line: rgba(255,255,255,.10);
-
   --text:#eaf0ff;
   --muted: rgba(234,240,255,.70);
-
   --accent:#7c5cff;
   --warn:#f59e0b;
   --err:#ef4444;
-
   --radius:18px;
   --shadow: 0 18px 45px rgba(0,0,0,.45);
 }
@@ -128,7 +126,7 @@ body{
   border-color: var(--text);
 }
 
-/* ===== Analytics Dashboard (الجديد) ===== */
+/* ===== Analytics Dashboard ===== */
 .analyticsArea{
   display: flex;
   flex-wrap: wrap;
@@ -139,7 +137,7 @@ body{
   align-items: center;
 }
 .chartContainer{
-  height: 140px;
+  height: 160px;
   flex: 1;
   min-width: 250px;
   max-width: 400px;
@@ -155,6 +153,18 @@ body{
 }
 .revTitle{ color: var(--muted); font-size: 13px; font-weight: 900; margin-bottom: 8px; }
 .revValue{ color: var(--text); font-size: 24px; font-weight: 900; }
+
+/* ===== Bulk Actions Bar (الجديد) ===== */
+.bulkBar{
+  display: none;
+  padding: 12px 14px;
+  background: rgba(124,92,255,.15);
+  border-bottom: 1px solid var(--line);
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+}
+.bulkBar span{ font-weight: 900; color: #fff; }
 
 .pills{margin-inline-start:auto;display:flex;gap:8px;flex-wrap:wrap}
 
@@ -200,7 +210,7 @@ table{
   width:100%;
   border-collapse:separate;
   border-spacing:0;
-  min-width: 980px;
+  min-width: 1000px;
 }
 thead th{
   position:sticky; top:0;
@@ -223,8 +233,16 @@ tbody tr:hover{ background: rgba(255,255,255,.03); }
 
 tr.expired-row{ background: rgba(239,68,68,.10); }
 tr.expiring-row{ background: rgba(245,158,11,.08); }
-tr.expired-row td:first-child{ box-shadow: inset 4px 0 0 rgba(239,68,68,.85); }
-tr.expiring-row td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.85); }
+tr.expired-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(239,68,68,.85); }
+tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85); }
+
+/* Custom Checkbox */
+input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
 
 .badge{
   display:inline-flex;
@@ -281,7 +299,6 @@ tr.expiring-row td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.85); 
   gap:10px;
 }
 @media (max-width: 980px){
-  table{min-width: 860px}
   .formGrid{ grid-template-columns: 1fr 1fr; }
 }
 .field label{
@@ -305,7 +322,7 @@ tr.expiring-row td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.85); 
   box-shadow: 0 0 0 4px rgba(124,92,255,.14);
 }
 
-/* ===== Actions Modal (للجدول فقط) ===== */
+/* ===== Actions Modal ===== */
 .actionPill{
   padding:10px 12px;
   border-radius:16px;
@@ -379,7 +396,7 @@ tr.expiring-row td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.85); 
 .toast .sub{ color: var(--muted); font-weight: 800; }
 
 @media print{
-  .filtersBar, .topbar, .analyticsArea, .btn, .toast, .modal{ display:none !important; }
+  .filtersBar, .topbar, .analyticsArea, .bulkBar, .btn, .toast, .modal{ display:none !important; }
 }
 </style>
 
@@ -392,7 +409,7 @@ tr.expiring-row td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.85); 
 <div class="container">
   <div class="header">
     <h1>🧾 لوحة تسيير الاشتراكات</h1>
-    <div class="sub">⚡ المرحلة 2: لوحة قيادة احترافية + رسومات بيانية. <span style="opacity:.7;font-weight:800">(v3.0)</span></div>
+    <div class="sub">⚡ النسخة الشاملة v4.0: حماية، إحصائيات مرئية، فلاتر، واتساب، وإجراءات جماعية.</div>
   </div>
 
   <div class="card">
@@ -432,10 +449,17 @@ tr.expiring-row td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.85); 
       </div>
     </div>
 
+    <div class="bulkBar" id="bulkBar">
+      <span id="bulkCount">0 محدد</span>
+      <button class="btn primary" id="bulkExtend" type="button">🔁 تجديد بشهر</button>
+      <button class="btn danger" id="bulkDelete" type="button">🗑️ حذف المحدد</button>
+    </div>
+
     <div class="tableWrap">
       <table>
         <thead>
           <tr>
+            <th style="width:40px; text-align:center"><input type="checkbox" id="selectAll"></th>
             <th>الاسم</th>
             <th>الإيميل</th>
             <th>الهاتف</th> 
@@ -551,12 +575,14 @@ tr.expiring-row td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.85); 
   </div>
 </div>
 
-<div class="modal" id="backupModal" aria-hidden="true"><div class="box"><div class="modalHeader"><h2>📦 النسخ الاحتياطي</h2><button class="btn" id="closeBackup" type="button">✕ إغلاق</button></div><div class="modalBody"><div class="backGrid"><div class="backTile"><div class="t">⬇️ تصدير JSON</div><div class="actions"><button class="btn soft" id="exportJsonBtn" type="button">تصدير</button></div></div><div class="backTile"><div class="t">⬆️ استيراد ملف JSON</div><div class="actions"><button class="btn soft" id="importFileBtn" type="button">اختيار ملف</button><input id="fileInput" type="file" accept="application/json,.json" style="display:none"></div></div><div class="backTile"><div class="t">📋 لصق JSON</div><div class="actions"><button class="btn soft" id="openPasteFromBackup" type="button">فتح نافذة اللصق</button></div></div><div class="backTile"><div class="t">⬇️ تصدير CSV</div><div class="actions"><button class="btn soft" id="exportCsvBtn" type="button">تصدير</button></div></div><div class="backTile"><div class="t">↩️ استرجاع آخر حذف</div><div class="actions"><button class="btn soft" id="restoreLastDeleteBtn" type="button">استرجاع</button></div></div></div></div></div></div>
+<div class="modal" id="backupModal" aria-hidden="true"><div class="box"><div class="modalHeader"><h2>📦 النسخ الاحتياطي</h2><button class="btn" id="closeBackup" type="button">✕ إغلاق</button></div><div class="modalBody"><div class="backGrid"><div class="backTile"><div class="t">⬇️ تصدير JSON</div><div class="actions"><button class="btn soft" id="exportJsonBtn" type="button">تصدير</button></div></div><div class="backTile"><div class="t">⬆️ استيراد ملف JSON</div><div class="actions"><button class="btn soft" id="importFileBtn" type="button">اختيار ملف</button><input id="fileInput" type="file" accept="application/json,.json" style="display:none"></div></div><div class="backTile"><div class="t">📋 لصق JSON</div><div class="actions"><button class="btn soft" id="openPasteFromBackup" type="button">فتح نافذة اللصق</button></div></div><div class="backTile"><div class="t">⬇️ تصدير CSV</div><div class="actions"><button class="btn soft" id="exportCsvBtn" type="button">تصدير</button></div></div></div></div></div></div>
 <div class="modal" id="pasteModal" aria-hidden="true"><div class="box"><div class="modalHeader"><h2>📋 استيراد باللصق</h2><button class="btn" id="closePaste" type="button">✕</button></div><div class="modalBody"><textarea id="pasteArea" rows="10" style="width:100%;background:rgba(0,0,0,.22);color:#fff;padding:10px;border-radius:14px;border:1px solid rgba(255,255,255,.1)"></textarea></div><div class="modalFooter"><button class="btn primary" id="doPasteImport" type="button">استيراد</button></div></div></div>
 <div class="modal" id="syncModal" aria-hidden="true"><div class="box"><div class="modalHeader"><h2>☁️ المزامنة والنسخ الاحتياطي</h2><button class="btn" id="closeSyncX" type="button">✕</button></div><div class="modalBody"><div class="syncGrid"><button class="syncBtn" id="syncBackupDownload" type="button">💾 Backup (تنزيل)</button><button class="syncBtn" id="syncBackupShare" type="button">📤 مشاركة Backup</button></div></div></div></div>
 
 <script>
 'use strict';
+
+Chart.register(ChartDataLabels);
 
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ",
@@ -628,13 +654,11 @@ async function requireIdToken(){
 }
 
 const LOCAL_BACKUP_KEY = "subs_local_backup_v4";
-const PENDING_SYNC_KEY = "subs_pending_sync_v1";
-
 let syncState = "idle"; 
 let data = [];
 let editingId = null;
 let currentFilter = "all"; 
-let myChartInstance = null; // متغير Chart.js
+let myChartInstance = null;
 
 function setSyncState(state){
   syncState = state;
@@ -742,11 +766,7 @@ function status(endISO, alertDays){
   return {key:"active", label:"فعّال", cls:"ok", left};
 }
 function escapeHtml(s){ return (s||"").replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m])); }
-
-function currencyLabel(code){
-  const map = {DZD:"دج", USD:"$", EUR:"€"};
-  return map[code] || code;
-}
+function currencyLabel(code){ const map = {DZD:"دج", USD:"$", EUR:"€"}; return map[code] || code; }
 
 /* ===== Modals ===== */
 function openModal(id){ $(id).setAttribute("aria-hidden","false"); }
@@ -824,6 +844,14 @@ $("actEdit").onclick = ()=>{
   closeModal("rowActionsModal"); fillForm(rec); openModal("formModal");
 };
 
+$("actExtend").onclick = ()=>{
+  const rec = data.find(x => x.id === currentRowId);
+  if(!rec) return;
+  rec.end = addMonths(rec.end, Number(rec.months));
+  save(); render(); closeModal("rowActionsModal");
+  showToast("تم تجديد الاشتراك", "", "ok");
+};
+
 $("actDelete").onclick = ()=>{
   if(!confirm("حذف هذا الاشتراك؟")) return;
   data = data.filter(x => x.id !== currentRowId);
@@ -833,14 +861,56 @@ $("actDelete").onclick = ()=>{
 $("actWhatsApp").onclick = ()=>{
   const rec = data.find(x => x.id === currentRowId);
   if(!rec) return;
-  if(!rec.phone){
-    alert("❌ لا يوجد رقم هاتف لهذا العميل.");
-    return;
-  }
+  if(!rec.phone){ alert("❌ لا يوجد رقم هاتف لهذا العميل."); return; }
   let cleanPhone = rec.phone.replace(/[^0-9+]/g, '');
   let message = `مرحباً ${rec.name}،\nنود تذكيرك بأن اشتراكك سينتهي بتاريخ ${rec.end}.\nيرجى التجديد لضمان استمرار الخدمة.`;
   window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
   closeModal("rowActionsModal");
+};
+
+/* ===== Bulk Actions (الجديد) ===== */
+function updateBulkBar(){
+  const checked = document.querySelectorAll(".row-check:checked");
+  const bar = $("bulkBar");
+  if(checked.length > 0){
+    bar.style.display = "flex";
+    $("bulkCount").textContent = `${checked.length} محدد`;
+  } else {
+    bar.style.display = "none";
+    $("selectAll").checked = false;
+  }
+}
+
+$("selectAll").onchange = (e)=>{
+  document.querySelectorAll(".row-check").forEach(cb => cb.checked = e.target.checked);
+  updateBulkBar();
+};
+
+$("bulkDelete").onclick = ()=>{
+  const checkedIds = Array.from(document.querySelectorAll(".row-check:checked")).map(cb => cb.value);
+  if(!checkedIds.length) return;
+  if(!confirm(`هل تريد حذف ${checkedIds.length} اشتراك نهائياً؟`)) return;
+  
+  data = data.filter(r => !checkedIds.includes(r.id));
+  save(); render(); 
+  $("selectAll").checked = false; updateBulkBar();
+  showToast("تم الحذف بنجاح", "", "ok");
+};
+
+$("bulkExtend").onclick = ()=>{
+  const checkedIds = Array.from(document.querySelectorAll(".row-check:checked")).map(cb => cb.value);
+  if(!checkedIds.length) return;
+  if(!confirm(`هل تريد تجديد اشتراك ${checkedIds.length} عملاء لمدة شهر واحد إضافي؟`)) return;
+  
+  data = data.map(r => {
+    if(checkedIds.includes(r.id)) {
+      return {...r, end: addMonths(r.end, 1)};
+    }
+    return r;
+  });
+  save(); render();
+  $("selectAll").checked = false; updateBulkBar();
+  showToast("تم التجديد بنجاح", "", "ok");
 };
 
 /* ===== Filters Logic ===== */
@@ -849,20 +919,17 @@ document.querySelectorAll(".filterBtn").forEach(btn => {
     document.querySelectorAll(".filterBtn").forEach(b => b.classList.remove("active"));
     e.target.classList.add("active");
     currentFilter = e.target.getAttribute("data-filter");
+    $("selectAll").checked = false; updateBulkBar(); // إغلاق التحديد عند تغيير الفلتر
     render();
   };
 });
 
-/* ===== تحديث لوحة القيادة (Dashboard) ===== */
+/* ===== Dashboard Chart ===== */
 function updateDashboardChart(active, expiring, expired) {
   const ctx = document.getElementById('statusChart');
   if(!ctx) return;
+  if(myChartInstance) myChartInstance.destroy(); 
   
-  if(myChartInstance) {
-    myChartInstance.destroy(); // تدمير الرسم القديم قبل رسم الجديد
-  }
-  
-  // إذا كانت البيانات صفر، نعرض رسم رمادي
   const total = active + expiring + expired;
   const chartData = total > 0 ? [active, expiring, expired] : [1];
   const bgColors = total > 0 ? ['#22c55e', '#f59e0b', '#ef4444'] : ['rgba(255,255,255,0.1)'];
@@ -872,21 +939,22 @@ function updateDashboardChart(active, expiring, expired) {
     type: 'doughnut',
     data: {
       labels: chartLabels,
-      datasets: [{
-        data: chartData,
-        backgroundColor: bgColors,
-        borderWidth: 0,
-        hoverOffset: 4
-      }]
+      datasets: [{ data: chartData, backgroundColor: bgColors, borderWidth: 0, hoverOffset: 4 }]
     },
     options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      cutout: '75%', // لتبدو كحلقة رفيعة وجميلة
+      responsive: true, maintainAspectRatio: false, cutout: '60%',
       plugins: {
-        legend: {
-          position: 'right',
-          labels: { color: '#eaf0ff', font: {family: 'system-ui', size: 13, weight: 'bold'} }
+        legend: { position: 'right', labels: { color: '#eaf0ff', font: {family: 'system-ui', size: 13, weight: 'bold'} } },
+        datalabels: {
+          color: '#ffffff', font: { weight: 'bold', size: 13, family: 'system-ui' },
+          formatter: (value, context) => {
+            if (value === 0 || chartLabels[0] === 'لا توجد بيانات') return '';
+            let sum = 0;
+            context.chart.data.datasets[0].data.map(d => sum += d);
+            let percentage = (value * 100 / sum).toFixed(0) + "%";
+            return value + '\n(' + percentage + ')';
+          },
+          textAlign: 'center', textStrokeColor: 'rgba(0,0,0,0.6)', textStrokeWidth: 3
         }
       }
     }
@@ -895,30 +963,20 @@ function updateDashboardChart(active, expiring, expired) {
 
 function updateRevenueSummary() {
   const groups = {};
-  // جمع أسعار الاشتراكات
   for(const r of data){
     const c = r.currency || "DZD";
     const p = Number(r.price ?? 0);
     if(p <= 0) continue;
     groups[c] = (groups[c]||0) + p;
   }
-  
   const revDiv = $("revenueList");
   if(!revDiv) return;
-  
   const keys = Object.keys(groups);
-  if(keys.length === 0) {
-    revDiv.innerHTML = `<div class="revValue">0.00</div>`;
-    return;
-  }
-  
-  // طباعة الأرباح حسب العملات المتاحة
-  revDiv.innerHTML = keys.map(k => {
-    return `<div class="revValue">${groups[k].toFixed(2).replace(/\.00$/,"")} ${currencyLabel(k)}</div>`;
-  }).join('');
+  if(keys.length === 0) { revDiv.innerHTML = `<div class="revValue">0.00</div>`; return; }
+  revDiv.innerHTML = keys.map(k => `<div class="revValue">${groups[k].toFixed(2).replace(/\.00$/,"")} ${currencyLabel(k)}</div>`).join('');
 }
 
-/* ===== Render (رسم الجدول والإحصائيات) ===== */
+/* ===== Render ===== */
 $("search").addEventListener("input", render);
 
 function render(){
@@ -928,26 +986,19 @@ function render(){
   
   const alertDays = Number($("alertDays").value) || 7;
   
-  // حساب الأعداد للرسم البياني
   const allCounts={active:0, expiring:0, expired:0};
-  for(const r of data){
-    allCounts[status(r.end, alertDays).key]++;
-  }
+  for(const r of data) allCounts[status(r.end, alertDays).key]++;
   
-  // تحديث لوحة القيادة
   updateDashboardChart(allCounts.active, allCounts.expiring, allCounts.expired);
   updateRevenueSummary();
 
-  // الفلترة والبحث للجدول
   const rows = data.filter(r=>{
     const matchSearch = !q || (r.name||"").toLowerCase().includes(q) || (r.email||"").toLowerCase().includes(q) || (r.phone||"").includes(q);
     if(!matchSearch) return false;
-
     const stKey = status(r.end, alertDays).key;
     if(currentFilter === "active" && stKey !== "active") return false;
     if(currentFilter === "expiring" && stKey !== "expiring") return false;
     if(currentFilter === "expired" && stKey !== "expired") return false;
-
     return true;
   });
 
@@ -958,6 +1009,7 @@ function render(){
     if(st.key==="expiring") tr.classList.add("expiring-row");
 
     tr.innerHTML = `
+      <td style="text-align:center"><input type="checkbox" class="row-check" value="${r.id}"></td>
       <td>${escapeHtml(r.name)}</td>
       <td>${escapeHtml(r.email)}</td>
       <td style="font-family:monospace; color:var(--muted)">${escapeHtml(r.phone || '—')}</td>
@@ -973,8 +1025,13 @@ function render(){
   }
 
   if(rows.length === 0){
-    tb.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:18px">لا توجد سجلات لعرضها</td></tr>`;
+    tb.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:18px">لا توجد سجلات لعرضها</td></tr>`;
   }
+  
+  // تفعيل الاستماع للمربعات بعد رسم الجدول
+  document.querySelectorAll(".row-check").forEach(cb => {
+    cb.addEventListener("change", updateBulkBar);
+  });
 }
 
 $("tbody").addEventListener("click",(e)=>{
@@ -990,9 +1047,7 @@ $("closeSyncX").onclick = ()=> closeModal("syncModal");
 $("openAuth").onclick = ()=> openModal("authModal");
 
 /* init */
-(async ()=>{
-  try{ initAuth(); }catch{}
-})();
+(async ()=>{ try{ initAuth(); }catch{} })();
 </script>
 
 <div class="modal" id="authModal" aria-hidden="true">
