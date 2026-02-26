@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>لوحة تسيير الاشتراكات 4.0</title>
+<title>لوحة تسيير الاشتراكات 3.1 (مستقرة)</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
@@ -14,11 +14,14 @@
   --bg1:#0b1020;
   --card: rgba(255,255,255,.06);
   --line: rgba(255,255,255,.10);
+
   --text:#eaf0ff;
   --muted: rgba(234,240,255,.70);
+
   --accent:#7c5cff;
   --warn:#f59e0b;
   --err:#ef4444;
+
   --radius:18px;
   --shadow: 0 18px 45px rgba(0,0,0,.45);
 }
@@ -154,18 +157,6 @@ body{
 .revTitle{ color: var(--muted); font-size: 13px; font-weight: 900; margin-bottom: 8px; }
 .revValue{ color: var(--text); font-size: 24px; font-weight: 900; }
 
-/* ===== Bulk Actions Bar (الجديد) ===== */
-.bulkBar{
-  display: none;
-  padding: 12px 14px;
-  background: rgba(124,92,255,.15);
-  border-bottom: 1px solid var(--line);
-  align-items: center;
-  gap: 15px;
-  flex-wrap: wrap;
-}
-.bulkBar span{ font-weight: 900; color: #fff; }
-
 .pills{margin-inline-start:auto;display:flex;gap:8px;flex-wrap:wrap}
 
 /* ===== Stats Bar ===== */
@@ -210,7 +201,7 @@ table{
   width:100%;
   border-collapse:separate;
   border-spacing:0;
-  min-width: 1000px;
+  min-width: 980px;
 }
 thead th{
   position:sticky; top:0;
@@ -233,16 +224,8 @@ tbody tr:hover{ background: rgba(255,255,255,.03); }
 
 tr.expired-row{ background: rgba(239,68,68,.10); }
 tr.expiring-row{ background: rgba(245,158,11,.08); }
-tr.expired-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(239,68,68,.85); }
-tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85); }
-
-/* Custom Checkbox */
-input[type="checkbox"] {
-  accent-color: var(--accent);
-  width: 16px;
-  height: 16px;
-  cursor: pointer;
-}
+tr.expired-row td:first-child{ box-shadow: inset 4px 0 0 rgba(239,68,68,.85); }
+tr.expiring-row td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.85); }
 
 .badge{
   display:inline-flex;
@@ -396,7 +379,7 @@ input[type="checkbox"] {
 .toast .sub{ color: var(--muted); font-weight: 800; }
 
 @media print{
-  .filtersBar, .topbar, .analyticsArea, .bulkBar, .btn, .toast, .modal{ display:none !important; }
+  .filtersBar, .topbar, .analyticsArea, .btn, .toast, .modal{ display:none !important; }
 }
 </style>
 
@@ -409,7 +392,7 @@ input[type="checkbox"] {
 <div class="container">
   <div class="header">
     <h1>🧾 لوحة تسيير الاشتراكات</h1>
-    <div class="sub">⚡ النسخة الشاملة v4.0: حماية، إحصائيات مرئية، فلاتر، واتساب، وإجراءات جماعية.</div>
+    <div class="sub">⚡ النسخة المستقرة 3.1 مع كاشف الأخطاء المتقدم.</div>
   </div>
 
   <div class="card">
@@ -449,17 +432,10 @@ input[type="checkbox"] {
       </div>
     </div>
 
-    <div class="bulkBar" id="bulkBar">
-      <span id="bulkCount">0 محدد</span>
-      <button class="btn primary" id="bulkExtend" type="button">🔁 تجديد بشهر</button>
-      <button class="btn danger" id="bulkDelete" type="button">🗑️ حذف المحدد</button>
-    </div>
-
     <div class="tableWrap">
       <table>
         <thead>
           <tr>
-            <th style="width:40px; text-align:center"><input type="checkbox" id="selectAll"></th>
             <th>الاسم</th>
             <th>الإيميل</th>
             <th>الهاتف</th> 
@@ -639,7 +615,7 @@ function updateAuthUI(){
     t.textContent = `✅ مسجل دخول: ${currentUser.email || "—"}`;
     logoutBtn.disabled = false;
   }else{
-    t.textContent = "🔒 غير مسجل دخول.";
+    t.textContent = "🔒 يجب تسجيل الدخول.";
     logoutBtn.disabled = true;
   }
 }
@@ -653,12 +629,12 @@ async function requireIdToken(){
   return await currentUser.getIdToken(false);
 }
 
-const LOCAL_BACKUP_KEY = "subs_local_backup_v4";
+const LOCAL_BACKUP_KEY = "subs_local_backup_v3";
 let syncState = "idle"; 
 let data = [];
 let editingId = null;
 let currentFilter = "all"; 
-let myChartInstance = null;
+let myChartInstance = null; 
 
 function setSyncState(state){
   syncState = state;
@@ -697,6 +673,9 @@ async function firebasePull(){
   return Array.isArray(json) ? json : [];
 }
 
+// ==========================================
+// 💡 هذا هو التعديل السحري لكشف رسالة الخطأ
+// ==========================================
 async function firebasePushOnce(){
   const token = await requireIdToken();
   const url = `${FIREBASE_URL}/${FIREBASE_PATH}.json?auth=${encodeURIComponent(token)}`;
@@ -705,7 +684,12 @@ async function firebasePushOnce(){
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
   });
-  if(!res.ok) throw new Error("Push failed");
+  
+  // إذا رفضت قاعدة البيانات الحفظ، سنقوم بقراءة رسالة السيرفر بدلاً من تجاهلها
+  if(!res.ok) {
+     const errorText = await res.text().catch(()=>"");
+     throw new Error(`(${res.status}) ${errorText}`);
+  }
 }
 
 let syncTimer = null;
@@ -720,6 +704,7 @@ function scheduleSyncPush(delayMs=600){
       setSyncState("ok");
     }catch(e){
       setSyncState("fail");
+      // ستظهر لك رسالة الخطأ الحقيقية هنا (مثال: (401) Permission Denied)
       showToast("تعذر المزامنة", e.message, "err");
     }
   }, delayMs);
@@ -774,7 +759,8 @@ function closeModal(id){ $(id).setAttribute("aria-hidden","true"); }
 function showToast(msg, sub="", kind="warn"){
   const t=$("toast"); t.className=`toast ${kind} show`;
   t.innerHTML=`<span class="ico">${kind==="err"?"❌":kind==="ok"?"✅":"⚠️"}</span><div><div class="msg">${msg}</div><div class="sub">${sub}</div></div>`;
-  setTimeout(()=>t.classList.remove("show"), 2500);
+  // تم زيادة وقت عرض الرسالة لكي تتمكن من قراءة الخطأ بهدوء
+  setTimeout(()=>t.classList.remove("show"), 4000); 
 }
 
 /* ===== Form Logic ===== */
@@ -849,7 +835,6 @@ $("actExtend").onclick = ()=>{
   if(!rec) return;
   rec.end = addMonths(rec.end, Number(rec.months));
   save(); render(); closeModal("rowActionsModal");
-  showToast("تم تجديد الاشتراك", "", "ok");
 };
 
 $("actDelete").onclick = ()=>{
@@ -861,56 +846,14 @@ $("actDelete").onclick = ()=>{
 $("actWhatsApp").onclick = ()=>{
   const rec = data.find(x => x.id === currentRowId);
   if(!rec) return;
-  if(!rec.phone){ alert("❌ لا يوجد رقم هاتف لهذا العميل."); return; }
+  if(!rec.phone){
+    alert("❌ لا يوجد رقم هاتف لهذا العميل.");
+    return;
+  }
   let cleanPhone = rec.phone.replace(/[^0-9+]/g, '');
   let message = `مرحباً ${rec.name}،\nنود تذكيرك بأن اشتراكك سينتهي بتاريخ ${rec.end}.\nيرجى التجديد لضمان استمرار الخدمة.`;
   window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
   closeModal("rowActionsModal");
-};
-
-/* ===== Bulk Actions (الجديد) ===== */
-function updateBulkBar(){
-  const checked = document.querySelectorAll(".row-check:checked");
-  const bar = $("bulkBar");
-  if(checked.length > 0){
-    bar.style.display = "flex";
-    $("bulkCount").textContent = `${checked.length} محدد`;
-  } else {
-    bar.style.display = "none";
-    $("selectAll").checked = false;
-  }
-}
-
-$("selectAll").onchange = (e)=>{
-  document.querySelectorAll(".row-check").forEach(cb => cb.checked = e.target.checked);
-  updateBulkBar();
-};
-
-$("bulkDelete").onclick = ()=>{
-  const checkedIds = Array.from(document.querySelectorAll(".row-check:checked")).map(cb => cb.value);
-  if(!checkedIds.length) return;
-  if(!confirm(`هل تريد حذف ${checkedIds.length} اشتراك نهائياً؟`)) return;
-  
-  data = data.filter(r => !checkedIds.includes(r.id));
-  save(); render(); 
-  $("selectAll").checked = false; updateBulkBar();
-  showToast("تم الحذف بنجاح", "", "ok");
-};
-
-$("bulkExtend").onclick = ()=>{
-  const checkedIds = Array.from(document.querySelectorAll(".row-check:checked")).map(cb => cb.value);
-  if(!checkedIds.length) return;
-  if(!confirm(`هل تريد تجديد اشتراك ${checkedIds.length} عملاء لمدة شهر واحد إضافي؟`)) return;
-  
-  data = data.map(r => {
-    if(checkedIds.includes(r.id)) {
-      return {...r, end: addMonths(r.end, 1)};
-    }
-    return r;
-  });
-  save(); render();
-  $("selectAll").checked = false; updateBulkBar();
-  showToast("تم التجديد بنجاح", "", "ok");
 };
 
 /* ===== Filters Logic ===== */
@@ -919,15 +862,15 @@ document.querySelectorAll(".filterBtn").forEach(btn => {
     document.querySelectorAll(".filterBtn").forEach(b => b.classList.remove("active"));
     e.target.classList.add("active");
     currentFilter = e.target.getAttribute("data-filter");
-    $("selectAll").checked = false; updateBulkBar(); // إغلاق التحديد عند تغيير الفلتر
     render();
   };
 });
 
-/* ===== Dashboard Chart ===== */
+/* ===== Chart.js ===== */
 function updateDashboardChart(active, expiring, expired) {
   const ctx = document.getElementById('statusChart');
   if(!ctx) return;
+  
   if(myChartInstance) myChartInstance.destroy(); 
   
   const total = active + expiring + expired;
@@ -984,7 +927,7 @@ function render(){
   const tb = $("tbody");
   tb.innerHTML="";
   
-  const alertDays = Number($("alertDays").value) || 7;
+  const alertDays = Number($("alertDays")?.value || 7);
   
   const allCounts={active:0, expiring:0, expired:0};
   for(const r of data) allCounts[status(r.end, alertDays).key]++;
@@ -995,10 +938,12 @@ function render(){
   const rows = data.filter(r=>{
     const matchSearch = !q || (r.name||"").toLowerCase().includes(q) || (r.email||"").toLowerCase().includes(q) || (r.phone||"").includes(q);
     if(!matchSearch) return false;
+
     const stKey = status(r.end, alertDays).key;
     if(currentFilter === "active" && stKey !== "active") return false;
     if(currentFilter === "expiring" && stKey !== "expiring") return false;
     if(currentFilter === "expired" && stKey !== "expired") return false;
+
     return true;
   });
 
@@ -1009,7 +954,6 @@ function render(){
     if(st.key==="expiring") tr.classList.add("expiring-row");
 
     tr.innerHTML = `
-      <td style="text-align:center"><input type="checkbox" class="row-check" value="${r.id}"></td>
       <td>${escapeHtml(r.name)}</td>
       <td>${escapeHtml(r.email)}</td>
       <td style="font-family:monospace; color:var(--muted)">${escapeHtml(r.phone || '—')}</td>
@@ -1025,13 +969,8 @@ function render(){
   }
 
   if(rows.length === 0){
-    tb.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:18px">لا توجد سجلات لعرضها</td></tr>`;
+    tb.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:18px">لا توجد سجلات لعرضها</td></tr>`;
   }
-  
-  // تفعيل الاستماع للمربعات بعد رسم الجدول
-  document.querySelectorAll(".row-check").forEach(cb => {
-    cb.addEventListener("change", updateBulkBar);
-  });
 }
 
 $("tbody").addEventListener("click",(e)=>{
@@ -1047,11 +986,13 @@ $("closeSyncX").onclick = ()=> closeModal("syncModal");
 $("openAuth").onclick = ()=> openModal("authModal");
 
 /* init */
-(async ()=>{ try{ initAuth(); }catch{} })();
+(async ()=>{
+  try{ initAuth(); }catch{}
+})();
 </script>
 
 <div class="modal" id="authModal" aria-hidden="true">
-  <div class="box" role="dialog" aria-modal="true">
+  <div class="box" role="dialog" aria-modal="true" style="width:400px;">
     <div class="modalHeader">
       <div><h2>👤 الحساب</h2><div class="hint">يجب تسجيل الدخول للوصول للبيانات</div></div>
       <button class="btn" id="closeAuth" type="button" style="display:none;">✕</button>
