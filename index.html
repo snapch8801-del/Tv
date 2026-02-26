@@ -399,7 +399,13 @@ tr.expiring-row td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.85); 
       <button class="btn soft" id="printBtn" type="button">🖨️ طباعة</button>
       <button class="btn danger" id="clearBtn" type="button">حذف الكل</button>
 
-      <div class="pills" id="statsBar"></div>
+      <div class="pills" id="statsBar">
+        <div class="statChip sync" id="syncChip">
+          <span class="ico">☁️</span>
+          <span class="k">مزامنة:</span>
+          <span class="v" id="syncVal">—</span>
+        </div>
+      </div>
     </div>
 
     <div class="filtersBar" id="filtersBar">
@@ -610,17 +616,35 @@ const PENDING_SYNC_KEY = "subs_pending_sync_v1";
 let syncState = "idle"; 
 let data = [];
 let editingId = null;
-let currentFilter = "all"; // المتغير الجديد الخاص بالفلترة
+let currentFilter = "all"; 
 
+// ✅ تم تعديل هذه الدالة لتظهر الوقت والتحديث المباشر
 function setSyncState(state){
   syncState = state;
   const chip = document.getElementById("syncChip");
-  if(chip){
+  const val = document.getElementById("syncVal");
+
+  if(chip && val){
     chip.classList.remove("ok","warn","err","syncing","offline");
-    if(!navigator.onLine) chip.classList.add("offline");
-    else if(state==="saving") chip.classList.add("syncing");
-    else if(state==="ok") chip.classList.add("ok");
-    else if(state==="fail") chip.classList.add("err");
+
+    if(!navigator.onLine) {
+      chip.classList.add("offline");
+      val.textContent = "أوفلاين 📴";
+    }
+    else if(state==="saving") {
+      chip.classList.add("syncing");
+      val.textContent = "جاري الحفظ ⏳";
+    }
+    else if(state==="ok") {
+      chip.classList.add("ok");
+      const d = new Date();
+      const time = String(d.getHours()).padStart(2,"0") + ":" + String(d.getMinutes()).padStart(2,"0");
+      val.textContent = time + " ✅";
+    }
+    else if(state==="fail") {
+      chip.classList.add("err");
+      val.textContent = "فشل ❌";
+    }
   }
 }
 
@@ -739,7 +763,7 @@ function fillForm(rec){
   $("formTitle").textContent="تعديل اشتراك";
   $("name").value = rec.name || "";
   $("email").value = rec.email || "";
-  $("phone").value = rec.phone || ""; // تعبئة الهاتف
+  $("phone").value = rec.phone || ""; 
   $("months").value = rec.months || "";
   $("price").value = rec.price || "";
   $("start").value = rec.start || todayISO();
@@ -753,7 +777,7 @@ $("quickPlan").onchange = ()=>{ if($("quickPlan").value) $("months").value = $("
 $("saveBtn").onclick = ()=>{
   const name = $("name").value.trim();
   const email = $("email").value.trim().toLowerCase();
-  const phone = $("phone").value.trim(); // الهاتف
+  const phone = $("phone").value.trim(); 
   const months = Number($("months").value);
   const price = Number($("price").value);
   const start = $("start").value;
@@ -801,7 +825,6 @@ $("actDelete").onclick = ()=>{
   save(); render(); closeModal("rowActionsModal");
 };
 
-// --- زر المراسلة عبر الواتساب ---
 $("actWhatsApp").onclick = ()=>{
   const rec = data.find(x => x.id === currentRowId);
   if(!rec) return;
@@ -810,14 +833,10 @@ $("actWhatsApp").onclick = ()=>{
     return;
   }
   
-  // تنظيف الرقم من المسافات أو الرموز الزائدة
   let cleanPhone = rec.phone.replace(/[^0-9+]/g, '');
-  
-  // تجهيز الرسالة التلقائية
   let message = `مرحباً ${rec.name}،\nنود تذكيرك بأن اشتراكك سينتهي بتاريخ ${rec.end}.\nيرجى التجديد لضمان استمرار الخدمة.`;
   let encodedMsg = encodeURIComponent(message);
   
-  // فتح تطبيق الواتساب
   window.open(`https://wa.me/${cleanPhone}?text=${encodedMsg}`, '_blank');
   closeModal("rowActionsModal");
 };
@@ -825,11 +844,8 @@ $("actWhatsApp").onclick = ()=>{
 /* ===== Filters Logic ===== */
 document.querySelectorAll(".filterBtn").forEach(btn => {
   btn.onclick = (e) => {
-    // إزالة التفعيل من كل الأزرار
     document.querySelectorAll(".filterBtn").forEach(b => b.classList.remove("active"));
-    // تفعيل الزر المضغوط
     e.target.classList.add("active");
-    // تحديث متغير الفلتر وإعادة الرسم
     currentFilter = e.target.getAttribute("data-filter");
     render();
   };
@@ -845,13 +861,10 @@ function render(){
   
   const alertDays = Number($("alertDays").value) || 7;
 
-  // الفلترة والبحث
   const rows = data.filter(r=>{
-    // 1. الفلترة حسب البحث (الاسم، الايميل، الرقم)
     const matchSearch = !q || (r.name||"").toLowerCase().includes(q) || (r.email||"").toLowerCase().includes(q) || (r.phone||"").includes(q);
     if(!matchSearch) return false;
 
-    // 2. الفلترة حسب الأزرار العلوية (الكل، فعال، قريب، منتهي)
     const stKey = status(r.end, alertDays).key;
     if(currentFilter === "active" && stKey !== "active") return false;
     if(currentFilter === "expiring" && stKey !== "expiring") return false;
