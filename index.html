@@ -475,7 +475,6 @@ tr.expiring-row td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.85); 
 
 </style>
 
-<!-- Firebase (Compat) for Auth UI -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 
@@ -532,7 +531,6 @@ tr.expiring-row td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.85); 
   </div>
 </div>
 
-<!-- Modal: Add/Edit -->
 <div class="modal" id="formModal" aria-hidden="true">
   <div class="box" role="dialog" aria-modal="true">
     <div class="modalHeader">
@@ -600,7 +598,6 @@ tr.expiring-row td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.85); 
   </div>
 </div>
 
-<!-- Modal: Backup -->
 <div class="modal" id="backupModal" aria-hidden="true">
   <div class="box" role="dialog" aria-modal="true">
     <div class="modalHeader">
@@ -667,7 +664,6 @@ tr.expiring-row td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.85); 
   </div>
 </div>
 
-<!-- Modal: Paste JSON -->
 <div class="modal" id="pasteModal" aria-hidden="true">
   <div class="box" role="dialog" aria-modal="true">
     <div class="modalHeader">
@@ -692,7 +688,6 @@ tr.expiring-row td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.85); 
   </div>
 </div>
 
-<!-- ===== Modal: إجراءات الجدول ===== -->
 <div class="modal" id="rowActionsModal" aria-hidden="true">
   <div class="box" role="dialog" aria-modal="true" style="width:min(740px, 100%)">
     <div class="modalHeader">
@@ -718,7 +713,6 @@ tr.expiring-row td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.85); 
   </div>
 </div>
 
-<!-- ===== Modal: المزامنة والنسخ الاحتياطي ===== -->
 <div class="modal" id="syncModal" aria-hidden="true">
   <div class="box" role="dialog" aria-modal="true" style="width:min(760px, 100%)">
     <div class="modalHeader">
@@ -758,7 +752,6 @@ tr.expiring-row td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.85); 
   </div>
 </div>
 
-<!-- ===== Modal: المجموع (Totals) ===== -->
 <div class="modal" id="totalsModal" aria-hidden="true">
   <div class="box" role="dialog" aria-modal="true" style="width:min(760px, 100%)">
     <div class="modalHeader">
@@ -812,10 +805,25 @@ function initAuth(){
       firebase.initializeApp(FIREBASE_CONFIG);
     }
     const auth = firebase.auth();
-    auth.onAuthStateChanged((u)=>{
+    
+    // مراقبة حالة تسجيل الدخول تلقائياً - هذا ما يحمي موقعك!
+    auth.onAuthStateChanged(async (u)=>{
       currentUser = u || null;
       updateAuthUI();
+      
+      if(currentUser){
+        // إذا كان مسجل الدخول: اخفِ نافذة الحساب واجلب البيانات
+        closeModal("authModal");
+        await load();
+        render();
+      } else {
+        // إذا لم يسجل الدخول أو سجل خروجه: امسح البيانات وافتح نافذة الدخول إجبارياً
+        data = [];
+        render();
+        openModal("authModal");
+      }
     });
+    
     authReady = true;
     updateAuthUI();
     return true;
@@ -1833,13 +1841,12 @@ function updateStats(filteredCount){
 
   const shown = (typeof filteredCount==="number") ? filteredCount : (data||[]).length;
 
-  bar.innerHTML = `      <div class="statChip"><span class="ico">👁️</span><span class="k">المعروض</span><span class="v">${rows.length}</span></div>
+  bar.innerHTML = `
+      <div class="statChip"><span class="ico">👁️</span><span class="k">المعروض</span><span class="v">${shown}</span></div>
       <div class="statChip"><span class="ico">📦</span><span class="k">الإجمالي</span><span class="v">${data.length}</span></div>
-      <div class="statChip"><span class="ico">💰</span><span class="k">مجموع</span><span class="v" id="sumAll">—</span></div>
-      <div class="statChip"><span class="ico">🧾</span><span class="k">مجموع المعروض</span><span class="v" id="sumShown">—</span></div>
-      <div class="statChip ok"><span class="ico">✅</span><span class="k">فعّال</span><span class="v">${allCounts.active}</span></div>
-      <div class="statChip warn"><span class="ico">⏰</span><span class="k">قريب</span><span class="v">${allCounts.expiring}</span></div>
-      <div class="statChip err"><span class="ico">❌</span><span class="k">منتهي</span><span class="v">${allCounts.expired}</span></div>
+      <div class="statChip ok"><span class="ico">✅</span><span class="k">فعّال</span><span class="v">${active}</span></div>
+      <div class="statChip warn"><span class="ico">⏰</span><span class="k">قريب</span><span class="v">${expiring}</span></div>
+      <div class="statChip err"><span class="ico">❌</span><span class="k">منتهي</span><span class="v">${expired}</span></div>
       <div class="statChip sync" id="syncChip"><span class="ico">☁️</span><span class="k">مزامنة</span><span class="v" id="syncVal">${getSyncText()}</span></div>`;
 }
 
@@ -1916,46 +1923,23 @@ function render(){
 
   setSyncState(syncState);
 
-  const bar = document.getElementById("statsBar");
-  if(bar){
-    bar.innerHTML = `
-      <div class="statChip"><span class="ico">👁️</span><span class="k">المعروض</span><span class="v">${rows.length}</span></div>
-      <div class="statChip"><span class="ico">📦</span><span class="k">الإجمالي</span><span class="v">${data.length}</span></div>
-      <div class="statChip ok"><span class="ico">✅</span><span class="k">فعّال</span><span class="v">${allCounts.active}</span></div>
-      <div class="statChip warn"><span class="ico">⏰</span><span class="k">قريب</span><span class="v">${allCounts.expiring}</span></div>
-      <div class="statChip err"><span class="ico">❌</span><span class="k">منتهي</span><span class="v">${allCounts.expired}</span></div>
-      <div class="statChip sync"><span class="ico">☁️</span><span class="k">مزامنة</span><span class="v" id="syncVal">${getSyncText()}</span></div>
-    `;
-  }
-
   try{ updateStats(rows.length); }catch{}
 }
 
 /* init */
 (async ()=>{
-  // تهيئة تسجيل الدخول (إن وُجدت مكتبات Firebase)
   try{ initAuth(); }catch{}
-
-  await load();
-  render();
-
-  // إذا لم يتم تسجيل الدخول: افتح نافذة الحساب تلقائياً حتى تعمل المزامنة والقراءة
-  if(!currentUser){
-    try{ openModal("authModal"); }catch{}
-    try{ showToast("سجّل الدخول لتفعيل المزامنة", "بدون تسجيل الدخول سيظهر Permission denied", "warn"); }catch{}
-  }
 })();
 </script>
 
-<!-- Modal: Auth -->
 <div class="modal" id="authModal" aria-hidden="true">
   <div class="box" role="dialog" aria-modal="true">
     <div class="modalHeader">
       <div>
         <h2>👤 الحساب</h2>
-        <div class="hint">المرحلة 1: تسجيل الدخول/إنشاء حساب فقط (بدون ربط البيانات بالحساب بعد)</div>
+        <div class="hint">يجب تسجيل الدخول للوصول إلى لوحة التسيير</div>
       </div>
-      <button class="btn" id="closeAuth" type="button" aria-label="إغلاق">✕</button>
+      <button class="btn" id="closeAuth" type="button" aria-label="إغلاق" style="display:none;">✕</button>
     </div>
 
     <div style="padding:14px 16px">
@@ -1982,6 +1966,7 @@ function render(){
 <script>
 /* ربط أزرار auth بعد وجود المودال في DOM */
 $("closeAuth").onclick = ()=> closeModal("authModal");
+
 $("authLogin").onclick = async ()=>{
   if(!authReady) initAuth();
   const email = ($("authEmail").value || "").trim();
@@ -1999,6 +1984,7 @@ $("authLogin").onclick = async ()=>{
     showToast("فشل تسجيل الدخول", String(e?.message || e), "err");
   }
 };
+
 $("authRegister").onclick = async ()=>{
   if(!authReady) initAuth();
   const email = ($("authEmail").value || "").trim();
@@ -2016,6 +2002,7 @@ $("authRegister").onclick = async ()=>{
     showToast("فشل إنشاء الحساب", String(e?.message || e), "err");
   }
 };
+
 $("authLogout").onclick = async ()=>{
   if(!authReady) initAuth();
   try{
@@ -2034,7 +2021,6 @@ $("authLogout").onclick = async ()=>{
 
 
 
-<!-- Toast -->
 <div id="toast" class="toast" aria-live="polite" aria-atomic="true"></div>
 
 </body>
