@@ -36,9 +36,11 @@ body{
 
 .btn-close { padding: 8px 14px; font-size: 13px; border-radius: 12px; }
 
-.searchWrap{flex:1;min-width:240px}
-.searchWrap input, .searchWrap select { width:100%; padding:10px 12px; border-radius:14px; border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); outline:none; transition: all 0.2s; }
-.searchWrap input:focus, .searchWrap select:focus { border-color: rgba(124,92,255,.6); box-shadow: 0 0 0 4px rgba(124,92,255,.14); }
+/* تم تحديث تصميم شريط البحث ليحتوي الأزرار الجديدة */
+.searchWrap{ flex:1; min-width:240px; display: flex; gap: 6px; align-items: center; }
+.searchWrap input { flex:1; width:100%; padding:10px 12px; border-radius:14px; border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); outline:none; transition: all 0.2s; }
+.searchWrap input:focus { border-color: rgba(124,92,255,.6); box-shadow: 0 0 0 4px rgba(124,92,255,.14); }
+.searchWrap select { width:100%; padding:10px 12px; border-radius:14px; border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); outline:none; transition: all 0.2s; }
 
 input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active{
     -webkit-box-shadow: 0 0 0 30px #161b2a inset !important;
@@ -131,7 +133,11 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
       <button class="btn soft" id="openAuth" type="button" style="border-color:var(--accent); color:var(--accent); box-shadow: 0 0 15px rgba(124,92,255,0.2);">👤 الإدارة</button>
       <button class="btn soft" id="openToolsModal" type="button">⚙️ أدوات</button>
 
-      <div class="searchWrap"><input id="search" placeholder="بحث بالاسم أو الإيميل أو الرقم..." /></div>
+      <div class="searchWrap">
+        <input id="search" placeholder="بحث بالاسم أو الإيميل أو الرقم..." />
+        <button class="btn soft" id="pasteSearchBtn" title="لصق البحث" style="padding: 8px 12px; border-radius: 12px; font-size: 15px;">📋</button>
+        <button class="btn soft" id="clearSearchBtn" title="مسح البحث" style="padding: 8px 12px; border-radius: 12px; font-size: 15px; color: var(--err);">✕</button>
+      </div>
 
       <div class="pills" id="statsBar">
         <div class="statChip sync" id="syncChip"><span class="ico">☁️</span> <span class="v" id="syncVal">—</span></div>
@@ -195,7 +201,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
     </div>
     <div class="modalBody">
       <div class="formGrid">
-        <div class="field full-width"><label>الاسم</label><input id="name" placeholder="مثال: Ahmed"></div>
+        <div class="field full-width"><label>الاسم <span style="color:var(--err)">*</span></label><input id="name" placeholder="مثال: Ahmed"></div>
         <div class="field full-width">
           <label>الهاتف (مع الرمز)</label>
           <div style="display: flex; gap: 8px;">
@@ -205,12 +211,12 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
             <input id="phone" type="tel" dir="ltr" placeholder="555000000" style="flex:1;">
           </div>
         </div>
-        <div class="field full-width"><label>الإيميل (اختياري)</label><input id="email" placeholder="name@example.com" inputmode="email"></div>
+        <div class="field full-width"><label>الإيميل (إجباري) <span style="color:var(--err)">*</span></label><input id="email" placeholder="name@example.com" inputmode="email"></div>
         <div class="field"><label>اختيار سريع</label><select id="quickPlan"><option value="">— اختر —</option><option value="1">1 شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="12">12 شهر</option></select></div>
-        <div class="field"><label>عدد الأشهر</label><input id="months" type="number" min="1" step="1"></div>
+        <div class="field"><label>عدد الأشهر <span style="color:var(--err)">*</span></label><input id="months" type="number" min="1" step="1"></div>
         <div class="field"><label>السعر</label><input id="price" type="number" min="0" step="0.01"></div>
         <div class="field"><label>العملة</label><select id="currency"><option value="DZD">DZD</option><option value="EUR">EUR</option><option value="USD">USD</option><option value="MAD">MAD</option><option value="TND">TND</option></select></div>
-        <div class="field"><label>تاريخ البداية</label><input id="start" type="date"></div>
+        <div class="field"><label>تاريخ البداية <span style="color:var(--err)">*</span></label><input id="start" type="date"></div>
         <div class="field"><label>تنبيه قبل (أيام)</label><input id="alertDays" type="number" min="1" step="1" value="7"></div>
       </div>
     </div>
@@ -408,7 +414,6 @@ auth.onAuthStateChanged(async (u)=>{
   updateAuthUI();
 });
 
-// ==== التحديث الجديد للتصميم البصري للـ Authentication ====
 function updateAuthUI() {
   if(currentUser) {
     $("authLoginSection").style.display = "none"; 
@@ -577,15 +582,23 @@ $("confirmExtendBtn").onclick = async () => {
 };
 
 $("quickPlan").onchange = ()=>{ if($("quickPlan").value) $("months").value = $("quickPlan").value; };
+
+// ==== تم تحديث دالة الحفظ لرفض الإضافة إذا كان الإيميل فارغاً ====
 $("saveBtn").onclick = async () => {
-  const start = $("start").value; const months = parseInt($("months").value); if(!$("name").value || !start || isNaN(months)) return showToast("بيانات ناقصة", "err");
+  const start = $("start").value; const months = parseInt($("months").value); 
+  const emailVal = $("email").value.trim(); // سحب قيمة الإيميل
+  
+  if(!$("name").value.trim() || !emailVal || !start || isNaN(months)) {
+    return showToast("الرجاء إدخال البيانات الإجبارية (الاسم، الإيميل، المدة...)", "err");
+  }
   
   const actionName = editingId ? "تعديل اشتراك" : "إضافة اشتراك";
   logAction(actionName, `الاسم: ${$("name").value} - السعر: ${$("price").value} ${$("currency").value}`); 
 
   const endD = new Date(start); endD.setMonth(endD.getMonth() + months);
   const alertEl = $("alertDays");
-  const rec = { id: editingId || Date.now().toString(), name: $("name").value, email: $("email").value, phone: $("phone").value, countryCode: $("countryCode").value, alertDays: (alertEl && alertEl.value)?alertEl.value:7, months, price: $("price").value, currency: $("currency").value, start, end: endD.toISOString().split('T')[0] };
+  const rec = { id: editingId || Date.now().toString(), name: $("name").value, email: emailVal, phone: $("phone").value, countryCode: $("countryCode").value, alertDays: (alertEl && alertEl.value)?alertEl.value:7, months, price: $("price").value, currency: $("currency").value, start, end: endD.toISOString().split('T')[0] };
+  
   if(editingId) data = data.map(x => x.id === editingId ? rec : x); else data.unshift(rec);
   await firebasePush(); render(); closeModal("formModal"); showToast("تم الحفظ ✨");
 };
@@ -646,6 +659,26 @@ $("authLogout").onclick = () => auth.signOut();
 $("openAdd").onclick = () => { editingId=null; $("formTitle").textContent="إضافة اشتراك"; $("name").value=""; $("email").value=""; $("phone").value=""; $("countryCode").value="+213"; $("quickPlan").value=""; $("months").value=""; $("price").value=""; $("start").value=todayISO(); openModal("formModal"); };
 $("openAuth").onclick = () => openModal("authModal");
 $("search").oninput = render;
+
+// ==== برمجة أزرار شريط البحث (اللصق والمسح) ====
+if($("clearSearchBtn")) {
+  $("clearSearchBtn").onclick = () => { 
+    $("search").value = ""; 
+    render(); // لتحديث الجدول وعرض كل النتائج
+  };
+}
+
+if($("pasteSearchBtn")) {
+  $("pasteSearchBtn").onclick = async () => { 
+    try { 
+      const text = await navigator.clipboard.readText(); 
+      $("search").value = text; 
+      render(); // البحث فورياً بعد اللصق
+    } catch(e) { 
+      showToast("فشل اللصق، يرجى منح صلاحية الحافظة للمتصفح", "warn"); 
+    } 
+  };
+}
 
 function openModal(id){ $(id).setAttribute("aria-hidden","false"); }
 function closeModal(id){ $(id).setAttribute("aria-hidden","true"); }
