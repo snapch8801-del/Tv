@@ -406,7 +406,6 @@ function render(){
   
   const rows = data.filter(r => { 
     if(!r) return false;
-    // التأكد من عدم توقف البحث إذا كان هناك حساب قديم بدون اسم
     const n = (r.name || "").toString().toLowerCase();
     const p = (r.phone || "").toString().toLowerCase();
     const e = (r.email || "").toString().toLowerCase();
@@ -486,13 +485,32 @@ $("undoDeleteBtn").onclick = async () => {
   await firebasePush(); render(); closeModal('toolsModal'); showToast("تم استرجاع البيانات المحذوفة ↩️");
 };
 
+// ==== تحديث نظام المجاميع لحساب العملات ====
 $("openTotals").onclick = () => { 
-  const alertEl = $("alertDays"); const alertD = (alertEl && alertEl.value) ? parseInt(alertEl.value) : 7;
+  const alertEl = $("alertDays"); 
+  const alertD = (alertEl && alertEl.value) ? parseInt(alertEl.value) : 7;
   const activeData = data.filter(r => getStatus(r.end, alertD).key !== "expired"); 
-  const total = activeData.reduce((sum, r) => sum + (parseFloat(r.price) || 0), 0); 
-  $("totalsBody").innerHTML = `<div style="color:var(--accent); font-size:32px; margin-bottom:10px;">${total.toLocaleString()}</div><div style="font-size:13px; color:var(--muted)">إجمالي المداخيل من الاشتراكات الفعّالة والقريبة من الانتهاء.</div>`; 
+  
+  const totalsByCurrency = {};
+  activeData.forEach(r => {
+    const curr = r.currency || "DZD";
+    const price = parseFloat(r.price) || 0;
+    totalsByCurrency[curr] = (totalsByCurrency[curr] || 0) + price;
+  });
+
+  let totalsHtml = "";
+  if (Object.keys(totalsByCurrency).length === 0) {
+    totalsHtml = `<div style="color:var(--accent); font-size:32px; margin-bottom:10px;">0 <span style="font-size:18px; color:var(--muted);">DZD</span></div>`;
+  } else {
+    for (let curr in totalsByCurrency) {
+      totalsHtml += `<div style="color:var(--accent); font-size:32px; margin-bottom:5px;">${totalsByCurrency[curr].toLocaleString()} <span style="font-size:18px; color:var(--muted);">${curr}</span></div>`;
+    }
+  }
+  
+  $("totalsBody").innerHTML = `${totalsHtml}<div style="font-size:13px; color:var(--muted); margin-top:15px;">إجمالي المداخيل من الاشتراكات الفعّالة والقريبة من الانتهاء.</div>`; 
   openModal("totalsModal"); 
 };
+
 $("exportJsonBtn").onclick = () => { if(data.length === 0) return showToast("لا توجد بيانات", "warn"); const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data)); const a = document.createElement("a"); a.href = dataStr; a.download = `Backup_${todayISO()}.json`; a.click(); closeModal("toolsModal"); showToast("تم تنزيل نسخة JSON 📥"); };
 $("importFileBtn").onclick = () => $("fileInput").click();
 $("fileInput").onchange = (e) => { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = async (event) => { try { const imported = JSON.parse(event.target.result); if(Array.isArray(imported)) { data = imported; await firebasePush(); render(); closeModal("backupModal"); closeModal("toolsModal"); showToast("تم الاستيراد ✅"); } } catch(err) { showToast("ملف غير صالح", "err"); } }; reader.readAsText(file); };
@@ -511,6 +529,14 @@ function openModal(id){ $(id).setAttribute("aria-hidden","false"); }
 function closeModal(id){ $(id).setAttribute("aria-hidden","true"); }
 function showToast(m, type="ok"){ const t=$("toast"); t.textContent=m; t.style.borderColor = type==="err"?"#ef4444":"#22c55e"; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"), 3000); }
 document.querySelectorAll(".filterBtn").forEach(b => { b.onclick = (e) => { document.querySelectorAll(".filterBtn").forEach(x=>x.classList.remove("active")); e.target.classList.add("active"); currentFilter = e.target.dataset.filter; render(); }; });
+
+// ==== إصلاح أزرار الإغلاق ====
+if($("closeForm")) $("closeForm").onclick = () => closeModal("formModal");
+if($("closeTotalsX")) $("closeTotalsX").onclick = () => closeModal("totalsModal");
+if($("closeRowActionsX")) $("closeRowActionsX").onclick = () => closeModal("rowActionsModal");
+if($("closeBackup")) $("closeBackup").onclick = () => closeModal("backupModal");
+if($("closeSyncX")) $("closeSyncX").onclick = () => closeModal("syncModal");
+
 </script>
 </body>
 </html>
