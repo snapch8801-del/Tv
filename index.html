@@ -7,53 +7,285 @@
 
 <style>
 :root{
-  --bg0:#070a12; --bg1:#0b1020; --card: rgba(255,255,255,.06); --line: rgba(255,255,255,.10);
-  --text:#eaf0ff; --muted: rgba(234,240,255,.70); --accent:#7c5cff; --warn:#f59e0b;
-  --err:#ef4444; --radius:18px; --shadow: 0 18px 45px rgba(0,0,0,.45);
+  --bg0:#070a12;
+  --bg1:#0b1020;
+  --card: rgba(255,255,255,.06);
+  --line: rgba(255,255,255,.10);
+  --text:#eaf0ff;
+  --muted: rgba(234,240,255,.70);
+  --accent:#7c5cff;
+  --warn:#f59e0b;
+  --err:#ef4444;
+  --radius:18px;
+  --shadow: 0 18px 45px rgba(0,0,0,.45);
 }
 
 *{box-sizing:border-box}
 body{
-  margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial; color: var(--text);
-  background: radial-gradient(1200px 650px at 85% -10%, rgba(124,92,255,.25), transparent 60%), linear-gradient(180deg, var(--bg0), var(--bg1));
+  margin:0;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial;
+  color: var(--text);
+  background:
+    radial-gradient(1200px 650px at 85% -10%, rgba(124,92,255,.25), transparent 60%),
+    radial-gradient(1000px 600px at 10% 0%, rgba(34,197,94,.18), transparent 60%),
+    linear-gradient(180deg, var(--bg0), var(--bg1));
   padding: 18px;
 }
 .container{max-width:1200px;margin:0 auto}
+
 .header{margin-bottom:14px}
 .header h1{margin:0;font-size:20px}
 .header .sub{margin-top:6px;font-size:13px;color:var(--muted);line-height:1.7}
 
-.card{ background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); backdrop-filter: blur(10px); overflow:hidden; }
-.topbar{ padding:14px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+.card{
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+  overflow:hidden;
+}
 
-.btn{ border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); padding:10px 12px; border-radius:14px; font-weight:900; cursor:pointer; transition: transform .08s ease; }
-.btn.primary{ border-color: rgba(124,92,255,.55); background: linear-gradient(135deg, rgba(124,92,255,.55), rgba(124,92,255,.15)); }
-.btn.danger{ border-color: rgba(239,68,68,.55); background: rgba(239,68,68,.12); }
+.topbar{
+  padding:14px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.btn{
+  border:1px solid var(--line);
+  background: rgba(0,0,0,.18);
+  color: var(--text);
+  padding:10px 12px;
+  border-radius:14px;
+  font-weight:900;
+  cursor:pointer;
+  transition: transform .08s ease, background .15s ease, border-color .15s ease;
+}
+.btn:hover{ background: rgba(255,255,255,.06); }
+.btn:active{ transform: scale(.98); }
+.btn.primary{
+  border-color: rgba(124,92,255,.55);
+  background: linear-gradient(135deg, rgba(124,92,255,.55), rgba(124,92,255,.15));
+}
+.btn.danger{
+  border-color: rgba(239,68,68,.55);
+  background: linear-gradient(135deg, rgba(239,68,68,.35), rgba(239,68,68,.12));
+}
+.btn.soft{
+  border-color: rgba(255,255,255,.14);
+  background: rgba(255,255,255,.04);
+}
 
 .searchWrap{flex:1;min-width:240px}
-.searchWrap input{ width:100%; padding:10px 12px; border-radius:14px; border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); outline:none; }
+.searchWrap input{
+  width:100%;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid var(--line);
+  background: rgba(0,0,0,.18);
+  color: var(--text);
+  outline:none;
+}
+.searchWrap input:focus{
+  border-color: rgba(124,92,255,.6);
+  box-shadow: 0 0 0 4px rgba(124,92,255,.14);
+}
 
-.filtersBar{ width: 100%; display: flex; gap: 8px; padding: 0 14px 14px 14px; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
-.filterBtn{ padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: rgba(0,0,0,.18); color: var(--muted); font-size: 13px; font-weight: 800; cursor: pointer; }
-.filterBtn.active{ background: var(--text); color: var(--bg0); border-color: var(--text); }
+.filtersBar{
+  width: 100%;
+  display: flex;
+  gap: 8px;
+  padding: 0 14px 14px 14px;
+  flex-wrap: wrap;
+  border-bottom: 1px solid var(--line);
+}
+.filterBtn{
+  padding: 8px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: rgba(0,0,0,.18);
+  color: var(--muted);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.filterBtn.active{
+  background: var(--text);
+  color: var(--bg0);
+  border-color: var(--text);
+}
 
-.statChip{ display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:999px; border:1px solid var(--line); background: rgba(0,0,0,.18); font-size:12px; font-weight:900; color: var(--text); }
-.statChip.sync{ border-color: rgba(124,92,255,.45); background: rgba(124,92,255,.10); }
+.pills{margin-inline-start:auto;display:flex;gap:8px;flex-wrap:wrap}
+
+#statsBar{
+  margin-inline-start:auto;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.statChip{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 10px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  background: rgba(0,0,0,.18);
+  font-size:12px;
+  font-weight:900;
+  color: var(--text);
+}
+.statChip.sync{
+  border-color: rgba(124,92,255,.45);
+  background: rgba(124,92,255,.10);
+}
 
 .tableWrap{ overflow:auto; }
-table{ width:100%; border-collapse:separate; border-spacing:0; min-width: 980px; }
-thead th{ position:sticky; top:0; z-index:5; background: rgba(0,0,0,.22); color: var(--muted); text-align:right; font-size:12px; padding:12px; border-bottom:1px solid var(--line); }
-tbody td{ padding:12px; border-bottom:1px solid rgba(255,255,255,.07); white-space:nowrap; }
+table{
+  width:100%;
+  border-collapse:separate;
+  border-spacing:0;
+  min-width: 980px;
+}
+thead th{
+  position:sticky; top:0;
+  z-index:5;
+  background: rgba(0,0,0,.22);
+  color: var(--muted);
+  text-align:right;
+  font-size:12px;
+  font-weight:900;
+  padding:12px 12px;
+  border-bottom:1px solid var(--line);
+}
+tbody td{
+  padding:12px 12px;
+  border-bottom:1px solid rgba(255,255,255,.07);
+  white-space:nowrap;
+}
 tr.expired-row{ background: rgba(239,68,68,.10); }
+tr.expiring-row{ background: rgba(245,158,11,.08); }
 
-.modal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,.62); z-index:9999; padding: 18px; }
+.badge{
+  display:inline-flex;
+  align-items:center;
+  padding:6px 10px;
+  border-radius:999px;
+  border:1px solid var(--line);
+  font-size:12px;
+  font-weight:900;
+}
+.badge.ok{ border-color: rgba(34,197,94,.45); color:#c8f7d9; }
+.badge.warn{ border-color: rgba(245,158,11,.45); color:#ffe2b3; }
+.badge.err{ border-color: rgba(239,68,68,.45); color:#ffd0d0; }
+
+.modal{
+  position:fixed; inset:0;
+  display:none;
+  align-items:center; justify-content:center;
+  background: rgba(0,0,0,.62);
+  z-index:9999;
+  padding: 18px;
+}
 .modal[aria-hidden="false"]{ display:flex; }
-.modal .box{ width:min(860px, 100%); background: rgba(10,14,26,.96); border: 1px solid rgba(255,255,255,.10); border-radius: 22px; }
+.modal .box{
+  width:min(860px, 100%);
+  background: rgba(10,14,26,.96);
+  border: 1px solid rgba(255,255,255,.10);
+  border-radius: 22px;
+  box-shadow: 0 30px 90px rgba(0,0,0,.65);
+  overflow:hidden;
+}
 
-.toast{ position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%) translateY(20px); padding: 12px 14px; border-radius: 16px; background: rgba(10,14,26,.92); border: 1px solid rgba(255,255,255,.12); color: var(--text); display: flex; align-items: center; gap: 10px; opacity: 0; transition: all .18s ease; z-index: 10000; }
+.modalHeader{
+  padding:14px 16px;
+  border-bottom:1px solid rgba(255,255,255,.10);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.modalBody{ padding: 14px 16px; }
+.modalFooter{
+  padding:12px 16px;
+  border-top:1px solid rgba(255,255,255,.10);
+  display:flex; gap:10px; flex-wrap:wrap;
+  justify-content:flex-start;
+}
+
+.formGrid{
+  display:grid;
+  grid-template-columns: 1.2fr 1.2fr 1.2fr .9fr .9fr .9fr .9fr .9fr;
+  gap:10px;
+}
+@media (max-width: 980px){
+  .formGrid{ grid-template-columns: 1fr 1fr; }
+}
+
+.field label{
+  display:block;
+  font-weight:900;
+  font-size:12px;
+  color: var(--muted);
+  margin-bottom:6px;
+}
+.field input, .field select{
+  width:100%;
+  padding:10px 12px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.10);
+  background: rgba(0,0,0,.22);
+  color: var(--text);
+  outline:none;
+}
+
+.actionPill{
+  padding:10px 12px;
+  border-radius:16px;
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.04);
+  color: var(--text);
+  font-weight: 900;
+  cursor:pointer;
+}
+
+.actGrid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap:12px;
+}
+@media (max-width: 640px){
+  .actGrid{ grid-template-columns: 1fr; }
+}
+.actBtn{
+  border:1px solid rgba(255,255,255,.12);
+  background: rgba(255,255,255,.04);
+  color: var(--text);
+  padding: 14px 14px;
+  border-radius: 18px;
+  font-weight: 900;
+  cursor:pointer;
+}
+
+.toast{
+  position: fixed;
+  left: 50%; bottom: 18px;
+  transform: translateX(-50%) translateY(20px);
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(10,14,26,.92);
+  border: 1px solid rgba(255,255,255,.12);
+  color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  opacity: 0;
+  transition: all .18s ease;
+  z-index: 10000;
+}
 .toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); }
-
-@media print{ .filtersBar, .topbar, .btn, .toast, .modal{ display:none !important; } }
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -65,28 +297,41 @@ tr.expired-row{ background: rgba(239,68,68,.10); }
 <div class="container">
   <div class="header">
     <h1>🧾 لوحة تسيير الاشتراكات</h1>
-    <div class="sub">⚡ النسخة 2.0: استقرار كامل ومزامنة لحظية</div>
+    <div class="sub">⚡ نسخة منظفة ومستقرة (v2.0 الكاملة)</div>
   </div>
 
   <div class="card">
     <div class="topbar">
       <button class="btn primary" id="openAdd">➕ إضافة</button>
-      <button class="btn" id="openAuth">👤 حساب</button>
-      <div class="searchWrap"><input id="search" placeholder="بحث بالاسم أو الرقم..." /></div>
+      <button class="btn soft" id="openAuth">👤 حساب</button>
+
+      <div class="searchWrap">
+        <input id="search" placeholder="بحث بالاسم أو الإيميل أو الرقم..." />
+      </div>
+
       <div class="pills" id="statsBar">
-        <div class="statChip sync" id="syncChip"><span class="ico">☁️</span> <span id="syncVal">—</span></div>
+        <div class="statChip sync" id="syncChip">
+          <span class="ico">☁️</span>
+          <span class="k">مزامنة:</span>
+          <span class="v" id="syncVal">—</span>
+        </div>
       </div>
     </div>
 
-    <div class="filtersBar">
+    <div class="filtersBar" id="filtersBar">
       <button class="filterBtn active" data-filter="all">الكل</button>
       <button class="filterBtn" data-filter="active">✅ فعّال</button>
+      <button class="filterBtn" data-filter="expiring">⏰ قريب ينتهي</button>
       <button class="filterBtn" data-filter="expired">❌ منتهي</button>
     </div>
 
     <div class="tableWrap">
       <table>
-        <thead><tr><th>الاسم</th><th>الهاتف</th><th>المدة</th><th>السعر</th><th>الانتهاء</th><th>الحالة</th><th>إجراء</th></tr></thead>
+        <thead>
+          <tr>
+            <th>الاسم</th><th>الإيميل</th><th>الهاتف</th><th>المدة</th><th>السعر</th><th>البداية</th><th>الانتهاء</th><th>المتبقي</th><th>الحالة</th><th>إجراء</th>
+          </tr>
+        </thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
@@ -94,23 +339,64 @@ tr.expired-row{ background: rgba(239,68,68,.10); }
 </div>
 
 <div class="modal" id="formModal" aria-hidden="true">
-  <div class="box" style="padding: 20px;">
-    <h3>إضافة اشتراك</h3>
-    <input id="name" placeholder="الاسم" style="width:100%; margin-bottom:10px; padding:10px; background:#000; color:#fff; border:1px solid #333; border-radius:10px;">
-    <input id="phone" placeholder="الهاتف" style="width:100%; margin-bottom:10px; padding:10px; background:#000; color:#fff; border:1px solid #333; border-radius:10px;">
-    <input id="months" type="number" placeholder="الأشهر" style="width:100%; margin-bottom:10px; padding:10px; background:#000; color:#fff; border:1px solid #333; border-radius:10px;">
-    <input id="price" type="number" placeholder="السعر" style="width:100%; margin-bottom:10px; padding:10px; background:#000; color:#fff; border:1px solid #333; border-radius:10px;">
-    <input id="start" type="date" style="width:100%; margin-bottom:20px; padding:10px; background:#000; color:#fff; border:1px solid #333; border-radius:10px;">
-    <button class="btn primary" id="saveBtn" style="width:100%">💾 حفظ</button>
+  <div class="box">
+    <div class="modalHeader">
+      <h2 id="formTitle">إضافة اشتراك</h2>
+      <button class="btn" onclick="closeModal('formModal')">✕</button>
+    </div>
+    <div class="modalBody">
+      <div class="formGrid">
+        <div class="field"><label>الاسم</label><input id="name"></div>
+        <div class="field"><label>الإيميل</label><input id="email"></div>
+        <div class="field"><label>الهاتف</label><input id="phone"></div>
+        <div class="field">
+          <label>الخطة</label>
+          <select id="quickPlan">
+            <option value="">— اختر —</option>
+            <option value="1">1 شهر</option><option value="3">3 أشهر</option>
+            <option value="6">6 أشهر</option><option value="12">12 شهر</option>
+          </select>
+        </div>
+        <div class="field"><label>الأشهر</label><input id="months" type="number"></div>
+        <div class="field"><label>السعر</label><input id="price" type="number"></div>
+        <div class="field">
+          <label>العملة</label>
+          <select id="currency"><option value="DZD">DZD</option><option value="USD">USD</option></select>
+        </div>
+        <div class="field"><label>البداية</label><input id="start" type="date"></div>
+      </div>
+    </div>
+    <div class="modalFooter">
+      <button class="btn primary" id="saveBtn">💾 حفظ</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="rowActionsModal" aria-hidden="true">
+  <div class="box" style="width: 400px">
+    <div class="modalHeader"><h2>إجراءات سريعة</h2><button class="btn" onclick="closeModal('rowActionsModal')">✕</button></div>
+    <div class="modalBody">
+      <div class="actGrid">
+        <button class="actBtn" id="actExtend">🔁 تجديد</button>
+        <button class="actBtn" id="actEdit">✏️ تعديل</button>
+        <button class="actBtn" id="actCopyEmail">📋 نسخ Email</button>
+        <button class="actBtn" id="actWhatsApp" style="color:#22c55e">💬 واتساب</button>
+        <button class="actBtn danger" id="actDelete" style="grid-column: span 2;">🗑️ حذف الاشتراك</button>
+      </div>
+    </div>
   </div>
 </div>
 
 <div class="modal" id="authModal" aria-hidden="true">
-  <div class="box" style="width: 350px; padding: 20px;">
-    <h3>🔐 تسجيل الدخول</h3>
-    <input id="authEmail" placeholder="الإيميل" style="width:100%; margin-bottom:10px; padding:10px; background:#000; color:#fff; border:1px solid #333; border-radius:10px;">
-    <input id="authPass" type="password" placeholder="كلمة المرور" style="width:100%; margin-bottom:20px; padding:10px; background:#000; color:#fff; border:1px solid #333; border-radius:10px;">
-    <button class="btn primary" id="authLogin" style="width:100%">دخول</button>
+  <div class="box" style="width: 350px">
+    <div class="modalHeader"><h2>👤 الحساب</h2></div>
+    <div style="padding: 15px">
+      <div class="field" style="margin-bottom:10px"><label>الإيميل</label><input id="authEmail"></div>
+      <div class="field" style="margin-bottom:15px"><label>كلمة المرور</label><input id="authPass" type="password"></div>
+      <button class="btn primary" id="authLogin" style="width:100%">تسجيل الدخول</button>
+      <button class="btn soft" id="authLogout" style="width:100%; margin-top:10px">خروج</button>
+      <div id="authStateText" style="margin-top:10px; font-size:12px; color:var(--muted)"></div>
+    </div>
   </div>
 </div>
 
@@ -118,7 +404,6 @@ tr.expired-row{ background: rgba(239,68,68,.10); }
 
 <script>
 'use strict';
-const $ = (id)=>document.getElementById(id);
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ",
   authDomain: "dattta-6f497.firebaseapp.com",
@@ -129,75 +414,190 @@ const FIREBASE_CONFIG = {
   appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb"
 };
 
-let data = []; let editingId = null; let currentFilter = 'all';
+const $ = (id)=>document.getElementById(id);
+const FIREBASE_PATH = "subscriptions";
+const LOCAL_BACKUP_KEY = "subs_local_backup_v4";
+let data = []; let editingId = null; let currentRowId = null; let currentFilter = "all"; let currentUser = null;
 
+// === Firebase Init ===
 if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+const auth = firebase.auth();
 const db = firebase.database();
-firebase.auth().onAuthStateChanged(async (u) => {
-  if(u) { closeModal("authModal"); await load(); }
+
+auth.onAuthStateChanged(async (u)=>{
+  currentUser = u;
+  if(u){ closeModal("authModal"); await load(); }
   else { data = []; render(); openModal("authModal"); }
+  updateAuthUI();
 });
 
+function updateAuthUI(){
+  const t = $("authStateText");
+  if(t) t.textContent = currentUser ? `✅ متصل: ${currentUser.email}` : "🔒 غير متصل";
+}
+
+function setSyncState(state){
+  const chip = $("syncChip"); const val = $("syncVal");
+  if(!chip || !val) return;
+  chip.className = "statChip sync " + state;
+  if(!navigator.onLine) val.textContent = "أوفلاين 📴";
+  else if(state==="saving") val.textContent = "جاري الحفظ ⏳";
+  else if(state==="ok") {
+    const d = new Date();
+    val.textContent = d.getHours()+":"+String(d.getMinutes()).padStart(2,"0") + " ✅";
+  }
+}
+
 async function load() {
-  setSyncState('saving');
+  if(!navigator.onLine) { data = loadLocalBackup(); render(); return; }
   try {
-    const snap = await db.ref("subscriptions").once('value');
+    setSyncState("saving");
+    const snap = await db.ref(FIREBASE_PATH).once('value');
     data = snap.val() ? Object.values(snap.val()) : [];
-    render(); setSyncState('ok');
-  } catch(e) { setSyncState('fail'); showToast("فشل في تحميل البيانات: " + e.message, "err"); }
+    saveLocalBackup(); setSyncState("ok"); render();
+  } catch(e) { setSyncState("err"); }
 }
 
 async function firebasePush() {
-  setSyncState('saving');
+  if(!navigator.onLine) return;
   try {
-    await db.ref("subscriptions").set(data);
-    setSyncState('ok');
-  } catch(e) { setSyncState('fail'); showToast("تعذر الحفظ: " + e.message, "err"); }
+    setSyncState("saving");
+    await db.ref(FIREBASE_PATH).set(data);
+    saveLocalBackup();
+    setSyncState("ok");
+  } catch(e) { setSyncState("err"); showToast(e.message, "err"); }
 }
 
-function setSyncState(st) {
-  const val = $('syncVal'); const chip = $('syncChip');
-  chip.className = "statChip sync " + st;
-  if(st==='saving') val.textContent = 'جاري المزامنة...';
-  if(st==='ok') { const d=new Date(); val.textContent = d.getHours()+':'+String(d.getMinutes()).padStart(2,'0') + ' ✅'; }
-  if(st==='fail') val.textContent = 'فشل ❌';
+function saveLocalBackup(){ localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(data)); }
+function loadLocalBackup(){
+  try { const j = JSON.parse(localStorage.getItem(LOCAL_BACKUP_KEY)); return Array.isArray(j) ? j : []; } catch { return []; }
 }
 
-function render() {
-  const tb = $('tbody'); tb.innerHTML = '';
-  const q = $('search').value.toLowerCase();
-  data.filter(r => {
-    const match = !q || r.name.toLowerCase().includes(q) || (r.phone||"").includes(q);
-    const left = Math.round((new Date(r.end) - new Date()) / 86400000);
-    const key = left < 0 ? 'expired' : 'active';
-    if(currentFilter !== 'all' && currentFilter !== key) return false;
+function getStatus(endISO) {
+  const left = Math.round((new Date(endISO) - new Date().setHours(0,0,0,0))/(1000*60*60*24));
+  if(left < 0) return {key:"expired", label:"منتهي", cls:"err", left};
+  if(left <= 7) return {key:"expiring", label:"قريب", cls:"warn", left};
+  return {key:"active", label:"فعّال", cls:"ok", left};
+}
+
+function render(){
+  const q = ($("search").value||"").trim().toLowerCase();
+  const tb = $("tbody"); tb.innerHTML="";
+  const rows = data.filter(r=>{
+    const match = !q || r.name.toLowerCase().includes(q) || (r.phone||"").includes(q) || (r.email||"").toLowerCase().includes(q);
+    const st = getStatus(r.end).key;
+    if(currentFilter !== "all" && currentFilter !== st) return false;
     return match;
-  }).forEach(r => {
-    const left = Math.round((new Date(r.end) - new Date()) / 86400000);
-    const tr = document.createElement('tr');
-    if(left < 0) tr.className = 'expired-row';
-    tr.innerHTML = `<td>${r.name}</td><td>${r.phone||'-'}</td><td>${r.months} ش</td><td>${r.price} DZD</td><td>${r.end}</td><td><span style="color:${left<0?'#ef4444':'#22c55e'}">${left<0?'منتهي':'فعال'}</span></td><td><button class="btn" onclick="deleteRow('${r.id}')">🗑️</button></td>`;
+  });
+  rows.forEach(r=>{
+    const st = getStatus(r.end);
+    const tr = document.createElement("tr");
+    if(st.key==="expired") tr.className = "expired-row";
+    tr.innerHTML = `<td>${r.name}</td><td>${r.email||'-'}</td><td dir="ltr">${r.phone||'-'}</td><td>${r.months} ش</td><td>${r.price} ${r.currency}</td><td>${r.start}</td><td>${r.end}</td><td>${st.left < 0 ? 'منذ ' + Math.abs(st.left) : st.left} يوم</td><td><span class="badge ${st.cls}">${st.label}</span></td><td><button class="actionPill" onclick="openRowActions('${r.id}')">⚡ إجراءات</button></td>`;
     tb.appendChild(tr);
   });
 }
 
-$('saveBtn').onclick = async () => {
-  const start = $('start').value; const months = parseInt($('months').value);
-  if(!$('name').value || !start || isNaN(months)) return showToast("بيانات ناقصة", "err");
-  const endD = new Date(start); endD.setMonth(endD.getMonth() + months);
-  const rec = { id: Date.now().toString(), name: $('name').value, phone: $('phone').value, price: $('price').value, start, end: endD.toISOString().split('T')[0], months };
-  data.unshift(rec);
-  await firebasePush(); render(); closeModal('formModal');
+// === فتح نافذة الإجراءات ===
+window.openRowActions = (id) => { currentRowId = id; openModal("rowActionsModal"); };
+
+// === وظائف أزرار الإجراءات ===
+$("actEdit").onclick = () => {
+  const rec = data.find(x => x.id === currentRowId);
+  if(!rec) return;
+  closeModal("rowActionsModal");
+  editingId = rec.id;
+  $("formTitle").textContent = "تعديل اشتراك";
+  $("name").value = rec.name || "";
+  $("email").value = rec.email || "";
+  $("phone").value = rec.phone || "";
+  $("quickPlan").value = "";
+  $("months").value = rec.months || "";
+  $("price").value = rec.price || "";
+  $("currency").value = rec.currency || "DZD";
+  $("start").value = rec.start || todayISO();
+  openModal("formModal");
 };
 
-window.deleteRow = async (id) => { if(confirm("حذف؟")) { data = data.filter(x => x.id !== id); await firebasePush(); render(); } };
-$('authLogin').onclick = () => { firebase.auth().signInWithEmailAndPassword($('authEmail').value, $('authPass').value).catch(e => showToast(e.message, "err")); };
-function openModal(id) { $(id).setAttribute('aria-hidden','false'); }
-function closeModal(id) { $(id).setAttribute('aria-hidden','true'); }
-function showToast(m, k="ok") { const t=$('toast'); t.textContent=m; t.style.background=k==="err"?"#ef4444":"#7c5cff"; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 3000); }
-$('openAdd').onclick = () => { $('start').value=new Date().toISOString().split('T')[0]; openModal('formModal'); };
-$('search').oninput = render;
-$('openAuth').onclick = () => openModal('authModal');
+$("actDelete").onclick = async () => {
+  if(!confirm("تأكيد حذف هذا الاشتراك نهائياً؟")) return;
+  data = data.filter(x => x.id !== currentRowId);
+  await firebasePush(); render(); closeModal("rowActionsModal"); showToast("تم الحذف 🗑️");
+};
+
+$("actExtend").onclick = async () => {
+  const rec = data.find(x => x.id === currentRowId);
+  if(!rec) return;
+  const m = prompt("كم شهراً تريد أن تجدد لهذا العميل؟", "1");
+  if(!m || isNaN(m)) return;
+  
+  const endD = new Date(rec.end);
+  endD.setMonth(endD.getMonth() + parseInt(m));
+  rec.end = endD.toISOString().split('T')[0];
+  rec.months = parseInt(rec.months) + parseInt(m);
+  
+  await firebasePush(); render(); closeModal("rowActionsModal"); showToast("تم التجديد بنجاح 🔁");
+};
+
+$("actCopyEmail").onclick = () => {
+  const rec = data.find(x => x.id === currentRowId);
+  if(!rec || !rec.email) return showToast("لا يوجد إيميل مسجل", "err");
+  navigator.clipboard.writeText(rec.email);
+  closeModal("rowActionsModal"); showToast("تم نسخ الإيميل 📋");
+};
+
+$("actWhatsApp").onclick = () => {
+  const rec = data.find(x => x.id === currentRowId);
+  if(!rec || !rec.phone) return showToast("لا يوجد رقم مسجل لهذا المشترك", "err");
+  let cleanPhone = rec.phone.replace(/[^0-9+]/g, '');
+  let message = `مرحباً ${rec.name}،\nنود تذكيرك بأن اشتراكك سينتهي بتاريخ ${rec.end}.\nيرجى التجديد لضمان استمرار الخدمة.`;
+  window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
+  closeModal("rowActionsModal");
+};
+
+// === حفظ الإضافة/التعديل من النافذة ===
+function todayISO(){ const d=new Date(); d.setHours(0,0,0,0); return d.toISOString().split('T')[0]; }
+$("quickPlan").onchange = ()=>{ if($("quickPlan").value) $("months").value = $("quickPlan").value; };
+
+$("saveBtn").onclick = async () => {
+  const start = $("start").value; const months = parseInt($("months").value);
+  if(!$("name").value || !start || !months) return showToast("الرجاء إكمال البيانات الأساسية", "err");
+  
+  const endD = new Date(start); endD.setMonth(endD.getMonth() + months);
+  const rec = { 
+    id: editingId || Date.now().toString(), 
+    name: $("name").value, 
+    email: $("email").value, 
+    phone: $("phone").value, 
+    months, 
+    price: $("price").value, 
+    currency: $("currency").value, 
+    start, 
+    end: endD.toISOString().split('T')[0] 
+  };
+  
+  if(editingId) data = data.map(x => x.id === editingId ? rec : x);
+  else data.unshift(rec);
+  
+  await firebasePush(); render(); closeModal("formModal"); showToast("تم الحفظ بنجاح ✨");
+};
+
+// === الحساب والواجهة ===
+$("authLogin").onclick = () => { auth.signInWithEmailAndPassword($("authEmail").value, $("authPass").value).catch(e => showToast(e.message, "err")); };
+$("authLogout").onclick = () => auth.signOut();
+$("openAdd").onclick = () => { editingId=null; $("formTitle").textContent="إضافة اشتراك"; $("name").value=""; $("email").value=""; $("phone").value=""; $("months").value=""; $("price").value=""; $("start").value=todayISO(); openModal("formModal"); };
+$("search").oninput = render;
+
+function openModal(id){ $(id).setAttribute("aria-hidden","false"); }
+function closeModal(id){ $(id).setAttribute("aria-hidden","true"); }
+function showToast(m, type="ok"){ const t=$("toast"); t.textContent=m; t.style.borderColor = type==="err"?"#ef4444":"#22c55e"; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"), 3000); }
+
+document.querySelectorAll(".filterBtn").forEach(b => {
+  b.onclick = (e) => {
+    document.querySelectorAll(".filterBtn").forEach(x=>x.classList.remove("active"));
+    e.target.classList.add("active"); currentFilter = e.target.dataset.filter; render();
+  };
+});
 </script>
 </body>
 </html>
