@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>لوحة تسيير الاشتراكات - v8.0</title>
+<title>لوحة تسيير الاشتراكات - v9.0</title>
 
 <style>
 :root{
@@ -112,7 +112,17 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 .auth-input:focus { border-color: rgba(124,92,255,.6); box-shadow: 0 0 0 4px rgba(124,92,255,.14); background:rgba(0,0,0,0.6); }
 .auth-label { font-size:13px; color:var(--muted); margin-bottom:8px; display:block; text-align: right; font-weight: bold; }
 
-@media print{ .filtersBar, .topbar, .btn, .toast, .modal, .bulkBar{ display:none !important; } }
+/* ======== كود الطباعة الذكي الخاص بالوصل ======== */
+@media print {
+    body * { visibility: hidden; }
+    body { background: white !important; }
+    /* إظهار نافذة الوصل فقط وتمديدها على الشاشة */
+    #receiptModal, #receiptModal * { visibility: visible; }
+    #receiptModal { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: white !important; align-items: flex-start; padding: 0;}
+    #receiptModal .box { width: 100% !important; max-width: none !important; box-shadow: none !important; border: none !important; border-radius: 0 !important; }
+    /* إخفاء الأزرار عند الطباعة */
+    .no-print, .modalHeader { display: none !important; }
+}
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -123,8 +133,8 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v8.0</span></h1>
-    <div class="sub">⚡ النسخة الشاملة (المصححة والنهائية 100%)</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v9.0</span></h1>
+    <div class="sub">⚡ النسخة الشاملة (مع ميزة إصدار الوصل الرقمي)</div>
   </div>
 
   <div class="card">
@@ -239,6 +249,47 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
   </div>
 </div>
 
+<div class="modal" id="receiptModal" aria-hidden="true">
+  <div class="box" style="width: 450px; background: #ffffff; color: #000000; border: none; border-radius: 12px;">
+    
+    <div class="modalHeader no-print" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
+      <h2 style="color: #0f172a;">📄 الوصل الرقمي</h2>
+      <button class="btn btn-close" style="background:#f1f5f9; color:#ef4444; border:1px solid #e2e8f0;" onclick="closeModal('receiptModal')">✕ إغلاق</button>
+    </div>
+    
+    <div class="modalBody receipt-content" style="padding: 30px 25px; font-family: Tahoma, Arial, sans-serif; background: #ffffff;">
+      <div style="text-align: center; margin-bottom: 25px;">
+        <div style="font-size: 40px; margin-bottom: 5px;">💎</div>
+        <h1 style="margin: 0; font-size: 24px; color: #4f46e5; font-weight: 900;">متجر الاشتراكات</h1>
+        <div style="color: #64748b; font-size: 13px; margin-top: 5px;">فاتورة اشتراك إلكترونية</div>
+      </div>
+      
+      <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+        <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">اسم العميل:</td><td style="padding: 12px 0; text-align: left; font-weight: bold; color: #0f172a;" id="recName"></td></tr>
+        <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">رقم الهاتف:</td><td style="padding: 12px 0; text-align: left; direction: ltr; color: #0f172a;" id="recPhone"></td></tr>
+        <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">نوع الخدمة:</td><td style="padding: 12px 0; text-align: left; font-weight: bold; color: #8b5cf6;" id="recService"></td></tr>
+        <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">مدة الاشتراك:</td><td style="padding: 12px 0; text-align: left; color: #0f172a;" id="recMonths"></td></tr>
+        <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">تاريخ البداية:</td><td style="padding: 12px 0; text-align: left; color: #0f172a;" id="recStart"></td></tr>
+        <tr style="border-bottom: 1px solid #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">تاريخ الانتهاء:</td><td style="padding: 12px 0; text-align: left; color: #0f172a;" id="recEnd"></td></tr>
+        <tr>
+          <td style="padding: 20px 0; color: #0f172a; font-size: 18px; font-weight: 900;">المبلغ الإجمالي:</td>
+          <td style="padding: 20px 0; text-align: left; font-size: 20px; font-weight: 900; color: #10b981;" id="recPrice"></td>
+        </tr>
+      </table>
+      
+      <div style="text-align: center; margin-top: 35px; font-size: 12px; color: #94a3b8; line-height: 1.6;">
+        نشكركم على ثقتكم بنا 🤍<br>
+        <span style="font-size: 10px;">تم إصدار هذا الوصل آلياً بتاريخ <span id="recToday"></span></span>
+      </div>
+    </div>
+    
+    <div class="modalFooter no-print" style="background: #f8fafc; border-top: 1px solid #e2e8f0; border-radius: 0 0 12px 12px;">
+      <button class="btn primary" style="width: 100%; padding: 14px; font-size: 15px; border-radius: 12px; background: #4f46e5; border-color: #4338ca;" onclick="window.print()">🖨️ طباعة الوصل أو حفظ PDF</button>
+    </div>
+  </div>
+</div>
+
+
 <div class="modal" id="extendModal" aria-hidden="true">
   <div class="box" style="width: 350px">
     <div class="modalHeader">
@@ -263,9 +314,10 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
       <div class="actGrid">
         <button class="actBtn" id="actExtend" type="button">🔁 تجديد</button>
         <button class="actBtn" id="actEdit" type="button">✏️ تعديل</button>
+        <button class="actBtn" id="actReceipt" type="button" style="color: #60a5fa; border-color: rgba(96,165,250,.5); background: rgba(96,165,250,.15);">📄 إصدار وصل</button>
         <button class="actBtn" id="actCopyEmail" type="button">📋 نسخ Email</button>
         <button class="actBtn" id="actWhatsApp" type="button" style="border-color: rgba(37,211,102,.5); background: rgba(37,211,102,.15); color: #4ade80;">💬 مراسلة واتساب</button>
-        <button class="actBtn danger" id="actDelete" type="button" style="grid-column: span 2;">🗑️ حذف</button>
+        <button class="actBtn danger" id="actDelete" type="button">🗑️ حذف</button>
       </div>
     </div>
   </div>
@@ -383,7 +435,7 @@ window.openAuditLog = async () => {
       let actionColor = "var(--text)";
       if(l.action.includes("حذف")) actionColor = "#ef4444"; 
       else if(l.action.includes("إضافة")) actionColor = "#22c55e"; 
-      else if(l.action.includes("تعديل") || l.action.includes("تجديد")) actionColor = "#f59e0b"; 
+      else if(l.action.includes("تعديل") || l.action.includes("تجديد") || l.action.includes("وصل")) actionColor = "#f59e0b"; 
 
       tb.innerHTML += `
         <tr>
@@ -536,7 +588,7 @@ function render(){
     const n = (r.name || "").toString().toLowerCase();
     const p = (r.phone || "").toString().toLowerCase();
     const e = (r.email || "").toString().toLowerCase();
-    const srv = (r.serviceType || "").toString().toLowerCase(); // بحث عن طريق الخدمة
+    const srv = (r.serviceType || "").toString().toLowerCase(); 
     const match = !q || n.includes(q) || p.includes(q) || e.includes(q) || srv.includes(q); 
     const st = getStatus(r.end, alertD); 
     if(currentFilter !== "all" && currentFilter !== st.key) return false; 
@@ -582,6 +634,28 @@ $("bulkDelete").onclick = async () => {
 $("bulkExtend").onclick = () => { extendMode = "bulk"; $("extendTitle").textContent = `تجديد ${selectedIds.size} مشترك`; $("extendValue").value = 1; $("extendUnit").value = "months"; openModal("extendModal"); };
 
 window.openRowActions = (id) => { currentRowId = id; const rec = data.find(x => x.id === id); $("rowActionsHint").textContent = rec.name; openModal("rowActionsModal"); };
+
+// وظيفة الوصل الرقمي الجديدة
+$("actReceipt").onclick = () => {
+  const rec = data.find(x => x.id === currentRowId); 
+  if(!rec) return; 
+  closeModal("rowActionsModal"); 
+  
+  $("recName").textContent = rec.name || "-";
+  $("recPhone").textContent = rec.phone ? `${rec.countryCode||''}${rec.phone}` : "-";
+  $("recService").textContent = rec.serviceType || "غير محدد";
+  $("recMonths").textContent = `${rec.months || 0} شهر`;
+  $("recStart").textContent = rec.start || "-";
+  $("recEnd").textContent = rec.end || "-";
+  $("recPrice").textContent = `${parseFloat(rec.price || 0).toLocaleString()} ${rec.currency || 'DZD'}`;
+  
+  const d = new Date();
+  $("recToday").textContent = `${d.toLocaleDateString('en-GB')} - ${d.toLocaleTimeString('en-GB')}`;
+  
+  logAction("إصدار وصل", `للعميل: ${rec.name}`);
+  openModal("receiptModal"); 
+};
+
 $("actEdit").onclick = () => { 
   const rec = data.find(x => x.id === currentRowId); if(!rec) return; 
   closeModal("rowActionsModal"); editingId = rec.id; 
@@ -590,7 +664,7 @@ $("actEdit").onclick = () => {
   $("email").value = rec.email||""; 
   $("phone").value = rec.phone||""; 
   $("countryCode").value = rec.countryCode||"+213"; 
-  $("serviceType").value = rec.serviceType||""; // تعبئة حقل الخدمة في التعديل
+  $("serviceType").value = rec.serviceType||""; 
   $("months").value = rec.months||""; 
   $("price").value = rec.price||""; 
   $("currency").value = rec.currency||"DZD"; 
@@ -598,6 +672,7 @@ $("actEdit").onclick = () => {
   $("alertDays").value = rec.alertDays||"7"; 
   openModal("formModal"); 
 };
+
 $("actDelete").onclick = async () => { 
   if(confirm("حذف؟")) { 
     const recToDelete = data.find(x => x.id === currentRowId);
@@ -666,7 +741,6 @@ $("undoDeleteBtn").onclick = async () => {
   await firebasePush(); render(); closeModal('toolsModal'); showToast("تم استرجاع البيانات المحذوفة ↩️");
 };
 
-// ==== تحديث المجموع ليظهر إحصائيات مبسطة عن الخدمات ====
 $("openTotals").onclick = () => { 
   const alertEl = $("alertDays"); 
   const alertD = (alertEl && alertEl.value) ? parseInt(alertEl.value) : 7;
@@ -676,12 +750,10 @@ $("openTotals").onclick = () => {
   const serviceCounts = {};
 
   activeData.forEach(r => {
-    // حساب العملات
     const curr = r.currency || "DZD";
     const price = parseFloat(r.price) || 0;
     totalsByCurrency[curr] = (totalsByCurrency[curr] || 0) + price;
 
-    // حساب عدد الخدمات الفعالة
     const srv = r.serviceType || "غير محدد";
     serviceCounts[srv] = (serviceCounts[srv] || 0) + 1;
   });
@@ -695,7 +767,6 @@ $("openTotals").onclick = () => {
     }
   }
 
-  // عرض إحصائية سريعة للفئات تحت المجموع
   let servicesHtml = `<div style="margin-top:15px; display:flex; flex-wrap:wrap; gap:5px; justify-content:center; padding-top:15px; border-top:1px solid rgba(255,255,255,0.1);">`;
   for(let s in serviceCounts) {
      servicesHtml += `<span class="statChip" style="font-size:11px; background:rgba(124,92,255,0.1); border-color:rgba(124,92,255,0.3); color:#eaf0ff;">${s}: ${serviceCounts[s]}</span>`;
