@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>لوحة تسيير الاشتراكات - v9.0</title>
+<title>لوحة تسيير الاشتراكات - v9.1</title>
 
 <style>
 :root{
@@ -113,15 +113,24 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 .auth-label { font-size:13px; color:var(--muted); margin-bottom:8px; display:block; text-align: right; font-weight: bold; }
 
 /* ======== كود الطباعة الذكي الخاص بالوصل ======== */
+.receipt-table { min-width: 0 !important; width: 100% !important; } /* هذه هي الإضافة التي حلت المشكلة */
+
 @media print {
     body * { visibility: hidden; }
-    body { background: white !important; }
-    /* إظهار نافذة الوصل فقط وتمديدها على الشاشة */
+    body { background: white !important; padding: 0 !important; margin: 0 !important; }
+    
     #receiptModal, #receiptModal * { visibility: visible; }
-    #receiptModal { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: white !important; align-items: flex-start; padding: 0;}
-    #receiptModal .box { width: 100% !important; max-width: none !important; box-shadow: none !important; border: none !important; border-radius: 0 !important; }
-    /* إخفاء الأزرار عند الطباعة */
-    .no-print, .modalHeader { display: none !important; }
+    #receiptModal { 
+      position: absolute; left: 0; top: 0; width: 100%; height: 100%; 
+      background: white !important; align-items: flex-start; padding: 15px;
+    }
+    
+    #receiptModal .box { 
+      width: 100% !important; max-width: none !important; box-shadow: none !important; 
+      border: none !important; border-radius: 0 !important; padding: 0 !important;
+    }
+    
+    .no-print, .modalHeader, .modalFooter, #toast { display: none !important; }
 }
 </style>
 
@@ -133,8 +142,8 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v9.0</span></h1>
-    <div class="sub">⚡ النسخة الشاملة (مع ميزة إصدار الوصل الرقمي)</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v9.1</span></h1>
+    <div class="sub">⚡ النسخة الشاملة (مع إصلاح طباعة الوصل)</div>
   </div>
 
   <div class="card">
@@ -264,8 +273,8 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
         <div style="color: #64748b; font-size: 13px; margin-top: 5px;">فاتورة اشتراك إلكترونية</div>
       </div>
       
-      <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
-        <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">اسم العميل:</td><td style="padding: 12px 0; text-align: left; font-weight: bold; color: #0f172a;" id="recName"></td></tr>
+      <table class="receipt-table" style="width: 100%; border-collapse: collapse; font-size: 15px;">
+        <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b; width:40%;">اسم العميل:</td><td style="padding: 12px 0; text-align: left; font-weight: bold; color: #0f172a;" id="recName"></td></tr>
         <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">رقم الهاتف:</td><td style="padding: 12px 0; text-align: left; direction: ltr; color: #0f172a;" id="recPhone"></td></tr>
         <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">نوع الخدمة:</td><td style="padding: 12px 0; text-align: left; font-weight: bold; color: #8b5cf6;" id="recService"></td></tr>
         <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">مدة الاشتراك:</td><td style="padding: 12px 0; text-align: left; color: #0f172a;" id="recMonths"></td></tr>
@@ -635,7 +644,6 @@ $("bulkExtend").onclick = () => { extendMode = "bulk"; $("extendTitle").textCont
 
 window.openRowActions = (id) => { currentRowId = id; const rec = data.find(x => x.id === id); $("rowActionsHint").textContent = rec.name; openModal("rowActionsModal"); };
 
-// وظيفة الوصل الرقمي الجديدة
 $("actReceipt").onclick = () => {
   const rec = data.find(x => x.id === currentRowId); 
   if(!rec) return; 
