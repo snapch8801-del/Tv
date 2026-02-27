@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>لوحة تسيير الاشتراكات - v11.5</title>
+<title>لوحة تسيير الاشتراكات - v11.6</title>
 
 <style>
 :root{
@@ -116,10 +116,8 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 @media print {
     body > *:not(#receiptModal) { display: none !important; }
     body { background: white !important; padding: 0 !important; margin: 0 !important; }
-    
     #receiptModal { display: block !important; position: static !important; background: white !important; }
     #receiptModal .box { width: 100% !important; max-width: none !important; box-shadow: none !important; border: none !important; border-radius: 0 !important; padding: 0 !important; }
-    
     .no-print { display: none !important; }
 }
 </style>
@@ -132,8 +130,8 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v11.5</span></h1>
-    <div class="sub">⚡ النسخة الصافية (إصلاح النوافذ المكررة والفاتورة)</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v11.6</span></h1>
+    <div class="sub">⚡ المحاسبة الآلية (حساب المتبقي تلقائياً دون تعقيد)</div>
   </div>
 
   <div class="card">
@@ -234,19 +232,13 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
           <datalist id="serviceList"><option value="IPTV"><option value="Netflix"><option value="Canva Pro"><option value="YouTube Premium"><option value="Office 365"></datalist>
         </div>
 
-        <div class="field"><label>المدة <span style="color:var(--err)">*</span></label><input id="months" type="number" min="1" step="1"></div>
-        <div class="field"><label>السعر الإجمالي</label><input id="price" type="number" min="0" step="0.01"></div>
-        <div class="field"><label>العملة</label><select id="currency"><option value="DZD">DZD</option><option value="EUR">EUR</option><option value="USD">USD</option><option value="MAD">MAD</option><option value="TND">TND</option></select></div>
-        
-        <div class="field"><label>حالة الدفع</label>
-          <select id="paymentStatus">
-            <option value="paid">🟢 خالص (مدفوع)</option>
-            <option value="partial">🟡 دفع جزئي (دين)</option>
-            <option value="unpaid">🔴 غير مدفوع (دين)</option>
-          </select>
-        </div>
-        <div class="field" id="paidAmountWrap" style="display:none;"><label>المبلغ المدفوع الآن</label><input id="paidAmount" type="number" min="0" step="0.01"></div>
         <div class="field"><label>اختيار سريع للمدة</label><select id="quickPlan"><option value="">— اختر —</option><option value="1">1 شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="12">12 شهر</option></select></div>
+        <div class="field"><label>المدة (أشهر) <span style="color:var(--err)">*</span></label><input id="months" type="number" min="1" step="1"></div>
+        <div class="field"><label>العملة</label><select id="currency"><option value="DZD">DZD</option><option value="EUR">EUR</option><option value="USD">USD</option><option value="MAD">MAD</option><option value="TND">TND</option></select></div>
+
+        <div class="field"><label>السعر الإجمالي</label><input id="price" type="number" min="0" step="0.01" placeholder="مثال: 5000"></div>
+        <div class="field"><label>المبلغ المدفوع <span style="color:var(--muted); font-weight:normal; font-size:10px;">(اتركه فارغاً إن دفع الكل)</span></label><input id="paidAmount" type="number" min="0" step="0.01" placeholder="مثال: 2000"></div>
+        <div class="field"><label>الدين المتبقي (آلي)</label><input id="debtAmount" type="text" readonly style="background: rgba(239,68,68,0.1); color: #ff8a8a; font-weight: bold; border-color: rgba(239,68,68,0.3); pointer-events: none;"></div>
 
         <div class="field"><label>تاريخ البداية <span style="color:var(--err)">*</span></label><input id="start" type="date"></div>
         <div class="field"><label>تنبيه قبل (أيام)</label><input id="alertDays" type="number" min="1" step="1" value="7"></div>
@@ -473,7 +465,17 @@ $("bulkExtend").onclick = () => { extendMode = "bulk"; $("extendTitle").textCont
 
 window.openRowActions = (id) => { currentRowId = id; const rec = data.find(x => x.id === id); $("rowActionsHint").textContent = rec.name; openModal("rowActionsModal"); };
 
-$("paymentStatus").addEventListener('change', (e) => { $("paidAmountWrap").style.display = e.target.value === 'partial' ? 'block' : 'none'; });
+// ================= نظام المحاسبة الآلي (جديد v11.6) =================
+function calcDebt() {
+  const p = parseFloat($("price").value) || 0;
+  let valRaw = $("paidAmount").value;
+  let a = valRaw === "" ? p : (parseFloat(valRaw) || 0); // إذا ترك فارغاً يفترض أنه دفع بالكامل
+  let d = p - a;
+  $("debtAmount").value = d > 0 ? d : 0;
+}
+$("price").addEventListener('input', calcDebt);
+$("paidAmount").addEventListener('input', calcDebt);
+// ===================================================================
 
 $("actReceipt").onclick = () => {
   const rec = data.find(x => x.id === currentRowId); if(!rec) return; closeModal("rowActionsModal"); 
@@ -522,14 +524,22 @@ $("sendReceiptWaBtn").onclick = () => {
 
 $("actEdit").onclick = () => { 
   const rec = data.find(x => x.id === currentRowId); if(!rec) return; closeModal("rowActionsModal"); editingId = rec.id; 
-  $("formTitle").textContent = "تعديل اشتراك"; $("name").value = rec.name||""; $("email").value = rec.email||""; $("phone").value = rec.phone||""; $("countryCode").value = rec.countryCode||"+213"; $("serviceType").value = rec.serviceType||""; $("months").value = rec.months||""; $("price").value = rec.price||""; $("currency").value = rec.currency||"DZD"; $("start").value = rec.start; $("alertDays").value = rec.alertDays||"7"; 
-  $("paymentStatus").value = rec.paymentStatus || "paid"; $("paidAmountWrap").style.display = (rec.paymentStatus === 'partial') ? "block" : "none"; $("paidAmount").value = rec.paidAmount || "";
+  $("formTitle").textContent = "تعديل اشتراك"; $("name").value = rec.name||""; $("email").value = rec.email||""; $("phone").value = rec.phone||""; $("countryCode").value = rec.countryCode||"+213"; $("serviceType").value = rec.serviceType||""; $("months").value = rec.months||""; 
+  $("price").value = rec.price||""; $("currency").value = rec.currency||"DZD"; $("start").value = rec.start; $("alertDays").value = rec.alertDays||"7"; 
+  
+  // تحميل بيانات المحاسبة الآلية
+  let oldTotal = parseFloat(rec.price) || 0;
+  if(rec.paymentStatus === 'unpaid') $("paidAmount").value = 0;
+  else if(rec.paymentStatus === 'partial') $("paidAmount").value = rec.paidAmount || 0;
+  else $("paidAmount").value = oldTotal; 
+  calcDebt();
+
   openModal("formModal"); 
 };
 
 $("openAdd").onclick = () => { 
   editingId=null; $("formTitle").textContent="إضافة اشتراك"; $("name").value=""; $("email").value=""; $("phone").value=""; $("countryCode").value="+213"; $("serviceType").value=""; $("quickPlan").value=""; $("months").value=""; $("price").value=""; $("start").value=todayISO(); 
-  $("paymentStatus").value = "paid"; $("paidAmountWrap").style.display = "none"; $("paidAmount").value = ""; openModal("formModal"); 
+  $("paidAmount").value = ""; calcDebt(); openModal("formModal"); 
 };
 
 $("actDelete").onclick = async () => { if(confirm("حذف؟")) { const recToDelete = data.find(x => x.id === currentRowId); logAction("حذف اشتراك", `الاسم: ${recToDelete.name}`); lastDeletedData = data.filter(x => x.id === currentRowId); data = data.filter(x => x.id !== currentRowId); await firebasePush(); render(); closeModal("rowActionsModal"); showToast("تم الحذف، التراجع ممكن من الأدوات 🗑️"); } };
@@ -546,13 +556,25 @@ $("confirmExtendBtn").onclick = async () => {
 };
 
 $("quickPlan").onchange = ()=>{ if($("quickPlan").value) $("months").value = $("quickPlan").value; };
+
 $("saveBtn").onclick = async () => {
   const start = $("start").value; const months = parseInt($("months").value); const emailVal = $("email").value.trim(); const serviceVal = $("serviceType").value.trim(); 
   if(!$("name").value.trim() || !emailVal || !serviceVal || !start || isNaN(months)) { return showToast("الرجاء إدخال البيانات الإجبارية", "err"); }
-  const pStatus = $("paymentStatus").value; const pAmount = pStatus === 'partial' ? parseFloat($("paidAmount").value) || 0 : 0;
+  
+  // الحفظ مع المحاسبة الآلية
+  const priceInput = $("price").value;
+  const priceFloat = parseFloat(priceInput) || 0;
+  const paidInput = $("paidAmount").value;
+  const paidFloat = paidInput === "" ? priceFloat : (parseFloat(paidInput) || 0);
+  
+  let pStatus = 'paid';
+  if(paidFloat === 0 && priceFloat > 0) pStatus = 'unpaid';
+  else if(paidFloat < priceFloat) pStatus = 'partial';
+
   const actionName = editingId ? "تعديل اشتراك" : "إضافة اشتراك"; logAction(actionName, `الاسم: ${$("name").value} - حالة الدفع: ${pStatus === 'paid' ? 'خالص' : 'دين'}`); 
   const endD = new Date(start); endD.setMonth(endD.getMonth() + months); const alertEl = $("alertDays");
-  const rec = { id: editingId || Date.now().toString(), name: $("name").value, email: emailVal, phone: $("phone").value, countryCode: $("countryCode").value, serviceType: serviceVal, alertDays: (alertEl && alertEl.value)?alertEl.value:7, months, price: $("price").value, currency: $("currency").value, paymentStatus: pStatus, paidAmount: pAmount, start, end: endD.toISOString().split('T')[0] };
+  const rec = { id: editingId || Date.now().toString(), name: $("name").value, email: emailVal, phone: $("phone").value, countryCode: $("countryCode").value, serviceType: serviceVal, alertDays: (alertEl && alertEl.value)?alertEl.value:7, months, price: priceInput, currency: $("currency").value, paymentStatus: pStatus, paidAmount: paidFloat, start, end: endD.toISOString().split('T')[0] };
+  
   if(editingId) data = data.map(x => x.id === editingId ? rec : x); else data.unshift(rec);
   await firebasePush(); render(); closeModal("formModal"); showToast("تم الحفظ ✨");
 };
