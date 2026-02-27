@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>لوحة تسيير الاشتراكات - النسخة النهائية المصححة</title>
+<title>لوحة تسيير الاشتراكات 2.1 - Digital Receipts</title>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
@@ -13,7 +13,8 @@
 <style>
 :root{
   --bg0:#070a12; --bg1:#0b1020; --card: rgba(255,255,255,.06); --line: rgba(255,255,255,.10);
-  --text:#eaf0ff; --muted: rgba(234,240,255,.70); --accent:#7c5cff; --radius:18px;
+  --text:#eaf0ff; --muted: rgba(234,240,255,.70); --accent:#7c5cff; --warn:#f59e0b;
+  --err:#ef4444; --radius:18px; --shadow: 0 18px 45px rgba(0,0,0,.45);
 }
 
 *{box-sizing:border-box}
@@ -23,55 +24,95 @@ body{
   padding: 18px;
 }
 .container{max-width:1200px;margin:0 auto}
-.card{ background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); backdrop-filter: blur(10px); overflow:hidden; }
+.header{margin-bottom:14px}
+.header h1{margin:0;font-size:20px}
+.header .sub{margin-top:6px;font-size:13px;color:var(--muted);line-height:1.7}
+
+.card{ background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); backdrop-filter: blur(10px); overflow:hidden; }
 .topbar{ padding:14px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 
-.btn{ border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); padding:10px 12px; border-radius:14px; font-weight:900; cursor:pointer; font-size: 13px; }
+.btn{ border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); padding:10px 12px; border-radius:14px; font-weight:900; cursor:pointer; }
 .btn.primary{ border-color: rgba(124,92,255,.55); background: linear-gradient(135deg, rgba(124,92,255,.55), rgba(124,92,255,.15)); }
 
-.searchWrap{flex:1;min-width:200px}
+.searchWrap{flex:1;min-width:240px}
 .searchWrap input{ width:100%; padding:10px 12px; border-radius:14px; border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); outline:none; }
 
-/* Receipt Style */
-#receiptCapture{ width: 380px; padding: 30px; background: #fff; color: #111; margin: 0 auto; text-align: right; }
-#receiptLogoPreview{ max-height: 80px; max-width: 150px; display: block; margin: 0 auto 15px; }
-.receipt-header{ text-align: center; border-bottom: 2px dashed #eee; padding-bottom: 15px; margin-bottom: 20px; }
-.receipt-row{ display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; }
-.receipt-total{ margin-top: 20px; padding-top: 15px; border-top: 2px solid #111; display: flex; justify-content: space-between; font-weight: 900; font-size: 18px; }
+.filtersBar{ width: 100%; display: flex; gap: 8px; padding: 0 14px 14px 14px; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+.filterBtn{ padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: rgba(0,0,0,.18); color: var(--muted); font-size: 13px; font-weight: 800; cursor: pointer; }
+.filterBtn.active{ background: var(--text); color: var(--bg0); border-color: var(--text); }
 
-table{ width:100%; border-collapse:separate; border-spacing:0; min-width: 800px; }
-thead th{ background: rgba(0,0,0,.22); color: var(--muted); text-align:right; font-size:12px; padding:12px; border-bottom:1px solid var(--line); }
-tbody td{ padding:12px; border-bottom:1px solid rgba(255,255,255,.07); }
+.statChip{ display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:999px; border:1px solid var(--line); background: rgba(0,0,0,.18); font-size:12px; font-weight:900; }
+.statChip.sync{ border-color: rgba(124,92,255,.45); background: rgba(124,92,255,.10); }
 
-.modal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,.85); z-index:9999; }
+.tableWrap{ overflow:auto; }
+table{ width:100%; border-collapse:separate; border-spacing:0; min-width: 980px; }
+thead th{ position:sticky; top:0; z-index:5; background: rgba(0,0,0,.22); color: var(--muted); text-align:right; font-size:12px; font-weight:900; padding:12px 12px; border-bottom:1px solid var(--line); }
+tbody td{ padding:12px 12px; border-bottom:1px solid rgba(255,255,255,.07); white-space:nowrap; vertical-align:middle; }
+tbody tr:hover{ background: rgba(255,255,255,.03); }
+
+.badge{ display:inline-flex; align-items:center; padding:6px 10px; border-radius:999px; border:1px solid var(--line); font-size:12px; font-weight:900; }
+.badge.ok{ border-color: rgba(34,197,94,.45); color:#c8f7d9; }
+.badge.warn{ border-color: rgba(245,158,11,.45); color:#ffe2b3; }
+.badge.err{ border-color: rgba(239,68,68,.45); color:#ffd0d0; }
+
+.modal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,.62); z-index:9999; padding: 18px; }
 .modal[aria-hidden="false"]{ display:flex; }
-.modal .box{ background: #161b2a; border-radius: 22px; padding: 20px; border: 1px solid var(--line); }
+.modal .box{ width:min(860px, 100%); background: rgba(10,14,26,.96); border: 1px solid rgba(255,255,255,.10); border-radius: 22px; box-shadow: 0 30px 90px rgba(0,0,0,.65); overflow:hidden; }
+.modalHeader{ padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.10); display:flex; align-items:center; justify-content:space-between; }
+.modalBody{ padding: 14px 16px; }
 
-.badge{ padding:4px 8px; border-radius:99px; font-size:11px; font-weight:bold; }
-.badge.ok{ background:rgba(34,197,94,.2); color:#4ade80; }
-.badge.warn{ background:rgba(245,158,11,.2); color:#fbbf24; }
-.badge.err{ background:rgba(239,68,68,.2); color:#f87171; }
+/* ===== Receipt Style ===== */
+#receiptCapture{
+  width: 380px; padding: 30px; background: #fff; color: #111; border-radius: 10px; font-family: 'Segoe UI', Tahoma, sans-serif;
+  position: relative; margin: 0 auto;
+}
+.receipt-header{ text-align: center; border-bottom: 2px dashed #eee; padding-bottom: 15px; margin-bottom: 20px; }
+.receipt-header h2{ margin: 0; color: #7c5cff; font-size: 24px; }
+.receipt-row{ display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 15px; }
+.receipt-row .label{ color: #666; }
+.receipt-row .val{ font-weight: bold; }
+.receipt-total{ margin-top: 20px; padding-top: 15px; border-top: 2px solid #111; display: flex; justify-content: space-between; font-weight: 900; font-size: 18px; }
+.receipt-footer{ text-align: center; margin-top: 30px; font-size: 12px; color: #999; }
 
-.toast{ position: fixed; left: 50%; bottom: 20px; transform: translateX(-50%); padding: 12px 20px; border-radius: 12px; background: #7c5cff; color: #fff; font-weight: bold; opacity: 0; transition: 0.3s; z-index: 10000; }
-.toast.show{ opacity: 1; }
+.actGrid{ display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; }
+.actBtn{ border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: var(--text); padding: 14px; border-radius: 18px; font-weight: 900; cursor:pointer; }
+.actionPill{ padding:10px 12px; border-radius:16px; border:1px solid var(--line); background: rgba(255,255,255,.04); color: var(--text); font-weight: 900; cursor:pointer; }
+
+.toast{ position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%) translateY(20px); padding: 12px 14px; border-radius: 16px; background: rgba(10,14,26,.92); border: 1px solid var(--line); color: var(--text); font-weight: 900; display: flex; align-items: center; gap: 10px; opacity: 0; pointer-events: none; transition: all .2s; z-index: 10000; }
+.toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); }
 </style>
+
 </head>
 <body>
 
 <div class="container">
+  <div class="header">
+    <h1>🧾 لوحة تسيير الاشتراكات</h1>
+    <div class="sub">نسخة 2.1 - مع نظام الوصل الرقمي الاحترافي 📄</div>
+  </div>
+
   <div class="card">
     <div class="topbar">
-      <button class="btn primary" id="openAdd">➕ مشترك جديد</button>
-      <button class="btn" onclick="$('logoInput').click()">🖼️ رفع الشعار</button>
-      <input type="file" id="logoInput" hidden accept="image/*">
-      <div class="searchWrap"><input id="search" placeholder="بحث بالاسم..."></div>
+      <button class="btn primary" id="openAdd">➕ إضافة</button>
       <button class="btn" id="openAuth">👤 حساب</button>
-      <div id="syncVal" style="font-size: 11px; color: var(--muted); margin-inline-start: 10px;">☁️ —</div>
+      <div class="searchWrap"><input id="search" placeholder="بحث بالاسم أو الرقم..." /></div>
+      <div id="statsBar">
+        <div class="statChip sync" id="syncChip"><span class="ico">☁️</span> <span id="syncVal">—</span></div>
+      </div>
     </div>
 
-    <div style="overflow-x:auto">
+    <div class="filtersBar">
+      <button class="filterBtn active" data-filter="all">الكل</button>
+      <button class="filterBtn" data-filter="active">✅ فعّال</button>
+      <button class="filterBtn" data-filter="expiring">⏰ قريب ينتهي</button>
+      <button class="filterBtn" data-filter="expired">❌ منتهي</button>
+    </div>
+
+    <div class="tableWrap">
       <table>
-        <thead><tr><th>الاسم</th><th>الهاتف</th><th>المبلغ</th><th>الانتهاء</th><th>إجراء</th></tr></thead>
+        <thead>
+          <tr><th>الاسم</th><th>الهاتف</th><th>المدة</th><th>السعر</th><th>الانتهاء</th><th>الحالة</th><th>إجراء</th></tr>
+        </thead>
         <tbody id="tbody"></tbody>
       </table>
     </div>
@@ -79,44 +120,55 @@ tbody td{ padding:12px; border-bottom:1px solid rgba(255,255,255,.07); }
 </div>
 
 <div class="modal" id="receiptModal" aria-hidden="true">
-  <div class="box" style="background: #f0f0f0; width: 420px;">
-    <div id="receiptCapture">
-      <img id="receiptLogoPreview" src="" alt="" style="display:none">
-      <div class="receipt-header">
-        <h2 id="receiptBusinessName">لوحة المشتركين</h2>
-        <p>وصل استلام اشتراك</p>
+  <div class="box" style="width: 420px; background: #f4f4f4;">
+    <div class="modalHeader"><h2 style="color:#333">معاينة الوصل</h2><button class="btn" onclick="closeModal('receiptModal')" style="color:#333">✕</button></div>
+    <div class="modalBody">
+      <div id="receiptCapture">
+        <div class="receipt-header">
+          <h2>ALICIA SERVICES</h2>
+          <p>وصل استلام اشتراك رقمي</p>
+        </div>
+        <div class="receipt-row"><span class="label">اسم العميل:</span><span class="val" id="recName">-</span></div>
+        <div class="receipt-row"><span class="label">تاريخ الدفع:</span><span class="val" id="recDate">-</span></div>
+        <div class="receipt-row"><span class="label">مدة الاشتراك:</span><span class="val" id="recMonths">-</span></div>
+        <div class="receipt-row"><span class="label">صالح لغاية:</span><span class="val" id="recEnd">-</span></div>
+        <div class="receipt-total"><span class="label">المبلغ الإجمالي:</span><span class="val" id="recPrice">-</span></div>
+        <div class="receipt-footer">شكراً لثقتكم بنا!<br>هذا الوصل تم إنشاؤه إلكترونياً.</div>
       </div>
-      <div class="receipt-row"><span>المشترك:</span><span id="recName"></span></div>
-      <div class="receipt-row"><span>من تاريخ:</span><span id="recStart"></span></div>
-      <div class="receipt-row"><span>إلى تاريخ:</span><span id="recEnd"></span></div>
-      <div class="receipt-total"><span>المبلغ:</span><span id="recPrice"></span></div>
-      <div style="text-align:center; font-size:11px; margin-top:20px; color:#999">شكراً لثقتكم - تم النشر من مدية</div>
     </div>
-    <div style="margin-top:15px; display:flex; gap:10px">
-      <button class="btn primary" style="flex:1" id="downloadBtn">⬇️ تحميل الوصل</button>
-      <button class="btn" style="background:#fff; color:#000" onclick="closeModal('receiptModal')">إغلاق</button>
+    <div style="padding: 15px; display: flex; gap: 10px;">
+      <button class="btn primary" style="flex:1" id="downloadReceiptBtn">💾 تحميل كصورة</button>
     </div>
   </div>
 </div>
 
 <div class="modal" id="formModal" aria-hidden="true">
-  <div class="box" style="width: 350px;">
-    <h3>إضافة / تعديل بيانات</h3>
-    <input id="name" placeholder="الاسم الكامل" class="btn" style="width:100%; margin-bottom:10px; text-align:right">
-    <input id="phone" placeholder="رقم الهاتف" class="btn" style="width:100%; margin-bottom:10px; text-align:right">
-    <input id="price" type="number" placeholder="المبلغ" class="btn" style="width:100%; margin-bottom:10px; text-align:right">
-    <input id="months" type="number" placeholder="عدد الأشهر" class="btn" style="width:100%; margin-bottom:10px; text-align:right">
-    <input id="start" type="date" class="btn" style="width:100%; margin-bottom:10px">
-    <button class="btn primary" id="saveBtn" style="width:100%">💾 حفظ البيانات</button>
+  <div class="box"><div class="modalHeader"><h2 id="formTitle">إضافة اشتراك</h2><button class="btn" onclick="closeModal('formModal')">✕</button></div>
+    <div class="modalBody">
+      <div style="display:grid; grid-template-columns: 1fr 1fr; gap:15px">
+        <input id="name" placeholder="الاسم" class="btn" style="text-align:right; background:rgba(0,0,0,.2)">
+        <input id="phone" placeholder="الهاتف" class="btn" style="text-align:right; background:rgba(0,0,0,.2)">
+        <input id="months" type="number" placeholder="الأشهر" class="btn" style="text-align:right; background:rgba(0,0,0,.2)">
+        <input id="price" type="number" placeholder="السعر" class="btn" style="text-align:right; background:rgba(0,0,0,.2)">
+        <input id="start" type="date" class="btn" style="background:rgba(0,0,0,.2)">
+        <select id="currency" class="btn" style="background:rgba(0,0,0,.2)"><option value="DZD">DZD</option><option value="USD">USD</option></select>
+      </div>
+      <button class="btn primary" id="saveBtn" style="width:100%; margin-top:20px">💾 حفظ البيانات</button>
+    </div>
   </div>
 </div>
 
-<div class="modal" id="authModal" aria-hidden="true">
-  <div class="box" style="width: 350px;">
-    <h3>تسجيل الدخول</h3>
-    <input id="authEmail" placeholder="الإيميل" class="btn" style="width:100%; margin-bottom:10px; text-align:right">
-    <input id="authPass" type="password" placeholder="كلمة المرور" class="btn" style="width:100%; margin-bottom:10px; text-align:right">
-    <button class="btn primary" id="authLogin" style="width:100%">دخول</button>
+<div class="modal" id="rowActionsModal" aria-hidden="true">
+  <div class="box" style="width: 400px;">
+    <div class="modalHeader"><h2>إجراءات</h2><button class="btn" onclick="closeModal('rowActionsModal')">✕</button></div>
+    <div class="modalBody">
+      <div class="actGrid">
+        <button class="actBtn" id="actReceipt" style="border-color:var(--accent); color:var(--accent)">📄 تحميل وصل</button>
+        <button class="actBtn" id="actWhatsApp" style="border-color:#25d366; color:#25d366">💬 واتساب</button>
+        <button class="actBtn" id="actEdit">✏️ تعديل</button>
+        <button class="actBtn danger" id="actDelete">🗑️ حذف</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -124,7 +176,7 @@ tbody td{ padding:12px; border-bottom:1px solid rgba(255,255,255,.07); }
 
 <script>
 'use strict';
-const $ = (id)=>document.getElementById(id);
+
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ",
   authDomain: "dattta-6f497.firebaseapp.com",
@@ -135,96 +187,110 @@ const FIREBASE_CONFIG = {
   appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb"
 };
 
-let data = []; let editingId = null; 
+const $ = (id)=>document.getElementById(id);
+let data = []; let editingId = null; let currentRowId = null; let currentFilter = 'all';
 
-// === Logo Logic ===
-const logo = localStorage.getItem('user_logo');
-if(logo) { $('receiptLogoPreview').src = logo; $('receiptLogoPreview').style.display='block'; }
-$('logoInput').onchange = (e) => {
-  const reader = new FileReader();
-  reader.onload = () => { localStorage.setItem('user_logo', reader.result); $('receiptLogoPreview').src = reader.result; $('receiptLogoPreview').style.display='block'; showToast("تم حفظ الشعار"); };
-  reader.readAsDataURL(e.target.files[0]);
-};
-
-// === Firebase Setup ===
+// === Firebase Init ===
 if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
 const db = firebase.database();
 firebase.auth().onAuthStateChanged(u => { if(u) load(); else openModal('authModal'); });
 
 async function load() {
+  setSyncState('saving');
   const snap = await db.ref("subscriptions").once('value');
   data = snap.val() ? Object.values(snap.val()) : [];
-  render(); updateSync();
+  render(); setSyncState('ok');
+}
+
+async function save() {
+  setSyncState('saving');
+  await db.ref("subscriptions").set(data);
+  setSyncState('ok');
+}
+
+function setSyncState(st) {
+  const val = $('syncVal');
+  if(st==='saving') val.textContent = 'جاري الحفظ...';
+  if(st==='ok') { const d=new Date(); val.textContent = d.getHours()+':'+d.getMinutes()+' ✅'; }
 }
 
 function render() {
   const tb = $('tbody'); tb.innerHTML = '';
   const q = $('search').value.toLowerCase();
-  data.filter(r => !q || r.name.toLowerCase().includes(q)).forEach(r => {
-    const left = Math.round((new Date(r.end) - new Date()) / 86400000);
-    const badge = left < 0 ? 'err' : (left <= 7 ? 'warn' : 'ok');
-    const label = left < 0 ? 'منتهي' : (left <= 7 ? 'قريب' : 'فعال');
-    
+  
+  data.filter(r => {
+    const match = !q || r.name.toLowerCase().includes(q) || (r.phone||"").includes(q);
+    const st = getStatus(r.end);
+    if(currentFilter !== 'all' && currentFilter !== st.key) return false;
+    return match;
+  }).forEach(r => {
+    const st = getStatus(r.end);
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${r.name}</td><td>${r.phone}</td><td>${r.price} DZD</td><td>${r.end}</td>
-    <td><button class="btn" onclick="openReceipt('${r.id}')">📄</button>
-    <button class="btn" onclick="editRow('${r.id}')">✏️</button></td>`;
+    tr.innerHTML = `<td>${r.name}</td><td>${r.phone||'-'}</td><td>${r.months} ش</td><td>${r.price} ${r.currency}</td><td>${r.end}</td><td><span class="badge ${st.cls}">${st.label}</span></td><td><button class="actionPill" onclick="openRowActions('${r.id}')">⚡</button></td>`;
     tb.appendChild(tr);
   });
 }
 
-window.openReceipt = (id) => {
-  const r = data.find(x => x.id === id);
-  $('recName').textContent = r.name;
-  $('recStart').textContent = r.start;
-  $('recEnd').textContent = r.end;
-  $('recPrice').textContent = r.price + " DZD";
-  openModal('receiptModal');
-};
+function getStatus(end) {
+  const left = Math.round((new Date(end) - new Date()) / 86400000);
+  if(left < 0) return {key:'expired', label:'منتهي', cls:'err'};
+  if(left <= 7) return {key:'expiring', label:'قريب', cls:'warn'};
+  return {key:'active', label:'فعال', cls:'ok'};
+}
 
-$('downloadBtn').onclick = () => {
-  html2canvas($('receiptCapture')).then(canvas => {
-    const a = document.createElement('a'); a.download = `وصل_${$('recName').textContent}.png`;
-    a.href = canvas.toDataURL(); a.click(); closeModal('receiptModal');
+// === Receipt Generator ===
+function generateReceipt(id) {
+  const r = data.find(x => x.id === id);
+  if(!r) return;
+  $('recName').textContent = r.name;
+  $('recDate').textContent = r.start;
+  $('recMonths').textContent = r.months + " أشهر";
+  $('recEnd').textContent = r.end;
+  $('recPrice').textContent = r.price + " " + r.currency;
+  openModal('receiptModal');
+}
+
+$('downloadReceiptBtn').onclick = () => {
+  const target = $('receiptCapture');
+  html2canvas(target).then(canvas => {
+    const link = document.createElement('a');
+    link.download = `وصل_دفع_${$('recName').textContent}.png`;
+    link.href = canvas.toDataURL();
+    link.click();
+    showToast("تم تحميل الوصل بنجاح ✅");
   });
 };
 
-$('saveBtn').onclick = async () => {
-  const start = $('start').value;
-  const months = parseInt($('months').value);
-  const endD = new Date(start); endD.setMonth(endD.getMonth() + months);
-  
-  const rec = {
+// === Actions ===
+window.openRowActions = (id) => { currentRowId = id; openModal('rowActionsModal'); };
+$('actReceipt').onclick = () => { closeModal('rowActionsModal'); generateReceipt(currentRowId); };
+$('actWhatsApp').onclick = () => { 
+  const r = data.find(x => x.id === currentRowId);
+  window.open(`https://wa.me/${r.phone}?text=مرحباً ${r.name}، تم تجديد اشتراكك لغاية ${r.end}`,'_blank');
+};
+
+$('saveBtn').onclick = () => {
+  const r = {
     id: editingId || Date.now().toString(),
-    name: $('name').value, phone: $('phone').value, price: $('price').value,
-    start, end: endD.toISOString().split('T')[0], months
+    name: $('name').value, phone: $('phone').value, months: $('months').value,
+    price: $('price').value, currency: $('currency').value, start: $('start').value,
+    end: addMonths($('start').value, parseInt($('months').value))
   };
-
-  if(editingId) data = data.map(x => x.id === editingId ? rec : x);
-  else data.unshift(rec);
-
-  await db.ref("subscriptions").set(data);
-  render(); closeModal('formModal'); showToast("تم الحفظ بنجاح");
+  if(editingId) data = data.map(x => x.id === editingId ? r : x); else data.unshift(r);
+  save(); render(); closeModal('formModal');
 };
 
-window.editRow = (id) => {
-  const r = data.find(x => x.id === id);
-  editingId = id; $('name').value = r.name; $('phone').value = r.phone;
-  $('price').value = r.price; $('months').value = r.months; $('start').value = r.start;
-  openModal('formModal');
-};
-
-$('authLogin').onclick = () => {
-  firebase.auth().signInWithEmailAndPassword($('authEmail').value, $('authPass').value)
-  .then(() => closeModal('authModal')).catch(e => alert(e.message));
-};
-
+function addMonths(iso, m) { const d = new Date(iso); d.setMonth(d.getMonth() + m); return d.toISOString().split('T')[0]; }
 function openModal(id) { $(id).setAttribute('aria-hidden','false'); }
 function closeModal(id) { $(id).setAttribute('aria-hidden','true'); }
 function showToast(m) { const t=$('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'), 3000); }
-function updateSync() { const d=new Date(); $('syncVal').textContent = `☁️ ${d.getHours()}:${d.getMinutes()} ✅`; }
-$('openAdd').onclick = () => { editingId=null; $('start').value=new Date().toISOString().split('T')[0]; openModal('formModal'); };
+$('openAdd').onclick = () => { editingId=null; openModal('formModal'); };
 $('search').oninput = render;
+
+document.querySelectorAll('.filterBtn').forEach(b => {
+  b.onclick = (e) => { document.querySelectorAll('.filterBtn').forEach(x=>x.classList.remove('active')); e.target.classList.add('active'); currentFilter=e.target.dataset.filter; render(); };
+});
 </script>
+
 </body>
 </html>
