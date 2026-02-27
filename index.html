@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>لوحة تسيير الاشتراكات - v10.1</title>
+<title>لوحة تسيير الاشتراكات - v10.2</title>
 
 <style>
 :root{
@@ -112,6 +112,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 .auth-input:focus { border-color: rgba(124,92,255,.6); box-shadow: 0 0 0 4px rgba(124,92,255,.14); background:rgba(0,0,0,0.6); }
 .auth-label { font-size:13px; color:var(--muted); margin-bottom:8px; display:block; text-align: right; font-weight: bold; }
 
+/* ======== كود الطباعة الذكي ======== */
 .receipt-table { min-width: 0 !important; width: 100% !important; } 
 
 @media print {
@@ -132,8 +133,8 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v10.1</span></h1>
-    <div class="sub">⚡ النسخة الشاملة (معالجة الأذونات والأخطاء)</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v10.2</span></h1>
+    <div class="sub">⚡ النسخة الذهبية (تم إصلاح تداخل النوافذ)</div>
   </div>
 
   <div class="card">
@@ -362,10 +363,11 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
         </div>
         <div id="ownerDashboard" style="display:none; padding:20px; background:rgba(124,92,255,0.08); border-radius:18px; border:1px solid rgba(124,92,255,0.2); margin-bottom:25px;">
           <h3 style="margin-top:0; color:#fff; font-size:15px; display:flex; align-items:center; gap:8px;">👑 أدوات المالك (Owner)</h3>
-          <button class="btn soft" onclick="openModal('storeSettingsModal')" style="width:100%; margin-bottom:12px; padding:12px; border-radius:12px; border-color:rgba(16,185,129,0.3); color:#10b981;">⚙️ إعدادات المتجر (الاسم واللوجو)</button>
-          <button class="btn primary" onclick="openModal('addAdminModal')" style="width:100%; margin-bottom:12px; padding:12px; border-radius:12px;">➕ إنشاء حساب مستخدم جديد</button>
-          <button class="btn soft" onclick="loadAdminsList()" style="width:100%; padding:12px; border-radius:12px; border-color:rgba(255,255,255,0.1);">👥 إدارة الصلاحيات للمستخدمين</button>
-          <button class="btn soft" onclick="openAuditLog()" style="width:100%; padding:12px; border-radius:12px; border-color:rgba(245,158,11,0.3); color:#f59e0b; margin-top:12px;">🕵️‍♂️ سجل نشاطات المدراء</button>
+          
+          <button class="btn soft" onclick="closeModal('authModal'); openModal('storeSettingsModal')" style="width:100%; margin-bottom:12px; padding:12px; border-radius:12px; border-color:rgba(16,185,129,0.3); color:#10b981;">⚙️ إعدادات المتجر (الاسم واللوجو)</button>
+          <button class="btn primary" onclick="closeModal('authModal'); openModal('addAdminModal')" style="width:100%; margin-bottom:12px; padding:12px; border-radius:12px;">➕ إنشاء حساب مستخدم جديد</button>
+          <button class="btn soft" onclick="closeModal('authModal'); loadAdminsList()" style="width:100%; padding:12px; border-radius:12px; border-color:rgba(255,255,255,0.1);">👥 إدارة الصلاحيات للمستخدمين</button>
+          <button class="btn soft" onclick="closeModal('authModal'); openAuditLog()" style="width:100%; padding:12px; border-radius:12px; border-color:rgba(245,158,11,0.3); color:#f59e0b; margin-top:12px;">🕵️‍♂️ سجل نشاطات المدراء</button>
         </div>
         <button class="btn danger" id="authLogout" style="width:100%; padding:14px; border-radius:14px; font-size:15px;">تسجيل الخروج المآمن</button>
       </div>
@@ -455,8 +457,9 @@ $("deleteSelectedLogsBtn").onclick = async () => {
 };
 
 window.openAuditLog = async () => {
-  openModal("auditLogModal"); selectedLogIds.clear(); updateLogBulkUI(); const tb = $("auditTbody");
+  selectedLogIds.clear(); updateLogBulkUI(); const tb = $("auditTbody");
   tb.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:20px;'>جاري تحميل السجل... ⏳</td></tr>";
+  openModal("auditLogModal");
   try {
     const snap = await db.ref("logs").orderByChild("time").limitToLast(100).once("value");
     const logsObj = snap.val() || {}; tb.innerHTML = "";
@@ -660,7 +663,7 @@ $("openTotals").onclick = () => {
 
 $("openBackup").onclick = () => { closeModal("toolsModal"); openModal("backupModal"); };
 $("openSync").onclick = () => { closeModal("toolsModal"); openModal("syncModal"); };
-$("exportJsonBtn").onclick = () => { if(data.length === 0) return showToast("لا توجد بيانات", "warn"); const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data)); const a = document.createElement("a"); a.href = dataStr; a.download = `Backup_${todayISO()}.json`; a.click(); closeModal("toolsModal"); showToast("تم التنزيل 📥"); };
+$("exportJsonBtn").onclick = () => { if(data.length === 0) return showToast("لا توجد بيانات", "warn"); const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data)); const a = document.createElement("a"); a.href = dataStr; a.download = `Backup_${todayISO()}.json`; a.click(); closeModal("toolsModal"); showToast("تم تنزيل نسخة JSON 📥"); };
 $("importFileBtn").onclick = () => $("fileInput").click();
 $("fileInput").onchange = (e) => { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = async (event) => { try { const imported = JSON.parse(event.target.result); if(Array.isArray(imported)) { data = imported; await firebasePush(); render(); closeModal("backupModal"); closeModal("toolsModal"); showToast("تم الاستيراد ✅"); } } catch(err) { showToast("ملف غير صالح", "err"); } }; reader.readAsText(file); };
 $("confirmPasteBtn").onclick = async () => { try { const imported = JSON.parse($("pasteArea").value); if(Array.isArray(imported)) { data = imported; await firebasePush(); render(); closeModal("pasteModal"); closeModal("backupModal"); closeModal("toolsModal"); $("pasteArea").value=""; showToast("تم الاستيراد ✅"); } } catch(e) { showToast("كود غير صالح", "err"); } };
