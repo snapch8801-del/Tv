@@ -472,6 +472,10 @@ $("saveBtn").onclick = async () => {
 // ==== وظائف نافذة "أدوات" ====
 $("openToolsModal").onclick = () => { openModal("toolsModal"); };
 
+// ==== الإصلاح الجديد: تفعيل أزرار النسخ الاحتياطي وحالة المزامنة ====
+$("openBackup").onclick = () => { closeModal("toolsModal"); openModal("backupModal"); };
+$("openSync").onclick = () => { closeModal("toolsModal"); openModal("syncModal"); };
+
 $("exportCsvBtn").onclick = () => {
   if(data.length === 0) return showToast("لا توجد بيانات لتصديرها", "warn");
   let csv = "\uFEFFالاسم,الإيميل,الهاتف,المدة,السعر,تاريخ البداية,تاريخ الانتهاء\n";
