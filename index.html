@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>لوحة تسيير الاشتراكات - النسخة الشاملة (المصححة والنهائية)</title>
+<title>لوحة تسيير الاشتراكات - v8.0</title>
 
 <style>
 :root{
@@ -21,8 +21,9 @@ body{
 .container{max-width:1200px;margin:0 auto}
 
 .header{margin-bottom:14px}
-.header h1{margin:0;font-size:20px}
+.header h1{margin:0;font-size:20px; display: flex; align-items: center; gap: 8px;}
 .header .sub{margin-top:6px;font-size:13px;color:var(--muted);line-height:1.7}
+.version-badge { background: linear-gradient(135deg, var(--accent), #5a3bc2); color: white; padding: 4px 8px; border-radius: 8px; font-weight: 900; font-size: 12px; box-shadow: 0 4px 15px rgba(124,92,255,0.3);}
 
 .card{ background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); backdrop-filter: blur(10px); overflow:hidden; }
 .topbar{ padding:14px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
@@ -36,7 +37,6 @@ body{
 
 .btn-close { padding: 8px 14px; font-size: 13px; border-radius: 12px; }
 
-/* تم تحديث تصميم شريط البحث ليحتوي الأزرار الجديدة */
 .searchWrap{ flex:1; min-width:240px; display: flex; gap: 6px; align-items: center; }
 .searchWrap input { flex:1; width:100%; padding:10px 12px; border-radius:14px; border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); outline:none; transition: all 0.2s; }
 .searchWrap input:focus { border-color: rgba(124,92,255,.6); box-shadow: 0 0 0 4px rgba(124,92,255,.14); }
@@ -64,7 +64,7 @@ input[type="checkbox"]:checked { background: var(--accent); border-color: var(--
 input[type="checkbox"]:checked::after { content: "✔"; position: absolute; color: white; font-size: 12px; left: 3px; top: -1px; font-weight: bold; }
 
 .tableWrap{ overflow:auto; }
-table{ width:100%; border-collapse:separate; border-spacing:0; min-width: 1050px; }
+table{ width:100%; border-collapse:separate; border-spacing:0; min-width: 1100px; }
 thead th{ position:sticky; top:0; z-index:5; background: rgba(0,0,0,.22); color: var(--muted); text-align:right; font-size:12px; font-weight:900; padding:12px 12px; border-bottom:1px solid var(--line); }
 tbody td{ padding:12px 12px; border-bottom:1px solid rgba(255,255,255,.07); white-space:nowrap; vertical-align:middle; }
 
@@ -77,6 +77,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 .badge.ok{ border-color: rgba(34,197,94,.45); color:#c8f7d9; }
 .badge.warn{ border-color: rgba(245,158,11,.45); color:#ffe2b3; }
 .badge.err{ border-color: rgba(239,68,68,.45); color:#ffd0d0; }
+.service-badge { background: rgba(124,92,255,0.15); color: #a78bfa; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 11px; }
 
 .modal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,.75); z-index:9999; padding: 18px; }
 .modal[aria-hidden="false"]{ display:flex; }
@@ -122,7 +123,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات</h1>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v8.0</span></h1>
     <div class="sub">⚡ النسخة الشاملة (المصححة والنهائية 100%)</div>
   </div>
 
@@ -134,7 +135,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
       <button class="btn soft" id="openToolsModal" type="button">⚙️ أدوات</button>
 
       <div class="searchWrap">
-        <input id="search" placeholder="بحث بالاسم أو الإيميل أو الرقم..." />
+        <input id="search" placeholder="بحث بالاسم أو الإيميل، الهاتف، أو الخدمة..." />
         <button class="btn soft" id="pasteSearchBtn" title="لصق البحث" style="padding: 8px 12px; border-radius: 12px; font-size: 15px;">📋</button>
         <button class="btn soft" id="clearSearchBtn" title="مسح البحث" style="padding: 8px 12px; border-radius: 12px; font-size: 15px; color: var(--err);">✕</button>
       </div>
@@ -163,7 +164,8 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
         <thead>
           <tr>
             <th style="width: 40px; text-align: center;"><input type="checkbox" id="selectAll"></th>
-            <th>الاسم</th> <th>الإيميل</th> <th>الهاتف</th> <th>المدة</th> <th>السعر</th>
+            <th>الاسم</th> <th>الإيميل</th> <th>الهاتف</th> 
+            <th>الخدمة / الباقة</th> <th>المدة</th> <th>السعر</th>
             <th>البداية</th> <th>الانتهاء</th> <th>المتبقي</th> <th>الحالة</th> <th>إجراء</th>
           </tr>
         </thead>
@@ -212,6 +214,19 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
           </div>
         </div>
         <div class="field full-width"><label>الإيميل (إجباري) <span style="color:var(--err)">*</span></label><input id="email" placeholder="name@example.com" inputmode="email"></div>
+        
+        <div class="field full-width">
+          <label>الخدمة / الباقة <span style="color:var(--err)">*</span></label>
+          <input id="serviceType" list="serviceList" placeholder="اختر أو اكتب خدمة جديدة (مثال: Netflix)">
+          <datalist id="serviceList">
+            <option value="IPTV">
+            <option value="Netflix">
+            <option value="Canva Pro">
+            <option value="YouTube Premium">
+            <option value="Office 365">
+          </datalist>
+        </div>
+
         <div class="field"><label>اختيار سريع</label><select id="quickPlan"><option value="">— اختر —</option><option value="1">1 شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="12">12 شهر</option></select></div>
         <div class="field"><label>عدد الأشهر <span style="color:var(--err)">*</span></label><input id="months" type="number" min="1" step="1"></div>
         <div class="field"><label>السعر</label><input id="price" type="number" min="0" step="0.01"></div>
@@ -315,7 +330,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 <div class="modal" id="backupModal" aria-hidden="true"><div class="box" style="width:400px"><div class="modalHeader"><h2>📦 النسخ الاحتياطي (JSON)</h2><button class="btn danger btn-close" id="closeBackup" type="button">✕ إغلاق</button></div><div class="modalBody"><div style="display:grid; gap:10px;"><button class="btn soft" id="exportJsonBtn">⬇️ تصدير نسخة JSON</button><button class="btn soft" id="importFileBtn">⬆️ استيراد نسخة JSON</button><input id="fileInput" type="file" accept=".json" style="display:none"><button class="btn soft" onclick="openModal('pasteModal')">📋 استيراد باللصق</button></div></div></div></div>
 <div class="modal" id="pasteModal" aria-hidden="true"><div class="box"><div class="modalHeader"><h2>📋 استيراد باللصق</h2><button class="btn danger btn-close" onclick="closeModal('pasteModal')">✕ إغلاق</button></div><div class="modalBody"><textarea id="pasteArea" rows="10" style="width:100%; background:rgba(0,0,0,0.3); color:white; border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:10px; outline:none;"></textarea></div><div class="modalFooter"><button class="btn primary" id="confirmPasteBtn">استيراد البيانات</button></div></div></div>
 <div class="modal" id="syncModal" aria-hidden="true"><div class="box"><div class="modalHeader"><h2>☁️ المزامنة والنسخ الاحتياطي</h2><button class="btn danger btn-close" id="closeSyncX" type="button">✕ إغلاق</button></div><div class="modalBody">ميزة المزامنة تعمل في الخلفية لحظياً وبشكل تلقائي ✅</div></div></div>
-<div class="modal" id="totalsModal" aria-hidden="true"><div class="box" style="width:350px"><div class="modalHeader"><h2>💰 المجموع العام</h2><button class="btn danger btn-close" id="closeTotalsX" type="button">✕ إغلاق</button></div><div class="modalBody"><div id="totalsBody" style="text-align:center; padding: 20px 0;"></div></div></div></div>
+<div class="modal" id="totalsModal" aria-hidden="true"><div class="box" style="width:400px"><div class="modalHeader"><h2>💰 المجموع العام</h2><button class="btn danger btn-close" id="closeTotalsX" type="button">✕ إغلاق</button></div><div class="modalBody"><div id="totalsBody" style="text-align:center; padding: 10px 0;"></div></div></div></div>
 
 <div id="toast" class="toast"></div>
 
@@ -521,7 +536,8 @@ function render(){
     const n = (r.name || "").toString().toLowerCase();
     const p = (r.phone || "").toString().toLowerCase();
     const e = (r.email || "").toString().toLowerCase();
-    const match = !q || n.includes(q) || p.includes(q) || e.includes(q); 
+    const srv = (r.serviceType || "").toString().toLowerCase(); // بحث عن طريق الخدمة
+    const match = !q || n.includes(q) || p.includes(q) || e.includes(q) || srv.includes(q); 
     const st = getStatus(r.end, alertD); 
     if(currentFilter !== "all" && currentFilter !== st.key) return false; 
     return match; 
@@ -532,7 +548,21 @@ function render(){
     const isChecked = selectedIds.has(r.id) ? "checked" : ""; 
     const tr = document.createElement("tr");
     if(st.key === "expired") tr.className = "expired-row"; else if(st.key === "expiring") tr.className = "expiring-row";
-    tr.innerHTML = `<td style="text-align: center;"><input type="checkbox" class="rowChk" value="${r.id}" ${isChecked}></td><td>${r.name||"-"}</td><td>${r.email||'-'}</td><td dir="ltr">${r.phone?`${r.countryCode||''} ${r.phone}`:'-'}</td><td>${r.months||0} ش</td><td>${r.price||0} ${r.currency||'DZD'}</td><td>${r.start||"-"}</td><td>${r.end||"-"}</td><td>${st.left < 0 ? 'منذ ' + Math.abs(st.left) : st.left} يوم</td><td><span class="badge ${st.cls}">${st.label}</span></td><td><button class="actionPill" onclick="openRowActions('${r.id}')">⚡ إجراء</button></td>`;
+    
+    const serviceHtml = `<span class="service-badge">${r.serviceType || "غير محدد"}</span>`;
+
+    tr.innerHTML = `<td style="text-align: center;"><input type="checkbox" class="rowChk" value="${r.id}" ${isChecked}></td>
+      <td>${r.name||"-"}</td>
+      <td>${r.email||'-'}</td>
+      <td dir="ltr">${r.phone?`${r.countryCode||''} ${r.phone}`:'-'}</td>
+      <td>${serviceHtml}</td>
+      <td>${r.months||0} ش</td>
+      <td>${r.price||0} ${r.currency||'DZD'}</td>
+      <td>${r.start||"-"}</td>
+      <td>${r.end||"-"}</td>
+      <td>${st.left < 0 ? 'منذ ' + Math.abs(st.left) : st.left} يوم</td>
+      <td><span class="badge ${st.cls}">${st.label}</span></td>
+      <td><button class="actionPill" onclick="openRowActions('${r.id}')">⚡ إجراء</button></td>`;
     tb.appendChild(tr);
   });
 }
@@ -552,7 +582,22 @@ $("bulkDelete").onclick = async () => {
 $("bulkExtend").onclick = () => { extendMode = "bulk"; $("extendTitle").textContent = `تجديد ${selectedIds.size} مشترك`; $("extendValue").value = 1; $("extendUnit").value = "months"; openModal("extendModal"); };
 
 window.openRowActions = (id) => { currentRowId = id; const rec = data.find(x => x.id === id); $("rowActionsHint").textContent = rec.name; openModal("rowActionsModal"); };
-$("actEdit").onclick = () => { const rec = data.find(x => x.id === currentRowId); if(!rec) return; closeModal("rowActionsModal"); editingId = rec.id; $("formTitle").textContent = "تعديل اشتراك"; $("name").value = rec.name||""; $("email").value = rec.email||""; $("phone").value = rec.phone||""; $("countryCode").value = rec.countryCode||"+213"; $("months").value = rec.months||""; $("price").value = rec.price||""; $("currency").value = rec.currency||"DZD"; $("start").value = rec.start; $("alertDays").value = rec.alertDays||"7"; openModal("formModal"); };
+$("actEdit").onclick = () => { 
+  const rec = data.find(x => x.id === currentRowId); if(!rec) return; 
+  closeModal("rowActionsModal"); editingId = rec.id; 
+  $("formTitle").textContent = "تعديل اشتراك"; 
+  $("name").value = rec.name||""; 
+  $("email").value = rec.email||""; 
+  $("phone").value = rec.phone||""; 
+  $("countryCode").value = rec.countryCode||"+213"; 
+  $("serviceType").value = rec.serviceType||""; // تعبئة حقل الخدمة في التعديل
+  $("months").value = rec.months||""; 
+  $("price").value = rec.price||""; 
+  $("currency").value = rec.currency||"DZD"; 
+  $("start").value = rec.start; 
+  $("alertDays").value = rec.alertDays||"7"; 
+  openModal("formModal"); 
+};
 $("actDelete").onclick = async () => { 
   if(confirm("حذف؟")) { 
     const recToDelete = data.find(x => x.id === currentRowId);
@@ -583,21 +628,21 @@ $("confirmExtendBtn").onclick = async () => {
 
 $("quickPlan").onchange = ()=>{ if($("quickPlan").value) $("months").value = $("quickPlan").value; };
 
-// ==== تم تحديث دالة الحفظ لرفض الإضافة إذا كان الإيميل فارغاً ====
 $("saveBtn").onclick = async () => {
   const start = $("start").value; const months = parseInt($("months").value); 
-  const emailVal = $("email").value.trim(); // سحب قيمة الإيميل
+  const emailVal = $("email").value.trim(); 
+  const serviceVal = $("serviceType").value.trim(); 
   
-  if(!$("name").value.trim() || !emailVal || !start || isNaN(months)) {
-    return showToast("الرجاء إدخال البيانات الإجبارية (الاسم، الإيميل، المدة...)", "err");
+  if(!$("name").value.trim() || !emailVal || !serviceVal || !start || isNaN(months)) {
+    return showToast("الرجاء إدخال البيانات الإجبارية (الاسم، الإيميل، الخدمة، المدة...)", "err");
   }
   
   const actionName = editingId ? "تعديل اشتراك" : "إضافة اشتراك";
-  logAction(actionName, `الاسم: ${$("name").value} - السعر: ${$("price").value} ${$("currency").value}`); 
+  logAction(actionName, `الاسم: ${$("name").value} - الخدمة: ${serviceVal}`); 
 
   const endD = new Date(start); endD.setMonth(endD.getMonth() + months);
   const alertEl = $("alertDays");
-  const rec = { id: editingId || Date.now().toString(), name: $("name").value, email: emailVal, phone: $("phone").value, countryCode: $("countryCode").value, alertDays: (alertEl && alertEl.value)?alertEl.value:7, months, price: $("price").value, currency: $("currency").value, start, end: endD.toISOString().split('T')[0] };
+  const rec = { id: editingId || Date.now().toString(), name: $("name").value, email: emailVal, phone: $("phone").value, countryCode: $("countryCode").value, serviceType: serviceVal, alertDays: (alertEl && alertEl.value)?alertEl.value:7, months, price: $("price").value, currency: $("currency").value, start, end: endD.toISOString().split('T')[0] };
   
   if(editingId) data = data.map(x => x.id === editingId ? rec : x); else data.unshift(rec);
   await firebasePush(); render(); closeModal("formModal"); showToast("تم الحفظ ✨");
@@ -609,8 +654,8 @@ $("openSync").onclick = () => { closeModal("toolsModal"); openModal("syncModal")
 
 $("exportCsvBtn").onclick = () => {
   if(data.length === 0) return showToast("لا توجد بيانات لتصديرها", "warn");
-  let csv = "\uFEFFالاسم,الإيميل,الهاتف,المدة,السعر,تاريخ البداية,تاريخ الانتهاء\n";
-  data.forEach(r => { let phone = r.phone ? `${r.countryCode||''}${r.phone}` : ''; csv += `${r.name||''},${r.email||''},${phone},${r.months||''} شهر,${r.price||0} ${r.currency||'DZD'},${r.start||''},${r.end||''}\n`; });
+  let csv = "\uFEFFالاسم,الإيميل,الهاتف,الخدمة,المدة,السعر,تاريخ البداية,تاريخ الانتهاء\n";
+  data.forEach(r => { let phone = r.phone ? `${r.countryCode||''}${r.phone}` : ''; csv += `${r.name||''},${r.email||''},${phone},${r.serviceType||''},${r.months||''} شهر,${r.price||0} ${r.currency||'DZD'},${r.start||''},${r.end||''}\n`; });
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Subscriptions_Excel_${todayISO()}.csv`; a.click(); closeModal('toolsModal'); showToast("تم التصدير بنجاح 📥");
 };
 
@@ -621,16 +666,24 @@ $("undoDeleteBtn").onclick = async () => {
   await firebasePush(); render(); closeModal('toolsModal'); showToast("تم استرجاع البيانات المحذوفة ↩️");
 };
 
+// ==== تحديث المجموع ليظهر إحصائيات مبسطة عن الخدمات ====
 $("openTotals").onclick = () => { 
   const alertEl = $("alertDays"); 
   const alertD = (alertEl && alertEl.value) ? parseInt(alertEl.value) : 7;
   const activeData = data.filter(r => getStatus(r.end, alertD).key !== "expired"); 
   
   const totalsByCurrency = {};
+  const serviceCounts = {};
+
   activeData.forEach(r => {
+    // حساب العملات
     const curr = r.currency || "DZD";
     const price = parseFloat(r.price) || 0;
     totalsByCurrency[curr] = (totalsByCurrency[curr] || 0) + price;
+
+    // حساب عدد الخدمات الفعالة
+    const srv = r.serviceType || "غير محدد";
+    serviceCounts[srv] = (serviceCounts[srv] || 0) + 1;
   });
 
   let totalsHtml = "";
@@ -641,8 +694,15 @@ $("openTotals").onclick = () => {
       totalsHtml += `<div style="color:var(--accent); font-size:32px; margin-bottom:5px;">${totalsByCurrency[curr].toLocaleString()} <span style="font-size:18px; color:var(--muted);">${curr}</span></div>`;
     }
   }
+
+  // عرض إحصائية سريعة للفئات تحت المجموع
+  let servicesHtml = `<div style="margin-top:15px; display:flex; flex-wrap:wrap; gap:5px; justify-content:center; padding-top:15px; border-top:1px solid rgba(255,255,255,0.1);">`;
+  for(let s in serviceCounts) {
+     servicesHtml += `<span class="statChip" style="font-size:11px; background:rgba(124,92,255,0.1); border-color:rgba(124,92,255,0.3); color:#eaf0ff;">${s}: ${serviceCounts[s]}</span>`;
+  }
+  servicesHtml += `</div>`;
   
-  $("totalsBody").innerHTML = `${totalsHtml}<div style="font-size:13px; color:var(--muted); margin-top:15px;">إجمالي المداخيل من الاشتراكات الفعّالة والقريبة من الانتهاء.</div>`; 
+  $("totalsBody").innerHTML = `${totalsHtml}<div style="font-size:13px; color:var(--muted); margin-top:15px;">إجمالي المداخيل من الاشتراكات الفعّالة والقريبة من الانتهاء.</div>${servicesHtml}`; 
   openModal("totalsModal"); 
 };
 
@@ -656,15 +716,14 @@ $("shareBtn").onclick = () => { closeModal("toolsModal"); if (navigator.share) {
 
 $("authLogin").onclick = () => { auth.signInWithEmailAndPassword($("authEmail").value, $("authPass").value).catch(e => showToast("بيانات الدخول خاطئة", "err")); };
 $("authLogout").onclick = () => auth.signOut();
-$("openAdd").onclick = () => { editingId=null; $("formTitle").textContent="إضافة اشتراك"; $("name").value=""; $("email").value=""; $("phone").value=""; $("countryCode").value="+213"; $("quickPlan").value=""; $("months").value=""; $("price").value=""; $("start").value=todayISO(); openModal("formModal"); };
+$("openAdd").onclick = () => { editingId=null; $("formTitle").textContent="إضافة اشتراك"; $("name").value=""; $("email").value=""; $("phone").value=""; $("countryCode").value="+213"; $("serviceType").value=""; $("quickPlan").value=""; $("months").value=""; $("price").value=""; $("start").value=todayISO(); openModal("formModal"); };
 $("openAuth").onclick = () => openModal("authModal");
 $("search").oninput = render;
 
-// ==== برمجة أزرار شريط البحث (اللصق والمسح) ====
 if($("clearSearchBtn")) {
   $("clearSearchBtn").onclick = () => { 
     $("search").value = ""; 
-    render(); // لتحديث الجدول وعرض كل النتائج
+    render(); 
   };
 }
 
@@ -673,7 +732,7 @@ if($("pasteSearchBtn")) {
     try { 
       const text = await navigator.clipboard.readText(); 
       $("search").value = text; 
-      render(); // البحث فورياً بعد اللصق
+      render(); 
     } catch(e) { 
       showToast("فشل اللصق، يرجى منح صلاحية الحافظة للمتصفح", "warn"); 
     } 
