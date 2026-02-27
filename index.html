@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>لوحة تسيير الاشتراكات - v11.1</title>
+<title>لوحة تسيير الاشتراكات - v11.2</title>
 
 <style>
 :root{
@@ -40,6 +40,7 @@ body{
 .searchWrap{ flex:1; min-width:240px; display: flex; gap: 6px; align-items: center; }
 .searchWrap input { flex:1; width:100%; padding:10px 12px; border-radius:14px; border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); outline:none; transition: all 0.2s; }
 .searchWrap input:focus { border-color: rgba(124,92,255,.6); box-shadow: 0 0 0 4px rgba(124,92,255,.14); }
+.searchWrap select { width:100%; padding:10px 12px; border-radius:14px; border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); outline:none; transition: all 0.2s; }
 
 input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active{
     -webkit-box-shadow: 0 0 0 30px #161b2a inset !important;
@@ -62,7 +63,6 @@ input[type="checkbox"] { appearance: none; width: 18px; height: 18px; border: 2p
 input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
 input[type="checkbox"]:checked::after { content: "✔"; position: absolute; color: white; font-size: 12px; left: 3px; top: -1px; font-weight: bold; }
 
-/* تم تقليص العرض الأدنى للجدول لأنه أصبح يحتوي على أعمدة أقل وأذكى */
 .tableWrap{ overflow:auto; }
 table{ width:100%; border-collapse:separate; border-spacing:0; min-width: 850px; }
 thead th{ position:sticky; top:0; z-index:5; background: rgba(0,0,0,.22); color: var(--muted); text-align:right; font-size:12px; font-weight:900; padding:14px 12px; border-bottom:1px solid var(--line); }
@@ -133,8 +133,8 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v11.1</span></h1>
-    <div class="sub">⚡ النسخة المدمجة (جدول ذكي بدون ازدحام + نظام محاسبة)</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v11.2</span></h1>
+    <div class="sub">⚡ تفاصيل الفاتورة الدقيقة (المبلغ المدفوع والمتبقي)</div>
   </div>
 
   <div class="card">
@@ -236,7 +236,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
         </div>
 
         <div class="field"><label>المدة <span style="color:var(--err)">*</span></label><input id="months" type="number" min="1" step="1"></div>
-        <div class="field"><label>السعر</label><input id="price" type="number" min="0" step="0.01"></div>
+        <div class="field"><label>السعر الإجمالي</label><input id="price" type="number" min="0" step="0.01"></div>
         <div class="field"><label>العملة</label><select id="currency"><option value="DZD">DZD</option><option value="EUR">EUR</option><option value="USD">USD</option><option value="MAD">MAD</option><option value="TND">TND</option></select></div>
         
         <div class="field"><label>حالة الدفع</label>
@@ -288,10 +288,12 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
         <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">نوع الخدمة:</td><td style="padding: 12px 0; text-align: left; font-weight: bold; color: #8b5cf6;" id="recService"></td></tr>
         <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">مدة الاشتراك:</td><td style="padding: 12px 0; text-align: left; color: #0f172a;" id="recMonths"></td></tr>
         <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">تاريخ البداية:</td><td style="padding: 12px 0; text-align: left; color: #0f172a;" id="recStart"></td></tr>
-        <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">تاريخ الانتهاء:</td><td style="padding: 12px 0; text-align: left; color: #0f172a;" id="recEnd"></td></tr>
-        <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">حالة الدفع:</td><td style="padding: 12px 0; text-align: left; font-weight:bold;" id="recPaymentStatus"></td></tr>
+        <tr style="border-bottom: 1px solid #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">تاريخ الانتهاء:</td><td style="padding: 12px 0; text-align: left; color: #0f172a;" id="recEnd"></td></tr>
+        
+        <tr><td style="padding: 20px 0 10px 0; color: #0f172a; font-size: 18px; font-weight: 900;">السعر الإجمالي:</td><td style="padding: 20px 0 10px 0; text-align: left; font-size: 20px; font-weight: 900; color: #10b981;" id="recPrice"></td></tr>
+        <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 10px 0; color: #64748b;">حالة الدفع:</td><td style="padding: 10px 0; text-align: left; font-weight:bold;" id="recPaymentStatus"></td></tr>
+        <tr id="recPaidAmountRow" style="display:none; border-bottom: 1px dashed #cbd5e1;"><td style="padding: 10px 0; color: #64748b;">المبلغ المدفوع:</td><td style="padding: 10px 0; text-align: left; font-weight:bold; color: #3b82f6;" id="recPaidAmount"></td></tr>
         <tr id="recRemainingRow" style="display:none; background:#fef2f2; border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 5px; color: #ef4444; font-weight:bold; border-radius:0 8px 8px 0;">❗ المبلغ المتبقي (دين):</td><td style="padding: 12px 5px; text-align: left; color: #ef4444; font-weight: 900; border-radius:8px 0 0 0;" id="recRemaining"></td></tr>
-        <tr><td style="padding: 20px 0; color: #0f172a; font-size: 18px; font-weight: 900;">المبلغ الإجمالي:</td><td style="padding: 20px 0; text-align: left; font-size: 20px; font-weight: 900; color: #10b981;" id="recPrice"></td></tr>
       </table>
       <div style="text-align: center; margin-top: 35px; font-size: 12px; color: #94a3b8; line-height: 1.6;">نشكركم على ثقتكم بنا 🤍<br><span style="font-size: 10px;">تم إصدار هذا الوصل آلياً بتاريخ <span id="recToday"></span></span></div>
     </div>
@@ -431,36 +433,21 @@ function render(){
     const st = getStatus(r.end, alertD); const isChecked = selectedIds.has(r.id) ? "checked" : ""; const tr = document.createElement("tr");
     if(st.key === "expired") tr.className = "expired-row"; else if(st.key === "expiring") tr.className = "expiring-row";
     
-    // شارة الدفع
     let pStatus = r.paymentStatus || 'paid'; let payBadge = '';
     if(pStatus === 'unpaid') payBadge = '<span class="badge err" style="padding:4px 6px; font-size:10px;">🔴 غير مدفوع</span>';
     else if(pStatus === 'partial') { let rem = (parseFloat(r.price)||0) - (parseFloat(r.paidAmount)||0); payBadge = `<span class="badge warn" style="padding:4px 6px; font-size:10px;" title="المتبقي: ${rem}">🟡 جزئي (${r.paidAmount||0})</span>`; }
     else payBadge = '<span class="badge ok" style="padding:4px 6px; font-size:10px;">🟢 خالص</span>';
 
-    // الأعمدة المدمجة (الذكية)
+    const serviceHtml = `<span class="service-badge">${r.serviceType || "غير محدد"}</span>`;
+    
     tr.innerHTML = `
       <td style="text-align: center;"><input type="checkbox" class="rowChk" value="${r.id}" ${isChecked}></td>
-      <td>
-        <div style="font-weight:bold; color:var(--text); font-size:14px;">${r.name||"-"}</div>
-        <div style="font-size:11px; color:var(--muted); margin-top:2px;">${r.email||''}</div>
-      </td>
+      <td><div style="font-weight:bold; color:var(--text); font-size:14px;">${r.name||"-"}</div><div style="font-size:11px; color:var(--muted); margin-top:2px;">${r.email||''}</div></td>
       <td dir="ltr" style="text-align:right; font-size:14px;">${r.phone?`${r.countryCode||''} ${r.phone}`:'-'}</td>
-      <td>
-        <div style="margin-bottom:4px;"><span class="service-badge">${r.serviceType || "غير محدد"}</span></div>
-        <div style="font-size:11px; color:var(--muted); font-weight:bold;">المدة: ${r.months||0} شهر</div>
-      </td>
-      <td>
-        <div style="font-weight:bold; font-size:14px;">${r.price||0} <span style="font-size:10px; color:var(--muted);">${r.currency||'DZD'}</span></div>
-        <div style="margin-top:4px;">${payBadge}</div>
-      </td>
-      <td style="font-size:12px; color:var(--muted); line-height:1.6;">
-        <span style="color:var(--text)">م:</span> ${r.start||"-"}<br>
-        <span style="color:var(--text)">إ:</span> ${r.end||"-"}
-      </td>
-      <td>
-        <div style="margin-bottom:4px;"><span class="badge ${st.cls}">${st.label}</span></div>
-        <div style="font-size:11px; font-weight:bold; color:${st.left < 0 ? 'var(--err)' : 'var(--text)'};">${st.left < 0 ? 'منذ ' + Math.abs(st.left) : 'بقي ' + st.left} يوم</div>
-      </td>
+      <td><div style="margin-bottom:4px;">${serviceHtml}</div><div style="font-size:11px; color:var(--muted); font-weight:bold;">المدة: ${r.months||0} شهر</div></td>
+      <td><div style="font-weight:bold; font-size:14px;">${r.price||0} <span style="font-size:10px; color:var(--muted);">${r.currency||'DZD'}</span></div><div style="margin-top:4px;">${payBadge}</div></td>
+      <td style="font-size:12px; color:var(--muted); line-height:1.6;"><span style="color:var(--text)">م:</span> ${r.start||"-"}<br><span style="color:var(--text)">إ:</span> ${r.end||"-"}</td>
+      <td><div style="margin-bottom:4px;"><span class="badge ${st.cls}">${st.label}</span></div><div style="font-size:11px; font-weight:bold; color:${st.left < 0 ? 'var(--err)' : 'var(--text)'};">${st.left < 0 ? 'منذ ' + Math.abs(st.left) : 'بقي ' + st.left} يوم</div></td>
       <td><button class="actionPill" onclick="openRowActions('${r.id}')">⚡ إجراء</button></td>
     `;
     tb.appendChild(tr);
@@ -479,22 +466,65 @@ window.openRowActions = (id) => { currentRowId = id; const rec = data.find(x => 
 
 $("paymentStatus").addEventListener('change', (e) => { $("paidAmountWrap").style.display = e.target.value === 'partial' ? 'block' : 'none'; });
 
+// التحديث هنا: ترتيب الفاتورة وإظهار المبلغ المدفوع
 $("actReceipt").onclick = () => {
   const rec = data.find(x => x.id === currentRowId); if(!rec) return; closeModal("rowActionsModal"); 
   $("receiptStoreName").textContent = storeSettings.name || "متجر الاشتراكات";
-  if(storeSettings.logo) { $("receiptLogoImg").src = storeSettings.logo; $("receiptLogoImg").style.display = "block"; $("receiptLogoEmoji").style.display = "none"; } else { $("receiptLogoImg").style.display = "none"; $("receiptLogoEmoji").style.display = "block"; }
-  $("recName").textContent = rec.name || "-"; $("recPhone").textContent = rec.phone ? `${rec.countryCode||''}${rec.phone}` : "-"; $("recService").textContent = rec.serviceType || "غير محدد"; $("recMonths").textContent = `${rec.months || 0} شهر`; $("recStart").textContent = rec.start || "-"; $("recEnd").textContent = rec.end || "-"; $("recPrice").textContent = `${parseFloat(rec.price || 0).toLocaleString()} ${rec.currency || 'DZD'}`;
-  let pStatus = rec.paymentStatus || 'paid'; let pText = pStatus === 'paid' ? '🟢 مدفوع بالكامل' : (pStatus === 'unpaid' ? '🔴 غير مدفوع' : '🟡 دفع جزئي'); $("recPaymentStatus").textContent = pText;
-  if(pStatus === 'partial' || pStatus === 'unpaid') { $("recRemainingRow").style.display = "table-row"; let total = parseFloat(rec.price) || 0; let paid = pStatus === 'unpaid' ? 0 : (parseFloat(rec.paidAmount) || 0); let rem = total - paid; $("recRemaining").textContent = `${rem.toLocaleString()} ${rec.currency || 'DZD'}`; } else { $("recRemainingRow").style.display = "none"; }
+  if(storeSettings.logo) { $("receiptLogoImg").src = storeSettings.logo; $("receiptLogoImg").style.display = "block"; $("receiptLogoEmoji").style.display = "none"; } 
+  else { $("receiptLogoImg").style.display = "none"; $("receiptLogoEmoji").style.display = "block"; }
+  
+  $("recName").textContent = rec.name || "-"; 
+  $("recPhone").textContent = rec.phone ? `${rec.countryCode||''}${rec.phone}` : "-"; 
+  $("recService").textContent = rec.serviceType || "غير محدد"; 
+  $("recMonths").textContent = `${rec.months || 0} شهر`; 
+  $("recStart").textContent = rec.start || "-"; 
+  $("recEnd").textContent = rec.end || "-"; 
+  $("recPrice").textContent = `${parseFloat(rec.price || 0).toLocaleString()} ${rec.currency || 'DZD'}`;
+  
+  let pStatus = rec.paymentStatus || 'paid'; 
+  let pText = pStatus === 'paid' ? '🟢 مدفوع بالكامل' : (pStatus === 'unpaid' ? '🔴 غير مدفوع' : '🟡 دفع جزئي'); 
+  $("recPaymentStatus").textContent = pText;
+  
+  // إظهار المبلغ المدفوع إذا كان جزئياً
+  if(pStatus === 'partial') {
+    $("recPaidAmountRow").style.display = "table-row";
+    $("recPaidAmount").textContent = `${parseFloat(rec.paidAmount || 0).toLocaleString()} ${rec.currency || 'DZD'}`;
+  } else {
+    $("recPaidAmountRow").style.display = "none";
+  }
+
+  // إظهار الدين المتبقي
+  if(pStatus === 'partial' || pStatus === 'unpaid') { 
+    $("recRemainingRow").style.display = "table-row"; 
+    let total = parseFloat(rec.price) || 0; 
+    let paid = pStatus === 'unpaid' ? 0 : (parseFloat(rec.paidAmount) || 0); 
+    let rem = total - paid; 
+    $("recRemaining").textContent = `${rem.toLocaleString()} ${rec.currency || 'DZD'}`; 
+  } else { 
+    $("recRemainingRow").style.display = "none"; 
+  }
+
   const d = new Date(); $("recToday").textContent = `${d.toLocaleDateString('en-GB')} - ${d.toLocaleTimeString('en-GB')}`;
   logAction("إصدار وصل", `للعميل: ${rec.name}`); openModal("receiptModal"); 
 };
 
+// التحديث هنا: رسالة الواتساب 
 $("sendReceiptWaBtn").onclick = () => {
   const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.phone) return showToast("العميل لا يملك رقم هاتف", "warn");
-  let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, ''); let sName = storeSettings.name || "متجر الاشتراكات"; let pText = rec.paymentStatus === 'unpaid' ? '🔴 غير مدفوع' : (rec.paymentStatus === 'partial' ? '🟡 دفع جزئي' : '🟢 خالص');
-  let msg = `🧾 *فاتورة اشتراك إلكترونية* 🧾\n\n🏢 المتجر: *${sName}*\n👤 العميل: ${rec.name||'-'}\n📦 الخدمة: ${rec.serviceType||'غير محدد'}\n⏳ المدة: ${rec.months||0} شهر\n📅 البداية: ${rec.start||'-'}\n🏁 الانتهاء: ${rec.end||'-'}\n\n💳 *حالة الدفع:* ${pText}\n💰 *السعر الإجمالي:* ${parseFloat(rec.price||0).toLocaleString()} ${rec.currency||'DZD'}\n`;
-  if(rec.paymentStatus === 'partial' || rec.paymentStatus === 'unpaid'){ let total = parseFloat(rec.price)||0; let paid = rec.paymentStatus === 'unpaid' ? 0 : parseFloat(rec.paidAmount)||0; msg += `❗ *المتبقي (دين):* ${total - paid} ${rec.currency||'DZD'}\n`; }
+  let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, ''); let sName = storeSettings.name || "متجر الاشتراكات"; 
+  let pText = rec.paymentStatus === 'unpaid' ? '🔴 غير مدفوع' : (rec.paymentStatus === 'partial' ? '🟡 دفع جزئي' : '🟢 خالص');
+  
+  let msg = `🧾 *فاتورة اشتراك إلكترونية* 🧾\n\n🏢 المتجر: *${sName}*\n👤 العميل: ${rec.name||'-'}\n📦 الخدمة: ${rec.serviceType||'غير محدد'}\n⏳ المدة: ${rec.months||0} شهر\n📅 البداية: ${rec.start||'-'}\n🏁 الانتهاء: ${rec.end||'-'}\n\n💰 *السعر الإجمالي:* ${parseFloat(rec.price||0).toLocaleString()} ${rec.currency||'DZD'}\n💳 *حالة الدفع:* ${pText}\n`;
+  
+  if(rec.paymentStatus === 'partial') {
+      msg += `💸 *المبلغ المدفوع:* ${parseFloat(rec.paidAmount||0).toLocaleString()} ${rec.currency||'DZD'}\n`;
+  }
+
+  if(rec.paymentStatus === 'partial' || rec.paymentStatus === 'unpaid'){ 
+      let total = parseFloat(rec.price)||0; 
+      let paid = rec.paymentStatus === 'unpaid' ? 0 : parseFloat(rec.paidAmount)||0; 
+      msg += `❗ *المتبقي (دين):* ${(total - paid).toLocaleString()} ${rec.currency||'DZD'}\n`; 
+  }
   msg += `\n🤍 نشكركم على ثقتكم بنا!`; window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
 };
 
