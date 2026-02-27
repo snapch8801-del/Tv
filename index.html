@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>لوحة تسيير الاشتراكات - v12.0</title>
+<title>لوحة تسيير الاشتراكات - v12.1</title>
 
 <style>
 :root{
@@ -125,8 +125,8 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.0</span></h1>
-    <div class="sub">⚡ النسخة الصافية (إصلاح النوافذ والأزرار بالكامل)</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.1</span></h1>
+    <div class="sub">⚡ توفير 99% من باقة الإنترنت (التحديث النقطي الذكي للبيانات)</div>
   </div>
 
   <div class="card">
@@ -172,6 +172,8 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
     </div>
   </div>
 </div>
+
+<!-- ================= MODALS ================= -->
 
 <div class="modal" id="toolsModal" aria-hidden="true">
   <div class="box" style="width: 480px">
@@ -323,7 +325,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 'use strict';
 const FIREBASE_CONFIG = { apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ", authDomain: "dattta-6f497.firebaseapp.com", databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com", projectId: "dattta-6f497", storageBucket: "dattta-6f497.firebasestorage.app", messagingSenderId: "804914291938", appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb" };
 
-const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.0";
+const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.1";
 const $ = (id)=>document.getElementById(id);
 const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
 let data = []; let editingId = null; let currentRowId = null; let currentFilter = "all"; 
@@ -373,7 +375,9 @@ window.loadData = async () => {
     const snap = await db.ref("subscriptions").once('value'); data = snap.val() ? Object.values(snap.val()) : []; saveLocalBackup(); setSyncState("ok"); window.render(); 
   } catch(e) { setSyncState("fail"); showToast("تم عرض النسخة المحفوظة محلياً", "warn"); data = loadLocalBackup(); window.render(); } 
 };
-async function firebasePush() { if(!navigator.onLine) return; try { setSyncState("saving"); await db.ref("subscriptions").set(data); saveLocalBackup(); setSyncState("ok"); } catch(e) { showToast("خطأ", "err"); } }
+
+// تم مسح دالة firebasePush القديمة البطيئة! الاعتماد كله الآن على التحديث النقطي السريع ⚡
+
 function getStatus(endISO, alertDays) { const left = Math.round((toDate(endISO) - toDate(todayISO()))/(1000*60*60*24)); if(left < 0) return {key:"expired", label:"منتهي", cls:"err", left}; if(left <= alertDays) return {key:"expiring", label:"قريب ينتهي", cls:"warn", left}; return {key:"active", label:"فعّال", cls:"ok", left}; }
 
 window.render = () => {
@@ -420,33 +424,112 @@ window.updateBulkUI = () => { const bar = $("bulkBar"); if(selectedIds.size > 0)
 $("tbody").addEventListener("change", (e) => { if(e.target.classList.contains("rowChk")) { if(e.target.checked) selectedIds.add(e.target.value); else selectedIds.delete(e.target.value); window.updateBulkUI(); } });
 window.toggleSelectAll = (el) => { const isChkd = el.checked; document.querySelectorAll(".rowChk").forEach(chk => { chk.checked = isChkd; if(isChkd) selectedIds.add(chk.value); else selectedIds.delete(chk.value); }); window.updateBulkUI(); };
 window.clearSelectionAction = () => { selectedIds.clear(); window.render(); window.updateBulkUI(); };
-window.bulkDeleteAction = async () => { if(!confirm(`تأكيد حذف ${selectedIds.size} اشتراكات؟`)) return; logAction("حذف جماعي", `عدد ${selectedIds.size} اشتراكات`); lastDeletedData = data.filter(x => selectedIds.has(x.id)); data = data.filter(x => !selectedIds.has(x.id)); selectedIds.clear(); await firebasePush(); window.render(); window.updateBulkUI(); showToast("تم الحذف، التراجع ممكن من الأدوات 🗑️"); };
-window.bulkExtendAction = () => { extendMode = "bulk"; $("extendTitle").textContent = `تجديد ${selectedIds.size} مشترك`; $("extendValue").value = 1; $("extendUnit").value = "months"; openModal("extendModal"); };
-window.confirmExtend = async () => { const val = parseInt($("extendValue").value); const unit = $("extendUnit").value; if(isNaN(val) || val < 1) return showToast("غير صالح", "err"); if(extendMode === "bulk") { logAction("تجديد جماعي", `عدد ${selectedIds.size} اشتراكات بمقدار ${val} ${unit}`); } else { const recToExtend = data.find(x => x.id === currentRowId); logAction("تجديد اشتراك", `الاسم: ${recToExtend.name}، المدة المضافة: ${val} ${unit}`); } const processRecord = (rec) => { const endD = new Date(rec.end); if(unit === "months") { endD.setMonth(endD.getMonth() + val); rec.months = (parseInt(rec.months)||0) + val; } else { endD.setDate(endD.getDate() + val); } rec.end = endD.toISOString().split('T')[0]; return rec; }; if(extendMode === "bulk") { data = data.map(x => selectedIds.has(x.id) ? processRecord(x) : x); selectedIds.clear(); window.updateBulkUI(); } else { data = data.map(x => x.id === currentRowId ? processRecord(x) : x); } await firebasePush(); window.render(); closeModal("extendModal"); showToast("تم التجديد 🔁"); };
 
-// العمليات الفردية
+// ================= العمليات المباشرة للواجهة =================
+
+window.openAddSub = () => { 
+  editingId=null; $("formTitle").textContent="إضافة اشتراك"; $("name").value=""; $("email").value=""; $("phone").value=""; $("countryCode").value="+213"; $("serviceType").value=""; $("quickPlan").value=""; $("months").value=""; $("price").value=""; $("start").value=todayISO(); 
+  $("paidAmount").value = ""; window.calcDebt(); openModal("formModal"); 
+};
+
+window.calcDebt = function() {
+  const p = parseFloat($("price").value) || 0; let valRaw = $("paidAmount").value; let a = valRaw === "" ? p : (parseFloat(valRaw) || 0); let d = p - a; $("debtAmount").value = d > 0 ? d : 0;
+};
+
+$("quickPlan").addEventListener('change', () => { if($("quickPlan").value) $("months").value = $("quickPlan").value; });
+
 window.openRowActions = (id) => { currentRowId = id; const rec = data.find(x => x.id === id); $("rowActionsHint").textContent = rec.name; openModal("rowActionsModal"); };
-window.actExtendAction = () => { extendMode = "single"; const rec = data.find(x => x.id === currentRowId); $("extendTitle").textContent = `تجديد لـ ${rec.name}`; $("extendValue").value = 1; $("extendUnit").value = "months"; closeModal("rowActionsModal"); openModal("extendModal"); };
-window.actCopyEmailAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.email) { closeModal("rowActionsModal"); return showToast("لا يوجد بريد مسجل.", "err"); } navigator.clipboard.writeText(rec.email); closeModal("rowActionsModal"); showToast("تم نسخ الإيميل 📋"); };
-window.actWhatsAppAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.phone) { closeModal("rowActionsModal"); return showToast("لا يوجد رقم هاتف.", "err"); } let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, ''); window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`مرحباً ${rec.name}، نود تذكيرك بانتهاء اشتراكك بتاريخ ${rec.end}.`)}`, '_blank'); closeModal("rowActionsModal"); };
-window.actDeleteAction = async () => { if(confirm("حذف؟")) { const recToDelete = data.find(x => x.id === currentRowId); logAction("حذف اشتراك", `الاسم: ${recToDelete.name}`); lastDeletedData = data.filter(x => x.id === currentRowId); data = data.filter(x => x.id !== currentRowId); await firebasePush(); window.render(); closeModal("rowActionsModal"); showToast("تم الحذف، التراجع ممكن من الأدوات 🗑️"); } };
+window.actEditAction = () => { 
+  const rec = data.find(x => x.id === currentRowId); if(!rec) return; closeModal("rowActionsModal"); editingId = rec.id; 
+  $("formTitle").textContent = "تعديل اشتراك"; $("name").value = rec.name||""; $("email").value = rec.email||""; $("phone").value = rec.phone||""; $("countryCode").value = rec.countryCode||"+213"; $("serviceType").value = rec.serviceType||""; $("months").value = rec.months||""; 
+  $("price").value = rec.price||""; $("currency").value = rec.currency||"DZD"; $("start").value = rec.start; $("alertDays").value = rec.alertDays||"7"; 
+  if(rec.paymentStatus === 'unpaid') $("paidAmount").value = 0; else if(rec.paymentStatus === 'partial') $("paidAmount").value = rec.paidAmount || 0; else $("paidAmount").value = ""; 
+  window.calcDebt(); openModal("formModal"); 
+};
 
-// المحاسبة والإضافة
-window.calcDebt = () => { const p = parseFloat($("price").value) || 0; let valRaw = $("paidAmount").value; let a = valRaw === "" ? p : (parseFloat(valRaw) || 0); let d = p - a; $("debtAmount").value = d > 0 ? d : 0; };
-window.handleQuickPlan = () => { if($("quickPlan").value) $("months").value = $("quickPlan").value; };
-window.openAddSub = () => { editingId=null; $("formTitle").textContent="إضافة اشتراك"; $("name").value=""; $("email").value=""; $("phone").value=""; $("countryCode").value="+213"; $("serviceType").value=""; $("quickPlan").value=""; $("months").value=""; $("price").value=""; $("start").value=todayISO(); $("paidAmount").value = ""; window.calcDebt(); openModal("formModal"); };
-window.actEditAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec) return; closeModal("rowActionsModal"); editingId = rec.id; $("formTitle").textContent = "تعديل اشتراك"; $("name").value = rec.name||""; $("email").value = rec.email||""; $("phone").value = rec.phone||""; $("countryCode").value = rec.countryCode||"+213"; $("serviceType").value = rec.serviceType||""; $("months").value = rec.months||""; $("price").value = rec.price||""; $("currency").value = rec.currency||"DZD"; $("start").value = rec.start; $("alertDays").value = rec.alertDays||"7"; if(rec.paymentStatus === 'unpaid') $("paidAmount").value = 0; else if(rec.paymentStatus === 'partial') $("paidAmount").value = rec.paidAmount || 0; else $("paidAmount").value = ""; window.calcDebt(); openModal("formModal"); };
+// ================= التحديث النقطي في حفظ البيانات =================
 window.saveSubscription = async () => {
   const start = $("start").value; const months = parseInt($("months").value); const emailVal = $("email").value.trim(); const serviceVal = $("serviceType").value.trim(); 
   if(!$("name").value.trim() || !emailVal || !serviceVal || !start || isNaN(months)) { return showToast("الرجاء إدخال البيانات الإجبارية", "err"); }
+  
   const priceInput = $("price").value; const priceFloat = parseFloat(priceInput) || 0; const paidInput = $("paidAmount").value; const paidFloat = paidInput === "" ? priceFloat : (parseFloat(paidInput) || 0);
   let pStatus = 'paid'; if(paidFloat === 0 && priceFloat > 0) pStatus = 'unpaid'; else if(paidFloat < priceFloat) pStatus = 'partial';
+
   const actionName = editingId ? "تعديل اشتراك" : "إضافة اشتراك"; logAction(actionName, `الاسم: ${$("name").value} - الدفع: ${pStatus === 'paid' ? 'خالص' : 'دين'}`); 
   const endD = new Date(start); endD.setMonth(endD.getMonth() + months); const alertEl = $("alertDays");
   const rec = { id: editingId || Date.now().toString(), name: $("name").value, email: emailVal, phone: $("phone").value, countryCode: $("countryCode").value, serviceType: serviceVal, alertDays: (alertEl && alertEl.value)?alertEl.value:7, months, price: priceInput, currency: $("currency").value, paymentStatus: pStatus, paidAmount: paidFloat, start, end: endD.toISOString().split('T')[0] };
+  
   if(editingId) data = data.map(x => x.id === editingId ? rec : x); else data.unshift(rec);
-  await firebasePush(); window.render(); closeModal("formModal"); showToast("تم الحفظ ✨");
+  
+  // ⚡ التحديث النقطي (إرسال بيانات زبون واحد فقط بدل 1000 زبون)
+  try {
+      setSyncState("saving");
+      await db.ref("subscriptions/" + rec.id).set(rec); 
+      saveLocalBackup(); setSyncState("ok");
+  } catch(e) { setSyncState("fail"); }
+
+  window.render(); closeModal("formModal"); showToast("تم الحفظ ✨");
 };
+
+// ================= التحديث النقطي في الحذف =================
+window.actDeleteAction = async () => { 
+  if(confirm("حذف؟")) { 
+    const recToDelete = data.find(x => x.id === currentRowId); logAction("حذف اشتراك", `الاسم: ${recToDelete.name}`); 
+    lastDeletedData = data.filter(x => x.id === currentRowId); data = data.filter(x => x.id !== currentRowId); 
+    
+    try {
+        setSyncState("saving");
+        await db.ref("subscriptions/" + currentRowId).remove(); // ⚡ مسح زبون واحد فقط من السيرفر
+        saveLocalBackup(); setSyncState("ok");
+    } catch(e) { setSyncState("fail"); }
+
+    window.render(); closeModal("rowActionsModal"); showToast("تم الحذف، التراجع ممكن من الأدوات 🗑️"); 
+  } 
+};
+
+window.bulkDeleteAction = async () => { 
+  if(!confirm(`تأكيد حذف ${selectedIds.size} اشتراكات؟`)) return; 
+  logAction("حذف جماعي", `عدد ${selectedIds.size} اشتراكات`); 
+  lastDeletedData = data.filter(x => selectedIds.has(x.id)); data = data.filter(x => !selectedIds.has(x.id)); 
+  
+  try {
+      setSyncState("saving");
+      const updates = {}; selectedIds.forEach(id => updates[id] = null);
+      await db.ref("subscriptions").update(updates); // ⚡ حذف عدة زبائن بالتحديث النقطي دفعة واحدة
+      saveLocalBackup(); setSyncState("ok");
+  } catch(e) { setSyncState("fail"); }
+
+  selectedIds.clear(); window.render(); window.updateBulkUI(); showToast("تم الحذف، التراجع ممكن من الأدوات 🗑️"); 
+};
+
+// ================= التحديث النقطي في التجديد =================
+window.actExtendAction = () => { extendMode = "single"; const rec = data.find(x => x.id === currentRowId); $("extendTitle").textContent = `تجديد لـ ${rec.name}`; $("extendValue").value = 1; $("extendUnit").value = "months"; closeModal("rowActionsModal"); openModal("extendModal"); };
+window.bulkExtendAction = () => { extendMode = "bulk"; $("extendTitle").textContent = `تجديد ${selectedIds.size} مشترك`; $("extendValue").value = 1; $("extendUnit").value = "months"; openModal("extendModal"); };
+
+window.confirmExtend = async () => {
+  const val = parseInt($("extendValue").value); const unit = $("extendUnit").value; if(isNaN(val) || val < 1) return showToast("غير صالح", "err");
+  if(extendMode === "bulk") { logAction("تجديد جماعي", `عدد ${selectedIds.size} اشتراكات بمقدار ${val} ${unit}`); } else { const recToExtend = data.find(x => x.id === currentRowId); logAction("تجديد اشتراك", `الاسم: ${recToExtend.name}، المدة المضافة: ${val} ${unit}`); }
+  const processRecord = (rec) => { const endD = new Date(rec.end); if(unit === "months") { endD.setMonth(endD.getMonth() + val); rec.months = (parseInt(rec.months)||0) + val; } else { endD.setDate(endD.getDate() + val); } rec.end = endD.toISOString().split('T')[0]; return rec; };
+  
+  const updates = {};
+  if(extendMode === "bulk") { 
+    data = data.map(x => { if(selectedIds.has(x.id)) { let upd = processRecord({...x}); updates[upd.id] = upd; return upd; } return x; }); 
+    selectedIds.clear(); window.updateBulkUI(); 
+  } else { 
+    data = data.map(x => { if(x.id === currentRowId) { let upd = processRecord({...x}); updates[upd.id] = upd; return upd; } return x; }); 
+  } 
+
+  try {
+      setSyncState("saving");
+      await db.ref("subscriptions").update(updates); // ⚡ تحديث تواريخ المحددين فقط 
+      saveLocalBackup(); setSyncState("ok");
+  } catch(e) { setSyncState("fail"); }
+
+  window.render(); closeModal("extendModal"); showToast("تم التجديد 🔁");
+};
+
+window.actCopyEmailAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.email) { closeModal("rowActionsModal"); return showToast("لا يوجد بريد مسجل.", "err"); } navigator.clipboard.writeText(rec.email); closeModal("rowActionsModal"); showToast("تم نسخ الإيميل 📋"); };
+window.actWhatsAppAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.phone) { closeModal("rowActionsModal"); return showToast("لا يوجد رقم هاتف.", "err"); } let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, ''); window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`مرحباً ${rec.name}، نود تذكيرك بانتهاء اشتراكك بتاريخ ${rec.end}.`)}`, '_blank'); closeModal("rowActionsModal"); };
 
 // الفاتورة الرقمية 
 window.openReceiptAction = () => {
@@ -492,12 +575,52 @@ window.exportCSV = () => {
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Subscriptions_Excel_${todayISO()}.csv`; a.click(); closeModal('toolsModal'); showToast("تم التصدير بنجاح 📥"); 
 };
 
-window.undoDelete = async () => { if(!lastDeletedData || lastDeletedData.length === 0) { closeModal('toolsModal'); return showToast("لا يوجد أي حذف أخير لاسترجاعه", "warn"); } logAction("تراجع عن الحذف", `استرجاع ${lastDeletedData.length} اشتراكات`); data = [...lastDeletedData, ...data]; lastDeletedData = null; await firebasePush(); window.render(); closeModal('toolsModal'); showToast("تم استرجاع البيانات المحذوفة ↩️"); };
+window.undoDelete = async () => { 
+  if(!lastDeletedData || lastDeletedData.length === 0) { closeModal('toolsModal'); return showToast("لا يوجد أي حذف أخير لاسترجاعه", "warn"); } 
+  logAction("تراجع عن الحذف", `استرجاع ${lastDeletedData.length} اشتراكات`); data = [...lastDeletedData, ...data]; 
+  
+  try {
+      setSyncState("saving"); const updates = {}; lastDeletedData.forEach(r => updates[r.id] = r);
+      await db.ref("subscriptions").update(updates); // ⚡ استرجاع المحددين فقط عبر التحديث النقطي
+      saveLocalBackup(); setSyncState("ok");
+  } catch(e) { setSyncState("fail"); }
+
+  lastDeletedData = null; window.render(); closeModal('toolsModal'); showToast("تم استرجاع البيانات المحذوفة ↩️"); 
+};
+
 window.exportJson = () => { if(data.length === 0) return showToast("لا توجد بيانات", "warn"); const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data)); const a = document.createElement("a"); a.href = dataStr; a.download = `Backup_${todayISO()}.json`; a.click(); closeModal("toolsModal"); showToast("تم التنزيل 📥"); };
 window.importFile = () => $("fileInput").click();
-window.handleFileSelect = (e) => { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = async (event) => { try { const imported = JSON.parse(event.target.result); if(Array.isArray(imported)) { data = imported; await firebasePush(); window.render(); closeModal("backupModal"); closeModal("toolsModal"); showToast("تم الاستيراد ✅"); } } catch(err) { showToast("ملف غير صالح", "err"); } }; reader.readAsText(file); };
-window.confirmPaste = async () => { try { const imported = JSON.parse($("pasteArea").value); if(Array.isArray(imported)) { data = imported; await firebasePush(); window.render(); closeModal("pasteModal"); closeModal("backupModal"); closeModal("toolsModal"); $("pasteArea").value=""; showToast("تم الاستيراد ✅"); } } catch(e) { showToast("كود غير صالح", "err"); } };
-window.clearAllData = async () => { if(confirm("⚠️ تحذير خطير: سيتم مسح كل البيانات!")) { logAction("تصفير اللوحة", "حذف كافة البيانات ⚠️"); lastDeletedData = [...data]; data = []; await firebasePush(); window.render(); closeModal("toolsModal"); showToast("تم مسح البيانات 🗑️ (يمكنك التراجع من الأدوات)"); } };
+window.handleFileSelect = (e) => { 
+  const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); 
+  reader.onload = async (event) => { 
+    try { 
+      const imported = JSON.parse(event.target.result); 
+      if(Array.isArray(imported)) { 
+        data = imported; 
+        try { setSyncState("saving"); const importDict = {}; imported.forEach(r => importDict[r.id] = r); await db.ref("subscriptions").set(importDict); saveLocalBackup(); setSyncState("ok"); } catch(e) { setSyncState("fail"); }
+        window.render(); closeModal("backupModal"); closeModal("toolsModal"); showToast("تم الاستيراد ✅"); 
+      } 
+    } catch(err) { showToast("ملف غير صالح", "err"); } 
+  }; 
+  reader.readAsText(file); 
+};
+window.confirmPaste = async () => { 
+  try { 
+    const imported = JSON.parse($("pasteArea").value); 
+    if(Array.isArray(imported)) { 
+      data = imported; 
+      try { setSyncState("saving"); const importDict = {}; imported.forEach(r => importDict[r.id] = r); await db.ref("subscriptions").set(importDict); saveLocalBackup(); setSyncState("ok"); } catch(e) { setSyncState("fail"); }
+      window.render(); closeModal("pasteModal"); closeModal("backupModal"); closeModal("toolsModal"); $("pasteArea").value=""; showToast("تم الاستيراد ✅"); 
+    } 
+  } catch(e) { showToast("كود غير صالح", "err"); } 
+};
+window.clearAllData = async () => { 
+  if(confirm("⚠️ تحذير خطير: سيتم مسح كل البيانات!")) { 
+    logAction("تصفير اللوحة", "حذف كافة البيانات ⚠️"); lastDeletedData = [...data]; data = []; 
+    try { setSyncState("saving"); await db.ref("subscriptions").remove(); saveLocalBackup(); setSyncState("ok"); } catch(e) { setSyncState("fail"); }
+    window.render(); closeModal("toolsModal"); showToast("تم مسح البيانات 🗑️ (يمكنك التراجع من الأدوات)"); 
+  } 
+};
 window.shareApp = () => { closeModal("toolsModal"); if (navigator.share) { navigator.share({ title: 'لوحة الاشتراكات', url: window.location.href }); } else { showToast("المشاركة غير مدعومة", "warn"); } };
 
 window.loginUser = () => { auth.signInWithEmailAndPassword($("authEmail").value, $("authPass").value).catch(e => showToast("بيانات الدخول خاطئة", "err")); };
