@@ -264,7 +264,12 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
       </div>
       <div id="authLoggedInSection" style="display:none; padding:10px;">
         <div style="text-align:center; margin-bottom:25px;"><div class="auth-icon-wrap" style="background:linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.05)); border-color:rgba(34,197,94,0.3); box-shadow: 0 10px 25px rgba(34,197,94,0.15);">✅</div><div id="authStateText" style="font-weight:900; font-size:15px; line-height:1.6;"></div></div>
-        <div id="ownerDashboard" style="display:none; padding:20px; background:rgba(124,92,255,0.08); border-radius:18px; border:1px solid rgba(124,92,255,0.2); margin-bottom:25px;"><h3 style="margin-top:0; color:#fff; font-size:15px; display:flex; align-items:center; gap:8px;">👑 أدوات المالك (Owner)</h3><button class="btn primary" onclick="openModal('addAdminModal')" style="width:100%; margin-bottom:12px; padding:12px; border-radius:12px;">➕ إنشاء حساب مستخدم جديد</button><button class="btn soft" onclick="loadAdminsList()" style="width:100%; padding:12px; border-radius:12px; border-color:rgba(255,255,255,0.1);">👥 إدارة الصلاحيات للمستخدمين</button></div>
+        <div id="ownerDashboard" style="display:none; padding:20px; background:rgba(124,92,255,0.08); border-radius:18px; border:1px solid rgba(124,92,255,0.2); margin-bottom:25px;">
+          <h3 style="margin-top:0; color:#fff; font-size:15px; display:flex; align-items:center; gap:8px;">👑 أدوات المالك (Owner)</h3>
+          <button class="btn primary" onclick="openModal('addAdminModal')" style="width:100%; margin-bottom:12px; padding:12px; border-radius:12px;">➕ إنشاء حساب مستخدم جديد</button>
+          <button class="btn soft" onclick="loadAdminsList()" style="width:100%; padding:12px; border-radius:12px; border-color:rgba(255,255,255,0.1);">👥 إدارة الصلاحيات للمستخدمين</button>
+          <button class="btn soft" onclick="openAuditLog()" style="width:100%; padding:12px; border-radius:12px; border-color:rgba(245,158,11,0.3); color:#f59e0b; margin-top:12px;">🕵️‍♂️ سجل نشاطات المدراء</button>
+        </div>
         <button class="btn danger" id="authLogout" style="width:100%; padding:14px; border-radius:14px; font-size:15px;">تسجيل الخروج المآمن</button>
       </div>
     </div>
@@ -273,6 +278,30 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 
 <div class="modal" id="addAdminModal" aria-hidden="true"><div class="box" style="width: 380px"><div class="modalHeader"><h2>➕ إضافة مستخدم جديد</h2><button class="btn danger btn-close" onclick="closeModal('addAdminModal')">✕ إغلاق</button></div><div class="modalBody"><div class="field" style="margin-bottom:15px"><label>البريد الإلكتروني</label><input id="newAdminEmail" type="email"></div><div class="field" style="margin-bottom:15px"><label>كلمة المرور (6 أحرف أو أكثر)</label><input id="newAdminPass" type="password"></div><div class="field" style="margin-bottom:25px"><label>نوع الصلاحية</label><select id="newAdminRole"><option value="admin">أدمن</option><option value="owner">مالك 👑</option></select></div><button class="btn primary" id="confirmAddAdminBtn" style="width:100%; padding:12px;">تأكيد وإنشاء الحساب</button></div></div></div>
 <div class="modal" id="manageAdminsModal" aria-hidden="true"><div class="box" style="width: 500px"><div class="modalHeader"><h2>👥 قائمة المستخدمين</h2><button class="btn danger btn-close" onclick="closeModal('manageAdminsModal')">✕ إغلاق</button></div><div class="modalBody"><div style="font-size:12px; color:var(--warn); margin-bottom:15px; padding:10px; background:rgba(245,158,11,0.1); border-radius:10px; border:1px solid rgba(245,158,11,0.3);"><b>ملاحظة هامة:</b> سحب الصلاحية يمنع المستخدم من الدخول للوحة. لحذف الإيميل نهائياً لإعادة تسجيله لاحقاً، يجب حذفه من قسم (Authentication) في Firebase.</div><div style="max-height:300px; overflow:auto;"><table style="min-width:100%;"><thead><tr><th>الإيميل</th><th>الصلاحية</th><th>إجراء</th></tr></thead><tbody id="adminsTbody"></tbody></table></div></div></div></div>
+
+<div class="modal" id="auditLogModal" aria-hidden="true">
+  <div class="box" style="width: 700px">
+    <div class="modalHeader">
+      <h2>🕵️‍♂️ سجل نشاطات المدراء</h2>
+      <button class="btn danger btn-close" onclick="closeModal('auditLogModal')">✕ إغلاق</button>
+    </div>
+    <div class="modalBody">
+      <div style="max-height:400px; overflow:auto; border:1px solid rgba(255,255,255,0.1); border-radius:12px;">
+        <table style="min-width:100%; font-size: 13px;">
+          <thead>
+            <tr>
+              <th>الوقت والتاريخ</th>
+              <th>المستخدم (الأدمن)</th>
+              <th>نوع الإجراء</th>
+              <th>التفاصيل</th>
+            </tr>
+          </thead>
+          <tbody id="auditTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="modal" id="backupModal" aria-hidden="true"><div class="box" style="width:400px"><div class="modalHeader"><h2>📦 النسخ الاحتياطي (JSON)</h2><button class="btn danger btn-close" id="closeBackup" type="button">✕ إغلاق</button></div><div class="modalBody"><div style="display:grid; gap:10px;"><button class="btn soft" id="exportJsonBtn">⬇️ تصدير نسخة JSON</button><button class="btn soft" id="importFileBtn">⬆️ استيراد نسخة JSON</button><input id="fileInput" type="file" accept=".json" style="display:none"><button class="btn soft" onclick="openModal('pasteModal')">📋 استيراد باللصق</button></div></div></div></div>
 <div class="modal" id="pasteModal" aria-hidden="true"><div class="box"><div class="modalHeader"><h2>📋 استيراد باللصق</h2><button class="btn danger btn-close" onclick="closeModal('pasteModal')">✕ إغلاق</button></div><div class="modalBody"><textarea id="pasteArea" rows="10" style="width:100%; background:rgba(0,0,0,0.3); color:white; border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:10px; outline:none;"></textarea></div><div class="modalFooter"><button class="btn primary" id="confirmPasteBtn">استيراد البيانات</button></div></div></div>
@@ -295,12 +324,64 @@ let lastDeletedData = null;
 if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
 const auth = firebase.auth(); const db = firebase.database();
 
+// دالة التسجيل الصامتة (تعمل في الخلفية)
+async function logAction(actionName, detailsStr) {
+  if (!currentUser) return;
+  try {
+    const logEntry = {
+      email: currentUser.email,
+      action: actionName,
+      details: detailsStr || "-",
+      time: new Date().toISOString()
+    };
+    await db.ref("logs").push(logEntry);
+  } catch(e) { /* يتم التجاهل كي لا يزعج المستخدم إذا فشل السجل */ }
+}
+
+// نافذة جلب وعرض السجل للمالك
+window.openAuditLog = async () => {
+  openModal("auditLogModal");
+  const tb = $("auditTbody");
+  tb.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px;'>جاري تحميل السجل... ⏳</td></tr>";
+  try {
+    const snap = await db.ref("logs").orderByChild("time").limitToLast(100).once("value");
+    const logsObj = snap.val() || {};
+    tb.innerHTML = "";
+    const logsArray = Object.values(logsObj).sort((a,b) => new Date(b.time) - new Date(a.time)); // الأحدث أولاً
+    
+    if(logsArray.length === 0) {
+      tb.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px; color:var(--muted);'>لا توجد نشاطات مسجلة حتى الآن</td></tr>";
+      return;
+    }
+    
+    logsArray.forEach(l => {
+      const d = new Date(l.time);
+      const timeStr = d.toLocaleDateString('en-GB') + " - " + d.toLocaleTimeString('en-GB');
+      
+      let actionColor = "var(--text)";
+      if(l.action.includes("حذف")) actionColor = "#ef4444"; // أحمر
+      else if(l.action.includes("إضافة")) actionColor = "#22c55e"; // أخضر
+      else if(l.action.includes("تعديل") || l.action.includes("تجديد")) actionColor = "#f59e0b"; // برتقالي
+
+      tb.innerHTML += `
+        <tr>
+          <td style="direction:ltr; text-align:right; color:var(--muted);">${timeStr}</td>
+          <td>${l.email}</td>
+          <td style="color:${actionColor}; font-weight:bold;">${l.action}</td>
+          <td>${l.details}</td>
+        </tr>`;
+    });
+  } catch(err) {
+    tb.innerHTML = "<tr><td colspan='4' style='text-align:center; padding:20px; color:var(--err)'>حدث خطأ أو ليس لديك صلاحية لعرض السجل</td></tr>";
+  }
+};
+
+
 // ==== إصلاح مشكلة الدخول اللانهائي ====
 auth.onAuthStateChanged(async (u)=>{
   currentUser = u;
   if(u){
     try {
-      // نحاول قراءة الصلاحية (لن تطرد المستخدم إذا فشلت)
       const roleSnap = await db.ref("admins/" + u.uid).once("value");
       let roleData = roleSnap.val();
       
@@ -309,12 +390,11 @@ auth.onAuthStateChanged(async (u)=>{
            roleData = { role: "owner", email: u.email }; 
            await db.ref("admins/" + u.uid).set(roleData); 
         } catch(writeErr) {
-           roleData = { role: "owner", email: u.email }; // في الذاكرة فقط إذا رفض السيرفر التحديث
+           roleData = { role: "owner", email: u.email }; 
         }
       }
       currentRole = (roleData && roleData.role) ? roleData.role : "admin";
     } catch(e) { 
-      // إذا فشلت قراءة الصلاحية بسبب قيود Firebase، نعطيه صلاحية "أدمن" افتراضياً بدلاً من طرده
       currentRole = "admin"; 
     }
     
@@ -425,7 +505,7 @@ function render(){
   });
 }
 
-// ==== الإجراءات ====
+// ==== الإجراءات (مع دمج نظام التتبع) ====
 function updateBulkUI() { const bar = $("bulkBar"); if(selectedIds.size > 0) { bar.style.display = "flex"; $("selCount").textContent = `${selectedIds.size} محدد`; } else { bar.style.display = "none"; $("selectAll").checked = false; } }
 $("tbody").addEventListener("change", (e) => { if(e.target.classList.contains("rowChk")) { if(e.target.checked) selectedIds.add(e.target.value); else selectedIds.delete(e.target.value); updateBulkUI(); } });
 $("selectAll").addEventListener("change", (e) => { const isChkd = e.target.checked; document.querySelectorAll(".rowChk").forEach(chk => { chk.checked = isChkd; if(isChkd) selectedIds.add(chk.value); else selectedIds.delete(chk.value); }); updateBulkUI(); });
@@ -433,6 +513,8 @@ $("clearSelection").onclick = () => { selectedIds.clear(); render(); updateBulkU
 
 $("bulkDelete").onclick = async () => { 
   if(!confirm(`تأكيد حذف ${selectedIds.size} اشتراكات؟`)) return; 
+  
+  logAction("حذف جماعي", `عدد ${selectedIds.size} اشتراكات`); // تتبع
   lastDeletedData = data.filter(x => selectedIds.has(x.id)); 
   data = data.filter(x => !selectedIds.has(x.id)); 
   selectedIds.clear(); await firebasePush(); render(); updateBulkUI(); showToast("تم الحذف، التراجع ممكن من الأدوات 🗑️"); 
@@ -443,6 +525,8 @@ window.openRowActions = (id) => { currentRowId = id; const rec = data.find(x => 
 $("actEdit").onclick = () => { const rec = data.find(x => x.id === currentRowId); if(!rec) return; closeModal("rowActionsModal"); editingId = rec.id; $("formTitle").textContent = "تعديل اشتراك"; $("name").value = rec.name||""; $("email").value = rec.email||""; $("phone").value = rec.phone||""; $("countryCode").value = rec.countryCode||"+213"; $("months").value = rec.months||""; $("price").value = rec.price||""; $("currency").value = rec.currency||"DZD"; $("start").value = rec.start; $("alertDays").value = rec.alertDays||"7"; openModal("formModal"); };
 $("actDelete").onclick = async () => { 
   if(confirm("حذف؟")) { 
+    const recToDelete = data.find(x => x.id === currentRowId);
+    logAction("حذف اشتراك", `الاسم: ${recToDelete.name}`); // تتبع
     lastDeletedData = data.filter(x => x.id === currentRowId); 
     data = data.filter(x => x.id !== currentRowId); 
     await firebasePush(); render(); closeModal("rowActionsModal"); showToast("تم الحذف، التراجع ممكن من الأدوات 🗑️");
@@ -454,6 +538,14 @@ $("actWhatsApp").onclick = () => { const rec = data.find(x => x.id === currentRo
 
 $("confirmExtendBtn").onclick = async () => {
   const val = parseInt($("extendValue").value); const unit = $("extendUnit").value; if(isNaN(val) || val < 1) return showToast("غير صالح", "err");
+  
+  if(extendMode === "bulk") { 
+    logAction("تجديد جماعي", `عدد ${selectedIds.size} اشتراكات بمقدار ${val} ${unit}`); // تتبع
+  } else { 
+    const recToExtend = data.find(x => x.id === currentRowId);
+    logAction("تجديد اشتراك", `الاسم: ${recToExtend.name}، المدة المضافة: ${val} ${unit}`); // تتبع
+  }
+
   const processRecord = (rec) => { const endD = new Date(rec.end); if(unit === "months") { endD.setMonth(endD.getMonth() + val); rec.months = (parseInt(rec.months)||0) + val; } else { endD.setDate(endD.getDate() + val); } rec.end = endD.toISOString().split('T')[0]; return rec; };
   if(extendMode === "bulk") { data = data.map(x => selectedIds.has(x.id) ? processRecord(x) : x); selectedIds.clear(); updateBulkUI(); } else { data = data.map(x => x.id === currentRowId ? processRecord(x) : x); }
   await firebasePush(); render(); closeModal("extendModal"); showToast("تم التجديد 🔁");
@@ -462,6 +554,10 @@ $("confirmExtendBtn").onclick = async () => {
 $("quickPlan").onchange = ()=>{ if($("quickPlan").value) $("months").value = $("quickPlan").value; };
 $("saveBtn").onclick = async () => {
   const start = $("start").value; const months = parseInt($("months").value); if(!$("name").value || !start || isNaN(months)) return showToast("بيانات ناقصة", "err");
+  
+  const actionName = editingId ? "تعديل اشتراك" : "إضافة اشتراك";
+  logAction(actionName, `الاسم: ${$("name").value} - السعر: ${$("price").value} ${$("currency").value}`); // تتبع
+
   const endD = new Date(start); endD.setMonth(endD.getMonth() + months);
   const alertEl = $("alertDays");
   const rec = { id: editingId || Date.now().toString(), name: $("name").value, email: $("email").value, phone: $("phone").value, countryCode: $("countryCode").value, alertDays: (alertEl && alertEl.value)?alertEl.value:7, months, price: $("price").value, currency: $("currency").value, start, end: endD.toISOString().split('T')[0] };
@@ -471,8 +567,6 @@ $("saveBtn").onclick = async () => {
 
 // ==== وظائف نافذة "أدوات" ====
 $("openToolsModal").onclick = () => { openModal("toolsModal"); };
-
-// ==== الإصلاح الجديد: تفعيل أزرار النسخ الاحتياطي وحالة المزامنة ====
 $("openBackup").onclick = () => { closeModal("toolsModal"); openModal("backupModal"); };
 $("openSync").onclick = () => { closeModal("toolsModal"); openModal("syncModal"); };
 
@@ -485,11 +579,11 @@ $("exportCsvBtn").onclick = () => {
 
 $("undoDeleteBtn").onclick = async () => {
   if(!lastDeletedData || lastDeletedData.length === 0) { closeModal('toolsModal'); return showToast("لا يوجد أي حذف أخير لاسترجاعه", "warn"); }
+  logAction("تراجع عن الحذف", `استرجاع ${lastDeletedData.length} اشتراك/اشتراكات`); // تتبع
   data = [...lastDeletedData, ...data]; lastDeletedData = null; 
   await firebasePush(); render(); closeModal('toolsModal'); showToast("تم استرجاع البيانات المحذوفة ↩️");
 };
 
-// ==== تحديث نظام المجاميع لحساب العملات ====
 $("openTotals").onclick = () => { 
   const alertEl = $("alertDays"); 
   const alertD = (alertEl && alertEl.value) ? parseInt(alertEl.value) : 7;
@@ -520,7 +614,7 @@ $("importFileBtn").onclick = () => $("fileInput").click();
 $("fileInput").onchange = (e) => { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = async (event) => { try { const imported = JSON.parse(event.target.result); if(Array.isArray(imported)) { data = imported; await firebasePush(); render(); closeModal("backupModal"); closeModal("toolsModal"); showToast("تم الاستيراد ✅"); } } catch(err) { showToast("ملف غير صالح", "err"); } }; reader.readAsText(file); };
 $("confirmPasteBtn").onclick = async () => { try { const imported = JSON.parse($("pasteArea").value); if(Array.isArray(imported)) { data = imported; await firebasePush(); render(); closeModal("pasteModal"); closeModal("backupModal"); closeModal("toolsModal"); $("pasteArea").value=""; showToast("تم الاستيراد ✅"); } } catch(e) { showToast("كود غير صالح", "err"); } };
 $("printBtn").onclick = () => { closeModal("toolsModal"); window.print(); };
-$("clearBtn").onclick = async () => { if(confirm("⚠️ تحذير خطير: سيتم مسح كل البيانات!")) { lastDeletedData = [...data]; data = []; await firebasePush(); render(); closeModal("toolsModal"); showToast("تم مسح البيانات 🗑️ (يمكنك التراجع من الأدوات)"); } };
+$("clearBtn").onclick = async () => { if(confirm("⚠️ تحذير خطير: سيتم مسح كل البيانات!")) { logAction("تصفير اللوحة", "حذف كافة البيانات ⚠️"); lastDeletedData = [...data]; data = []; await firebasePush(); render(); closeModal("toolsModal"); showToast("تم مسح البيانات 🗑️ (يمكنك التراجع من الأدوات)"); } };
 $("shareBtn").onclick = () => { closeModal("toolsModal"); if (navigator.share) { navigator.share({ title: 'لوحة الاشتراكات', url: window.location.href }); } else { showToast("المشاركة غير مدعومة", "warn"); } };
 
 $("authLogin").onclick = () => { auth.signInWithEmailAndPassword($("authEmail").value, $("authPass").value).catch(e => showToast("بيانات الدخول خاطئة", "err")); };
