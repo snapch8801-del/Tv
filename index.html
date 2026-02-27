@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>لوحة تسيير الاشتراكات - النسخة 2.5 (إدارة المدراء)</title>
+<title>لوحة تسيير الاشتراكات - النسخة الشاملة (المدمجة)</title>
 
 <style>
 :root{
@@ -19,6 +19,7 @@ body{
   padding: 18px;
 }
 .container{max-width:1200px;margin:0 auto}
+
 .header{margin-bottom:14px}
 .header h1{margin:0;font-size:20px}
 .header .sub{margin-top:6px;font-size:13px;color:var(--muted);line-height:1.7}
@@ -30,7 +31,7 @@ body{
 .btn:hover{ background: rgba(255,255,255,.06); }
 .btn:active{ transform: scale(.98); }
 .btn.primary{ border-color: rgba(124,92,255,.55); background: linear-gradient(135deg, rgba(124,92,255,.55), rgba(124,92,255,.15)); }
-.btn.danger{ border-color: rgba(239,68,68,.55); background: rgba(239,68,68,.12); color: #f87171; }
+.btn.danger{ border-color: rgba(239,68,68,.55); background: linear-gradient(135deg, rgba(239,68,68,.35), rgba(239,68,68,.12)); }
 .btn.soft{ border-color: rgba(255,255,255,.14); background: rgba(255,255,255,.04); }
 
 .searchWrap{flex:1;min-width:240px}
@@ -41,47 +42,57 @@ body{
 .filterBtn{ padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: rgba(0,0,0,.18); color: var(--muted); font-size: 13px; font-weight: 800; cursor: pointer; }
 .filterBtn.active{ background: var(--text); color: var(--bg0); border-color: var(--text); }
 
+/* شريط الإجراءات الجماعية */
 .bulkBar{ display: none; align-items: center; gap: 10px; padding: 12px 14px; background: rgba(124,92,255,.15); border-bottom: 1px solid rgba(124,92,255,.3); }
 .bulkBar .selCount{ font-weight: 900; color: #fff; background: var(--accent); padding: 4px 10px; border-radius: 99px; font-size: 12px; }
 
-#statsBar{ margin-inline-start:auto; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
+.pills{margin-inline-start:auto;display:flex;gap:8px;flex-wrap:wrap; align-items:center;}
 .statChip{ display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:999px; border:1px solid var(--line); background: rgba(0,0,0,.18); font-size:12px; font-weight:900; color: var(--text); }
 .statChip.sync{ border-color: rgba(124,92,255,.45); background: rgba(124,92,255,.10); }
 
+/* مربعات التحديد */
 input[type="checkbox"] { appearance: none; width: 18px; height: 18px; border: 2px solid var(--muted); border-radius: 4px; background: rgba(0,0,0,.2); cursor: pointer; position: relative; display: inline-block; vertical-align: middle; }
 input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
 input[type="checkbox"]:checked::after { content: "✔"; position: absolute; color: white; font-size: 12px; left: 3px; top: -1px; font-weight: bold; }
 
 .tableWrap{ overflow:auto; }
-table{ width:100%; border-collapse:separate; border-spacing:0; min-width: 980px; }
-thead th{ position:sticky; top:0; z-index:5; background: rgba(0,0,0,.22); color: var(--muted); text-align:right; font-size:12px; font-weight:900; padding:12px; border-bottom:1px solid var(--line); }
-tbody td{ padding:12px; border-bottom:1px solid rgba(255,255,255,.07); white-space:nowrap; }
+table{ width:100%; border-collapse:separate; border-spacing:0; min-width: 1050px; }
+thead th{ position:sticky; top:0; z-index:5; background: rgba(0,0,0,.22); color: var(--muted); text-align:right; font-size:12px; font-weight:900; padding:12px 12px; border-bottom:1px solid var(--line); }
+tbody td{ padding:12px 12px; border-bottom:1px solid rgba(255,255,255,.07); white-space:nowrap; vertical-align:middle; }
 
 tr.expired-row{ background: rgba(239,68,68,.10); }
 tr.expiring-row{ background: rgba(245,158,11,.08); }
+tr.expired-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(239,68,68,.85); }
+tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85); }
 
 .badge{ display:inline-flex; align-items:center; padding:6px 10px; border-radius:999px; border:1px solid var(--line); font-size:12px; font-weight:900; }
 .badge.ok{ border-color: rgba(34,197,94,.45); color:#c8f7d9; }
 .badge.warn{ border-color: rgba(245,158,11,.45); color:#ffe2b3; }
 .badge.err{ border-color: rgba(239,68,68,.45); color:#ffd0d0; }
 
-.modal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,.75); z-index:9999; padding: 18px; }
+.modal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,.62); z-index:9999; padding: 18px; }
 .modal[aria-hidden="false"]{ display:flex; }
-.modal .box{ width:min(860px, 100%); background: #0f1423; border: 1px solid rgba(255,255,255,.10); border-radius: 22px; box-shadow: 0 30px 90px rgba(0,0,0,.65); overflow:hidden; }
-.modalHeader{ padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.10); display:flex; align-items:center; justify-content:space-between; }
+.modal .box{ width:min(860px, 100%); background: rgba(10,14,26,.96); border: 1px solid rgba(255,255,255,.10); border-radius: 22px; box-shadow: 0 30px 90px rgba(0,0,0,.65); overflow:hidden; }
+.modalHeader{ padding:14px 16px; border-bottom:1px solid rgba(255,255,255,.10); display:flex; align-items:center; justify-content:space-between; gap:10px; }
+.modalHeader h2{margin:0;font-size:16px}
+.modalHeader .hint{color:var(--muted);font-size:12px}
 .modalBody{ padding: 14px 16px; }
-.modalFooter{ padding:12px 16px; border-top:1px solid rgba(255,255,255,.10); display:flex; gap:10px; flex-wrap:wrap; }
+.modalFooter{ padding:12px 16px; border-top:1px solid rgba(255,255,255,.10); display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-start; }
 
-.formGrid{ display:grid; grid-template-columns: 1fr 1fr; gap:10px; }
+.formGrid{ display:grid; grid-template-columns: 1.2fr 1.2fr 1.2fr .9fr .9fr .9fr .9fr .9fr; gap:10px; }
+@media (max-width: 980px){ .formGrid{ grid-template-columns: 1fr 1fr; } }
 .field label{ display:block; font-weight:900; font-size:12px; color: var(--muted); margin-bottom:6px; }
-.field input, .field select{ width:100%; padding:10px 12px; border-radius:14px; border:1px solid rgba(255,255,255,.10); background: rgba(0,0,0,.3); color: var(--text); outline:none; }
 
-.actionPill{ padding:8px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: var(--text); font-weight: 900; cursor:pointer; font-size:12px; }
-.actGrid{ display:grid; grid-template-columns: 1fr 1fr; gap:12px; }
-.actBtn{ border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: var(--text); padding: 14px; border-radius: 16px; font-weight: 900; cursor:pointer; }
+.actionPill{ padding:10px 12px; border-radius:16px; border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: var(--text); font-weight: 900; cursor:pointer; }
+.actGrid{ display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; }
+@media (max-width: 640px){ .actGrid{ grid-template-columns: 1fr; } }
+.actBtn{ border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: var(--text); padding: 14px; border-radius: 18px; font-weight: 900; cursor:pointer; }
+.actBtn.danger{ border-color: rgba(239,68,68,.45); background: rgba(239,68,68,.20); }
 
 .toast{ position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%) translateY(20px); padding: 12px 14px; border-radius: 16px; background: rgba(10,14,26,.92); border: 1px solid rgba(255,255,255,.12); color: var(--text); display: flex; align-items: center; gap: 10px; opacity: 0; pointer-events: none; transition: all .2s ease; z-index: 10000; }
-.toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); }
+.toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto;}
+
+@media print{ .filtersBar, .topbar, .btn, .toast, .modal, .bulkBar{ display:none !important; } }
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -93,24 +104,28 @@ tr.expiring-row{ background: rgba(245,158,11,.08); }
 <div class="container">
   <div class="header">
     <h1>🧾 لوحة تسيير الاشتراكات</h1>
-    <div class="sub">⚡ النسخة 2.5: إدارة متقدمة وإضافة المدراء من اللوحة</div>
+    <div class="sub">⚡ النسخة الشاملة والمدمجة (الأصل + الإضافات)</div>
   </div>
 
   <div class="card">
     <div class="topbar">
-      <button class="btn primary" id="openAdd">➕ إضافة عميل</button>
-      
-      <button class="btn soft" id="openAddAdminBtn" style="border-color:var(--accent); color:var(--accent);">👥 إضافة أدمن</button>
-      
-      <button class="btn soft" id="openAuth">👤 حساب</button>
+      <button class="btn primary" id="openAdd" type="button">➕ إضافة</button>
+      <button class="btn soft" id="openBackup" type="button">📦 النسخ الاحتياطي</button>
+      <button class="btn soft" id="openSync" type="button">☁️ المزامنة</button>
+      <button class="btn soft" id="openTotals" type="button">💰 المجموع</button>
+      <button class="btn soft" id="openAuth" type="button">👤 الحساب والإدارة</button>
 
       <div class="searchWrap">
         <input id="search" placeholder="بحث بالاسم أو الإيميل أو الرقم..." />
       </div>
 
+      <button class="btn soft" id="shareBtn" type="button">📤 مشاركة</button>
+      <button class="btn soft" id="printBtn" type="button">🖨️ طباعة</button>
+      <button class="btn danger" id="clearBtn" type="button">حذف الكل</button>
+
       <div class="pills" id="statsBar">
         <div class="statChip sync" id="syncChip">
-          <span class="ico">☁️</span><span class="v" id="syncVal">—</span>
+          <span class="ico">☁️</span> <span class="k">مزامنة:</span> <span class="v" id="syncVal">—</span>
         </div>
       </div>
     </div>
@@ -134,7 +149,8 @@ tr.expiring-row{ background: rgba(245,158,11,.08); }
         <thead>
           <tr>
             <th style="width: 40px; text-align: center;"><input type="checkbox" id="selectAll"></th>
-            <th>الاسم</th><th>الإيميل</th><th>الهاتف</th><th>المبلغ</th><th>الانتهاء</th><th>المتبقي</th><th>الحالة</th><th>إجراء</th>
+            <th>الاسم</th> <th>الإيميل</th> <th>الهاتف</th> <th>المدة</th> <th>السعر</th>
+            <th>البداية</th> <th>الانتهاء</th> <th>المتبقي</th> <th>الحالة</th> <th>إجراء</th>
           </tr>
         </thead>
         <tbody id="tbody"></tbody>
@@ -143,21 +159,37 @@ tr.expiring-row{ background: rgba(245,158,11,.08); }
   </div>
 </div>
 
-<div class="modal" id="addAdminModal" aria-hidden="true">
-  <div class="box" style="width: 380px">
-    <div class="modalHeader"><h2 id="extendTitle">👥 إضافة مدير جديد</h2><button class="btn" onclick="closeModal('addAdminModal')">✕</button></div>
+<div class="modal" id="formModal" aria-hidden="true">
+  <div class="box" role="dialog" aria-modal="true">
+    <div class="modalHeader"><div><h2 id="formTitle">إضافة اشتراك</h2><div class="hint">املأ البيانات ثم اضغط حفظ</div></div><button class="btn" id="closeForm" type="button">✕ إغلاق</button></div>
     <div class="modalBody">
-      <p style="font-size:12px; color:var(--warn); margin-top:0;">سيتمكن هذا المدير من قراءة وتعديل قاعدة البيانات بالكامل.</p>
-      <div class="field" style="margin-bottom:15px">
-        <label>البريد الإلكتروني الجديد</label>
-        <input id="newAdminEmail" type="email" placeholder="admin@example.com" style="background:#000;">
+      <div class="formGrid">
+        <div class="field"><label>الاسم</label><input id="name" placeholder="مثال: Ahmed"></div>
+        <div class="field"><label>الإيميل</label><input id="email" placeholder="name@example.com" inputmode="email"></div>
+        <div class="field">
+          <label>الهاتف (مع الرمز)</label>
+          <div style="display: flex; gap: 5px;">
+            <select id="countryCode" style="width: 90px; direction: ltr;">
+              <option value="+213">🇩🇿 +213</option><option value="+212">🇲🇦 +212</option><option value="+216">🇹🇳 +216</option><option value="">بدون رمز</option>
+            </select>
+            <input id="phone" type="tel" dir="ltr" placeholder="555000000" style="flex:1;">
+          </div>
+        </div>
+        <div class="field">
+          <label>اختيار سريع</label>
+          <select id="quickPlan"><option value="">— اختر —</option><option value="1">1 شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="12">12 شهر</option></select>
+        </div>
+        <div class="field"><label>عدد الأشهر</label><input id="months" type="number" min="1" step="1"></div>
+        <div class="field"><label>السعر</label><input id="price" type="number" min="0" step="0.01"></div>
+        <div class="field">
+          <label>العملة</label>
+          <select id="currency"><option value="DZD">DZD</option><option value="EUR">EUR</option><option value="USD">USD</option><option value="MAD">MAD</option><option value="TND">TND</option></select>
+        </div>
+        <div class="field"><label>تاريخ البداية</label><input id="start" type="date"></div>
+        <div class="field"><label>تنبيه قبل (أيام)</label><input id="alertDays" type="number" min="1" step="1" value="7"></div>
       </div>
-      <div class="field" style="margin-bottom:20px">
-        <label>كلمة المرور</label>
-        <input id="newAdminPass" type="password" placeholder="يجب أن تتكون من 6 أحرف على الأقل" style="background:#000;">
-      </div>
-      <button class="btn primary" id="confirmAddAdminBtn" style="width:100%">تأكيد وإعطاء الصلاحية</button>
     </div>
+    <div class="modalFooter"><button class="btn primary" id="saveBtn" type="button">💾 حفظ</button><button class="btn" id="cancelBtn" type="button">إلغاء</button></div>
   </div>
 </div>
 
@@ -165,299 +197,238 @@ tr.expiring-row{ background: rgba(245,158,11,.08); }
   <div class="box" style="width: 350px">
     <div class="modalHeader"><h2 id="extendTitle">تجديد الاشتراك</h2><button class="btn" onclick="closeModal('extendModal')">✕</button></div>
     <div class="modalBody">
-      <div class="field" style="margin-bottom:15px">
-        <label>المدة</label>
-        <input id="extendValue" type="number" min="1" value="1" style="background:#000;">
-      </div>
-      <div class="field" style="margin-bottom:20px">
-        <label>الوحدة</label>
-        <select id="extendUnit" style="background:#000;">
-          <option value="months">أشهر</option>
-          <option value="days">أيام</option>
-        </select>
-      </div>
+      <div class="field" style="margin-bottom:15px"><label>المدة</label><input id="extendValue" type="number" min="1" value="1"></div>
+      <div class="field" style="margin-bottom:20px"><label>الوحدة</label><select id="extendUnit"><option value="months">أشهر</option><option value="days">أيام</option></select></div>
       <button class="btn primary" id="confirmExtendBtn" style="width:100%">تأكيد التجديد</button>
     </div>
   </div>
 </div>
 
-<div class="modal" id="formModal" aria-hidden="true">
-  <div class="box" style="max-width: 500px">
-    <div class="modalHeader"><h2 id="formTitle">إضافة اشتراك</h2><button class="btn" onclick="closeModal('formModal')">✕</button></div>
-    <div class="modalBody">
-      <div class="formGrid">
-        <div class="field"><label>الاسم</label><input id="name"></div>
-        <div class="field"><label>الإيميل</label><input id="email"></div>
-        <div class="field" style="grid-column: span 2;">
-          <label>رقم الهاتف</label>
-          <div style="display: flex; gap: 8px;">
-            <select id="countryCode" style="width: 120px; direction: ltr; background: #000;">
-              <option value="+213">🇩🇿 +213</option><option value="+212">🇲🇦 +212</option><option value="+216">🇹🇳 +216</option><option value="+20">🇪🇬 +20</option><option value="+966">🇸🇦 +966</option><option value="+971">🇦🇪 +971</option><option value="">بدون رمز</option>
-            </select>
-            <input id="phone" type="tel" placeholder="مثال: 555000000" style="flex: 1; direction: ltr; text-align: right; background: #000;">
-          </div>
-        </div>
-        <div class="field"><label>السعر بالدينار</label><input id="price" type="number"></div>
-        <div class="field"><label>البداية</label><input id="start" type="date"></div>
-      </div>
-    </div>
-    <div class="modalFooter"><button class="btn primary" id="saveBtn" style="width:100%">💾 حفظ</button></div>
-  </div>
-</div>
-
 <div class="modal" id="rowActionsModal" aria-hidden="true">
-  <div class="box" style="width: 400px">
-    <div class="modalHeader"><h2>إجراءات سريعة</h2><button class="btn" onclick="closeModal('rowActionsModal')">✕</button></div>
+  <div class="box" role="dialog" aria-modal="true" style="width:min(740px, 100%)">
+    <div class="modalHeader"><div><h2>إجراءات</h2><div class="hint" id="rowActionsHint">—</div></div><button class="btn" id="closeRowActionsX" type="button">✕</button></div>
     <div class="modalBody">
       <div class="actGrid">
-        <button class="actBtn" id="actExtend">🔁 تجديد</button>
-        <button class="actBtn" id="actEdit">✏️ تعديل</button>
-        <button class="actBtn" id="actCopyEmail">📋 نسخ Email</button>
-        <button class="actBtn" id="actWhatsApp" style="color:#22c55e">💬 واتساب</button>
-        <button class="actBtn danger" id="actDelete" style="grid-column: span 2;">🗑️ حذف الاشتراك</button>
+        <button class="actBtn" id="actExtend" type="button">🔁 تجديد</button>
+        <button class="actBtn" id="actEdit" type="button">✏️ تعديل</button>
+        <button class="actBtn" id="actCopyEmail" type="button">📋 نسخ Email</button>
+        <button class="actBtn" id="actWhatsApp" type="button" style="border-color: rgba(37,211,102,.5); background: rgba(37,211,102,.15); color: #4ade80;">💬 مراسلة واتساب</button>
+        <button class="actBtn danger" id="actDelete" type="button" style="grid-column: span 2;">🗑️ حذف</button>
       </div>
     </div>
   </div>
 </div>
 
 <div class="modal" id="authModal" aria-hidden="true">
-  <div class="box" style="width: 350px">
-    <div class="modalHeader"><h2>👤 الحساب</h2></div>
-    <div style="padding: 15px">
-      <div class="field" style="margin-bottom:10px"><label>الإيميل</label><input id="authEmail"></div>
-      <div class="field" style="margin-bottom:15px"><label>كلمة المرور</label><input id="authPass" type="password"></div>
-      <button class="btn primary" id="authLogin" style="width:100%">دخول</button>
+  <div class="box" style="width: 450px">
+    <div class="modalHeader"><h2>👤 الحساب والإدارة</h2><button class="btn" id="closeAuthBtn" onclick="closeModal('authModal')" style="display:none">✕</button></div>
+    <div class="modalBody">
+      <div id="authLoginSection">
+        <div class="field" style="margin-bottom:10px"><label>الإيميل</label><input id="authEmail"></div>
+        <div class="field" style="margin-bottom:15px"><label>كلمة المرور</label><input id="authPass" type="password"></div>
+        <button class="btn primary" id="authLogin" style="width:100%">دخول</button>
+      </div>
+      <div id="authLoggedInSection" style="display:none;">
+        <div id="authStateText" style="margin-bottom:20px; font-weight:900; font-size:14px; text-align:center;"></div>
+        <div id="ownerDashboard" style="display:none; padding:15px; background:rgba(124,92,255,0.1); border-radius:16px; border:1px solid rgba(124,92,255,0.3); margin-bottom:20px;">
+          <h3 style="margin-top:0; color:#fff; font-size:14px;">👑 أدوات المالك</h3>
+          <button class="btn primary" onclick="openModal('addAdminModal')" style="width:100%; margin-bottom:10px;">➕ إنشاء حساب مستخدم جديد</button>
+          <button class="btn soft" onclick="loadAdminsList()" style="width:100%;">👥 إدارة الصلاحيات للمستخدمين</button>
+        </div>
+        <button class="btn danger" id="authLogout" style="width:100%">تسجيل خروج</button>
+      </div>
     </div>
   </div>
 </div>
+
+<div class="modal" id="addAdminModal" aria-hidden="true">
+  <div class="box" style="width: 380px">
+    <div class="modalHeader"><h2>➕ إضافة مستخدم جديد</h2><button class="btn" onclick="closeModal('addAdminModal')">✕</button></div>
+    <div class="modalBody">
+      <div class="field" style="margin-bottom:10px"><label>البريد الإلكتروني</label><input id="newAdminEmail" type="email"></div>
+      <div class="field" style="margin-bottom:10px"><label>كلمة المرور (6 أحرف أو أكثر)</label><input id="newAdminPass" type="password"></div>
+      <div class="field" style="margin-bottom:20px"><label>نوع الصلاحية</label><select id="newAdminRole"><option value="admin">أدمن</option><option value="owner">مالك 👑</option></select></div>
+      <button class="btn primary" id="confirmAddAdminBtn" style="width:100%">تأكيد وإنشاء الحساب</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="manageAdminsModal" aria-hidden="true">
+  <div class="box" style="width: 500px">
+    <div class="modalHeader"><h2>👥 قائمة المستخدمين</h2><button class="btn" onclick="closeModal('manageAdminsModal')">✕</button></div>
+    <div class="modalBody" style="max-height:300px; overflow:auto;">
+      <table style="min-width:100%;"><thead><tr><th>الإيميل</th><th>الصلاحية</th><th>إجراء</th></tr></thead><tbody id="adminsTbody"></tbody></table>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="backupModal" aria-hidden="true"><div class="box"><div class="modalHeader"><h2>📦 النسخ الاحتياطي</h2><button class="btn" id="closeBackup" type="button">✕ إغلاق</button></div><div class="modalBody"><div style="display:grid; gap:10px;"><button class="btn soft" id="exportJsonBtn">⬇️ تصدير JSON</button><button class="btn soft" id="importFileBtn">⬆️ استيراد JSON</button><input id="fileInput" type="file" style="display:none"><button class="btn soft" onclick="openModal('pasteModal')">📋 استيراد باللصق</button></div></div></div></div>
+<div class="modal" id="pasteModal" aria-hidden="true"><div class="box"><div class="modalHeader"><h2>📋 استيراد باللصق</h2><button class="btn" onclick="closeModal('pasteModal')">✕</button></div><div class="modalBody"><textarea id="pasteArea" rows="10" style="width:100%;"></textarea></div><div class="modalFooter"><button class="btn primary">استيراد</button></div></div></div>
+<div class="modal" id="syncModal" aria-hidden="true"><div class="box"><div class="modalHeader"><h2>☁️ المزامنة والنسخ الاحتياطي</h2><button class="btn" id="closeSyncX" type="button">✕</button></div><div class="modalBody">ميزة المزامنة تعمل في الخلفية حالياً ✅</div></div></div>
+<div class="modal" id="totalsModal" aria-hidden="true"><div class="box"><div class="modalHeader"><h2>💰 المجموع</h2><button class="btn" id="closeTotalsX" type="button">✕</button></div><div class="modalBody"><div id="totalsBody" style="font-size:20px; text-align:center; font-weight:bold;">سيتم حسابه قريباً</div></div></div></div>
 
 <div id="toast" class="toast"></div>
 
 <script>
 'use strict';
-const FIREBASE_CONFIG = {
-  apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ",
-  authDomain: "dattta-6f497.firebaseapp.com",
-  databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com",
-  projectId: "dattta-6f497",
-  storageBucket: "dattta-6f497.firebasestorage.app",
-  messagingSenderId: "804914291938",
-  appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb"
-};
+const FIREBASE_CONFIG = { apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ", authDomain: "dattta-6f497.firebaseapp.com", databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com", projectId: "dattta-6f497", storageBucket: "dattta-6f497.firebasestorage.app", messagingSenderId: "804914291938", appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb" };
 
 const $ = (id)=>document.getElementById(id);
+const LOCAL_BACKUP_KEY = "subs_local_backup_v5";
 let data = []; let editingId = null; let currentRowId = null; let currentFilter = "all"; 
 let selectedIds = new Set(); let extendMode = "single";
+let currentUser = null; let currentRole = null;
 
 if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
 const auth = firebase.auth(); const db = firebase.database();
 
-auth.onAuthStateChanged(async (u)=>{ if(u){ closeModal("authModal"); await load(); } else { openModal("authModal"); } });
+auth.onAuthStateChanged(async (u)=>{
+  currentUser = u;
+  if(u){
+    try {
+      const roleSnap = await db.ref("admins/" + u.uid).once("value");
+      let roleData = roleSnap.val();
+      if(roleData === true) { roleData = { role: "owner", email: u.email }; await db.ref("admins/" + u.uid).set(roleData); }
+      currentRole = roleData?.role || "admin";
+      $("closeAuthBtn").style.display = "block"; closeModal("authModal"); await load();
+    } catch(e) { showToast("خطأ في قراءة الصلاحيات", "err"); auth.signOut(); }
+  } else {
+    currentRole = null; data = []; render(); 
+    $("closeAuthBtn").style.display = "none"; openModal("authModal");
+  }
+  updateAuthUI();
+});
+
+function updateAuthUI() {
+  if(currentUser) {
+    $("authLoginSection").style.display = "none"; $("authLoggedInSection").style.display = "block";
+    $("authStateText").textContent = `مرحباً ${currentUser.email} (${currentRole === "owner" ? "مالك 👑" : "أدمن 👤"})`;
+    $("ownerDashboard").style.display = currentRole === "owner" ? "block" : "none";
+  } else {
+    $("authLoginSection").style.display = "block"; $("authLoggedInSection").style.display = "none";
+  }
+}
+
+// إنشاء مدراء (المالك)
+$("confirmAddAdminBtn").onclick = async () => {
+  const email = $("newAdminEmail").value.trim(); const pass = $("newAdminPass").value; const role = $("newAdminRole").value;
+  if(!email || pass.length < 6) return showToast("بيانات غير صالحة", "err");
+  try {
+    setSyncState("saving");
+    const secondaryApp = firebase.initializeApp(FIREBASE_CONFIG, "SecondaryApp");
+    const userCredential = await secondaryApp.auth().createUserWithEmailAndPassword(email, pass);
+    await db.ref("admins/" + userCredential.user.uid).set({ role: role, email: email });
+    await secondaryApp.auth().signOut(); await secondaryApp.delete();
+    closeModal("addAdminModal"); $("newAdminEmail").value = ""; $("newAdminPass").value = "";
+    showToast(`✅ تم إنشاء الحساب!`); setSyncState("ok");
+  } catch (error) { showToast("خطأ: " + error.message, "err"); setSyncState("fail"); try { const app = firebase.app("SecondaryApp"); if(app) await app.delete(); } catch(e){} }
+};
+
+// إدارة المدراء (المالك)
+window.loadAdminsList = async () => {
+  openModal("manageAdminsModal");
+  const tb = $("adminsTbody"); tb.innerHTML = "<tr><td colspan='3' style='text-align:center'>جاري التحميل...</td></tr>";
+  const snap = await db.ref("admins").once("value"); const adminsObj = snap.val() || {}; tb.innerHTML = "";
+  for(let uid in adminsObj) {
+    let uData = adminsObj[uid]; let isOwner = uData.role === "owner" || uData === true;
+    let actionBtn = uid === currentUser.uid ? `<span style="color:var(--muted)">حسابك</span>` : `<button class="btn danger" onclick="revokeAdmin('${uid}')">سحب صلاحية</button>`;
+    tb.innerHTML += `<tr><td>${uData.email || "غير محدد"}</td><td>${isOwner?"مالك 👑":"أدمن 👤"}</td><td>${actionBtn}</td></tr>`;
+  }
+};
+window.revokeAdmin = async (uid) => { if(confirm("سحب الصلاحيات؟")) { await db.ref("admins/" + uid).remove(); showToast("تم الحذف"); loadAdminsList(); } };
+
+// دوال مساعدة للتاريخ
+function todayISO(){ const d=new Date(); d.setHours(0,0,0,0); return d.toISOString().slice(0,10); }
+function toDate(iso){ const d=new Date(iso+"T00:00:00"); d.setHours(0,0,0,0); return d; }
+
+function saveLocalBackup(){ localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(data)); }
+function loadLocalBackup(){ try { const j = JSON.parse(localStorage.getItem(LOCAL_BACKUP_KEY)); return Array.isArray(j) ? j : []; } catch { return []; } }
 
 function setSyncState(state){
-  const chip = $("syncChip"); const val = $("syncVal");
-  chip.className = "statChip sync " + state;
-  if(state==="saving") val.textContent = "جاري الحفظ ⏳";
+  const chip = $("syncChip"); const val = $("syncVal"); chip.className = "statChip sync " + state;
+  if(!navigator.onLine) val.textContent = "أوفلاين 📴";
+  else if(state==="saving") val.textContent = "جاري الحفظ...";
   else if(state==="ok") { const d = new Date(); val.textContent = d.getHours()+":"+String(d.getMinutes()).padStart(2,"0") + " ✅"; }
 }
 
 async function load() {
-  try { setSyncState("saving"); const snap = await db.ref("subscriptions").once('value'); data = snap.val() ? Object.values(snap.val()) : []; setSyncState("ok"); render(); } catch(e) { }
+  if(!navigator.onLine) { data = loadLocalBackup(); render(); return; }
+  try { setSyncState("saving"); const snap = await db.ref("subscriptions").once('value'); data = snap.val() ? Object.values(snap.val()) : []; saveLocalBackup(); setSyncState("ok"); render(); } catch(e) {}
 }
-
 async function firebasePush() {
-  try { setSyncState("saving"); await db.ref("subscriptions").set(data); setSyncState("ok"); } catch(e) { showToast("خطأ في المزامنة", "err"); }
+  if(!navigator.onLine) return;
+  try { setSyncState("saving"); await db.ref("subscriptions").set(data); saveLocalBackup(); setSyncState("ok"); } catch(e) { showToast("خطأ", "err"); }
 }
 
-// === منطق إضافة أدمن جديد (Secondary Connection) ===
-$("openAddAdminBtn").onclick = () => { openModal("addAdminModal"); };
-
-$("confirmAddAdminBtn").onclick = async () => {
-  const email = $("newAdminEmail").value.trim();
-  const pass = $("newAdminPass").value;
-  if(!email || pass.length < 6) return showToast("يرجى التأكد من الإيميل وكلمة المرور (6 أحرف على الأقل)", "err");
-
-  try {
-    setSyncState("saving");
-    // إنشاء تطبيق ثانوي لإنشاء الحساب بدون طرد الأدمن الحالي
-    const secondaryApp = firebase.initializeApp(FIREBASE_CONFIG, "SecondaryApp");
-    const userCredential = await secondaryApp.auth().createUserWithEmailAndPassword(email, pass);
-    const newAdminUid = userCredential.user.uid;
-
-    // إعطاء الحساب الجديد صلاحية أدمن في الداتابيز باستخدام التطبيق الرئيسي
-    await db.ref("admins/" + newAdminUid).set(true);
-
-    // إغلاق التطبيق الثانوي
-    await secondaryApp.auth().signOut();
-    await secondaryApp.delete();
-
-    closeModal("addAdminModal");
-    $("newAdminEmail").value = ""; $("newAdminPass").value = "";
-    showToast("✅ تم إنشاء حساب المدير بنجاح وإعطاؤه الصلاحيات!");
-    setSyncState("ok");
-
-  } catch (error) {
-    showToast("حدث خطأ: " + error.message, "err");
-    setSyncState("fail");
-    // تنظيف في حال حدوث خطأ
-    try { const app = firebase.app("SecondaryApp"); if(app) await app.delete(); } catch(e){}
-  }
-};
-
-function updateBulkUI() {
-  const bar = $("bulkBar");
-  if(selectedIds.size > 0) { bar.style.display = "flex"; $("selCount").textContent = `${selectedIds.size} محدد`; } 
-  else { bar.style.display = "none"; $("selectAll").checked = false; }
-}
-
-$("tbody").addEventListener("change", (e) => {
-  if(e.target.classList.contains("rowChk")) {
-    if(e.target.checked) selectedIds.add(e.target.value); else selectedIds.delete(e.target.value);
-    updateBulkUI();
-  }
-});
-
-$("selectAll").addEventListener("change", (e) => {
-  const isChecked = e.target.checked;
-  document.querySelectorAll(".rowChk").forEach(chk => { chk.checked = isChecked; if(isChecked) selectedIds.add(chk.value); else selectedIds.delete(chk.value); });
-  updateBulkUI();
-});
-
+// الإجراءات الجماعية
+function updateBulkUI() { const bar = $("bulkBar"); if(selectedIds.size > 0) { bar.style.display = "flex"; $("selCount").textContent = `${selectedIds.size} محدد`; } else { bar.style.display = "none"; $("selectAll").checked = false; } }
+$("tbody").addEventListener("change", (e) => { if(e.target.classList.contains("rowChk")) { if(e.target.checked) selectedIds.add(e.target.value); else selectedIds.delete(e.target.value); updateBulkUI(); } });
+$("selectAll").addEventListener("change", (e) => { const isChkd = e.target.checked; document.querySelectorAll(".rowChk").forEach(chk => { chk.checked = isChkd; if(isChkd) selectedIds.add(chk.value); else selectedIds.delete(chk.value); }); updateBulkUI(); });
 $("clearSelection").onclick = () => { selectedIds.clear(); render(); updateBulkUI(); };
+$("bulkDelete").onclick = async () => { if(!confirm(`تأكيد حذف ${selectedIds.size} اشتراكات؟`)) return; data = data.filter(x => !selectedIds.has(x.id)); selectedIds.clear(); await firebasePush(); render(); updateBulkUI(); showToast("تم الحذف"); };
+$("bulkExtend").onclick = () => { extendMode = "bulk"; $("extendTitle").textContent = `تجديد ${selectedIds.size} مشترك`; $("extendValue").value = 1; $("extendUnit").value = "months"; openModal("extendModal"); };
 
-$("bulkDelete").onclick = async () => {
-  if(!confirm(`هل أنت متأكد من حذف ${selectedIds.size} اشتراكات نهائياً؟`)) return;
-  data = data.filter(x => !selectedIds.has(x.id));
-  selectedIds.clear(); await firebasePush(); render(); updateBulkUI(); showToast("تم الحذف الجماعي 🗑️");
-};
-
-$("bulkExtend").onclick = () => {
-  extendMode = "bulk"; $("extendTitle").textContent = `تجديد لـ ${selectedIds.size} مشترك`;
-  $("extendValue").value = 1; $("extendUnit").value = "months"; openModal("extendModal");
-};
-
-function getStatus(endISO) {
-  const left = Math.round((new Date(endISO) - new Date().setHours(0,0,0,0))/(1000*60*60*24));
+function getStatus(endISO, alertDays) {
+  const left = Math.round((toDate(endISO) - toDate(todayISO()))/(1000*60*60*24));
   if(left < 0) return {key:"expired", label:"منتهي", cls:"err", left};
-  if(left <= 7) return {key:"expiring", label:"قريب ينتهي", cls:"warn", left};
+  if(left <= alertDays) return {key:"expiring", label:"قريب ينتهي", cls:"warn", left};
   return {key:"active", label:"فعّال", cls:"ok", left};
 }
 
 function render(){
-  const q = ($("search").value||"").trim().toLowerCase();
-  const tb = $("tbody"); tb.innerHTML="";
-  if($("selectAll")) $("selectAll").checked = false;
-
-  const rows = data.filter(r=>{
-    const match = !q || r.name.toLowerCase().includes(q) || (r.phone||"").includes(q);
-    const st = getStatus(r.end);
-    if(currentFilter !== "all" && currentFilter !== st.key) return false;
-    return match;
-  });
-
+  const q = ($("search").value||"").trim().toLowerCase(); const tb = $("tbody"); tb.innerHTML=""; if($("selectAll")) $("selectAll").checked = false;
+  const alertD = parseInt($("alertDays")?.value || 7);
+  const rows = data.filter(r=>{ const match = !q || r.name.toLowerCase().includes(q) || (r.phone||"").includes(q) || (r.email||"").toLowerCase().includes(q); const st = getStatus(r.end, alertD); if(currentFilter !== "all" && currentFilter !== st.key) return false; return match; });
+  
   rows.forEach(r=>{
-    const st = getStatus(r.end);
-    const isChecked = selectedIds.has(r.id) ? "checked" : "";
-    const tr = document.createElement("tr");
-    
-    if(st.key === "expired") tr.className = "expired-row";
-    else if(st.key === "expiring") tr.className = "expiring-row";
-    
-    const displayPhone = r.phone ? `${r.countryCode || ''} ${r.phone}`.trim() : '-';
-    
-    tr.innerHTML = `
-      <td style="text-align: center;"><input type="checkbox" class="rowChk" value="${r.id}" ${isChecked}></td>
-      <td>${r.name}</td><td>${r.email||'-'}</td><td dir="ltr">${displayPhone}</td>
-      <td>${r.price} DZD</td><td>${r.end}</td>
-      <td>${st.left < 0 ? 'منذ ' + Math.abs(st.left) : st.left} يوم</td>
-      <td><span class="badge ${st.cls}">${st.label}</span></td>
-      <td><button class="actionPill" onclick="openRowActions('${r.id}')">⚡ إجراء</button></td>
-    `;
+    const st = getStatus(r.end, alertD); const isChecked = selectedIds.has(r.id) ? "checked" : ""; const tr = document.createElement("tr");
+    if(st.key === "expired") tr.className = "expired-row"; else if(st.key === "expiring") tr.className = "expiring-row";
+    tr.innerHTML = `<td style="text-align: center;"><input type="checkbox" class="rowChk" value="${r.id}" ${isChecked}></td><td>${r.name}</td><td>${r.email||'-'}</td><td dir="ltr">${r.phone?`${r.countryCode||''} ${r.phone}`:'-'}</td><td>${r.months} ش</td><td>${r.price||0} ${r.currency||'DZD'}</td><td>${r.start}</td><td>${r.end}</td><td>${st.left < 0 ? 'منذ ' + Math.abs(st.left) : st.left} يوم</td><td><span class="badge ${st.cls}">${st.label}</span></td><td><button class="actionPill" onclick="openRowActions('${r.id}')">⚡ إجراء</button></td>`;
     tb.appendChild(tr);
   });
 }
 
-window.openRowActions = (id) => { currentRowId = id; openModal("rowActionsModal"); };
-
-$("actEdit").onclick = () => {
-  const rec = data.find(x => x.id === currentRowId);
-  if(!rec) return;
-  closeModal("rowActionsModal"); editingId = rec.id; $("formTitle").textContent = "تعديل اشتراك";
-  $("name").value = rec.name || ""; $("email").value = rec.email || ""; 
-  $("phone").value = rec.phone || ""; $("countryCode").value = rec.countryCode || "+213";
-  $("price").value = rec.price || ""; $("start").value = rec.start;
-  openModal("formModal");
-};
-
+// الإجراءات الفردية وحفظ البيانات
+window.openRowActions = (id) => { currentRowId = id; const rec = data.find(x => x.id === id); $("rowActionsHint").textContent = rec.name; openModal("rowActionsModal"); };
+$("actEdit").onclick = () => { const rec = data.find(x => x.id === currentRowId); if(!rec) return; closeModal("rowActionsModal"); editingId = rec.id; $("formTitle").textContent = "تعديل اشتراك"; $("name").value = rec.name||""; $("email").value = rec.email||""; $("phone").value = rec.phone||""; $("countryCode").value = rec.countryCode||"+213"; $("months").value = rec.months||""; $("price").value = rec.price||""; $("currency").value = rec.currency||"DZD"; $("start").value = rec.start; openModal("formModal"); };
 $("actDelete").onclick = async () => { if(confirm("حذف؟")) { data = data.filter(x => x.id !== currentRowId); await firebasePush(); render(); closeModal("rowActionsModal"); } };
-
-$("actExtend").onclick = () => {
-  extendMode = "single"; const rec = data.find(x => x.id === currentRowId);
-  $("extendTitle").textContent = `تجديد لـ ${rec.name}`; $("extendValue").value = 1; $("extendUnit").value = "months";
-  closeModal("rowActionsModal"); openModal("extendModal");
-};
-
-$("actCopyEmail").onclick = () => {
-  const rec = data.find(x => x.id === currentRowId);
-  if(!rec || !rec.email) {
-    closeModal("rowActionsModal");
-    return showToast("لا يوجد بريد إلكتروني مسجل لهذا العميل.", "err");
-  }
-  navigator.clipboard.writeText(rec.email);
-  closeModal("rowActionsModal"); showToast("تم نسخ الإيميل 📋");
-};
-
-$("actWhatsApp").onclick = () => {
-  const rec = data.find(x => x.id === currentRowId);
-  if(!rec || !rec.phone) { closeModal("rowActionsModal"); return showToast("لا يوجد رقم لهذا العميل، يرجى إضافته أولاً.", "err"); }
-  let fullPhone = (rec.countryCode || '') + rec.phone;
-  let cleanPhone = fullPhone.replace(/[^0-9+]/g, '');
-  let message = `مرحباً ${rec.name}،\nنود تذكيرك بأن اشتراكك سينتهي بتاريخ ${rec.end}.\nيرجى التجديد لضمان استمرار الخدمة.`;
-  window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
-  closeModal("rowActionsModal");
-};
+$("actExtend").onclick = () => { extendMode = "single"; const rec = data.find(x => x.id === currentRowId); $("extendTitle").textContent = `تجديد لـ ${rec.name}`; $("extendValue").value = 1; $("extendUnit").value = "months"; closeModal("rowActionsModal"); openModal("extendModal"); };
+$("actCopyEmail").onclick = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.email) { closeModal("rowActionsModal"); return showToast("لا يوجد بريد مسجل.", "err"); } navigator.clipboard.writeText(rec.email); closeModal("rowActionsModal"); showToast("تم نسخ الإيميل 📋"); };
+$("actWhatsApp").onclick = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.phone) { closeModal("rowActionsModal"); return showToast("لا يوجد رقم هاتف.", "err"); } let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, ''); window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`مرحباً ${rec.name}، نود تذكيرك بانتهاء اشتراكك بتاريخ ${rec.end}.`)}`, '_blank'); closeModal("rowActionsModal"); };
 
 $("confirmExtendBtn").onclick = async () => {
-  const val = parseInt($("extendValue").value); const unit = $("extendUnit").value;
-  if(isNaN(val) || val < 1) return showToast("قيمة التجديد غير صالحة", "err");
-
-  const processRecord = (rec) => {
-    const endD = new Date(rec.end);
-    if(unit === "months") { endD.setMonth(endD.getMonth() + val); } else { endD.setDate(endD.getDate() + val); }
-    rec.end = endD.toISOString().split('T')[0]; return rec;
-  };
-
-  if(extendMode === "bulk") { data = data.map(x => selectedIds.has(x.id) ? processRecord(x) : x); selectedIds.clear(); updateBulkUI(); } 
-  else { data = data.map(x => x.id === currentRowId ? processRecord(x) : x); }
-
-  await firebasePush(); render(); closeModal("extendModal"); showToast("تم التجديد بنجاح 🔁");
+  const val = parseInt($("extendValue").value); const unit = $("extendUnit").value; if(isNaN(val) || val < 1) return showToast("غير صالح", "err");
+  const processRecord = (rec) => { const endD = new Date(rec.end); if(unit === "months") { endD.setMonth(endD.getMonth() + val); rec.months = (parseInt(rec.months)||0) + val; } else { endD.setDate(endD.getDate() + val); } rec.end = endD.toISOString().split('T')[0]; return rec; };
+  if(extendMode === "bulk") { data = data.map(x => selectedIds.has(x.id) ? processRecord(x) : x); selectedIds.clear(); updateBulkUI(); } else { data = data.map(x => x.id === currentRowId ? processRecord(x) : x); }
+  await firebasePush(); render(); closeModal("extendModal"); showToast("تم التجديد 🔁");
 };
 
+$("quickPlan").onchange = ()=>{ if($("quickPlan").value) $("months").value = $("quickPlan").value; };
 $("saveBtn").onclick = async () => {
-  const start = $("start").value; 
-  if(!$("name").value || !start) return showToast("بيانات ناقصة", "err");
-  const endD = new Date(start); endD.setMonth(endD.getMonth() + 1);
-  const rec = { 
-    id: editingId || Date.now().toString(), 
-    name: $("name").value, email: $("email").value, 
-    phone: $("phone").value, countryCode: $("countryCode").value,
-    price: $("price").value, start, end: editingId ? data.find(x=>x.id===editingId).end : endD.toISOString().split('T')[0] 
-  };
+  const start = $("start").value; const months = parseInt($("months").value); if(!$("name").value || !start || isNaN(months)) return showToast("بيانات ناقصة", "err");
+  const endD = new Date(start); endD.setMonth(endD.getMonth() + months);
+  const rec = { id: editingId || Date.now().toString(), name: $("name").value, email: $("email").value, phone: $("phone").value, countryCode: $("countryCode").value, months, price: $("price").value, currency: $("currency").value, start, end: endD.toISOString().split('T')[0] };
   if(editingId) data = data.map(x => x.id === editingId ? rec : x); else data.unshift(rec);
   await firebasePush(); render(); closeModal("formModal"); showToast("تم الحفظ ✨");
 };
 
-$("authLogin").onclick = () => { auth.signInWithEmailAndPassword($("authEmail").value, $("authPass").value).catch(e => showToast(e.message, "err")); };
-$("openAdd").onclick = () => { editingId=null; $("formTitle").textContent="إضافة اشتراك"; $("name").value=""; $("email").value=""; $("phone").value=""; $("countryCode").value="+213"; $("start").value=new Date().toISOString().split('T')[0]; openModal("formModal"); };
+// النوافذ والأزرار القديمة المسترجعة
+$("openBackup").onclick = ()=> openModal("backupModal"); $("closeBackup").onclick = ()=> closeModal("backupModal");
+$("openSync").onclick = ()=> openModal("syncModal"); $("closeSyncX").onclick = ()=> closeModal("syncModal");
+$("openTotals").onclick = ()=> openModal("totalsModal"); $("closeTotalsX").onclick = ()=> closeModal("totalsModal");
+$("closeForm").onclick = ()=> closeModal("formModal"); $("cancelBtn").onclick = ()=> closeModal("formModal");
+$("closeRowActionsX").onclick = ()=> closeModal("rowActionsModal");
+
+$("authLogin").onclick = () => { auth.signInWithEmailAndPassword($("authEmail").value, $("authPass").value).catch(e => showToast("خطأ: " + e.message, "err")); };
+$("authLogout").onclick = () => auth.signOut();
+$("openAdd").onclick = () => { editingId=null; $("formTitle").textContent="إضافة اشتراك"; $("name").value=""; $("email").value=""; $("phone").value=""; $("countryCode").value="+213"; $("quickPlan").value=""; $("months").value=""; $("price").value=""; $("start").value=todayISO(); openModal("formModal"); };
+$("openAuth").onclick = () => openModal("authModal");
 $("search").oninput = render;
 
 function openModal(id){ $(id).setAttribute("aria-hidden","false"); }
 function closeModal(id){ $(id).setAttribute("aria-hidden","true"); }
 function showToast(m, type="ok"){ const t=$("toast"); t.textContent=m; t.style.borderColor = type==="err"?"#ef4444":"#22c55e"; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"), 3000); }
-
-document.querySelectorAll(".filterBtn").forEach(b => {
-  b.onclick = (e) => { document.querySelectorAll(".filterBtn").forEach(x=>x.classList.remove("active")); e.target.classList.add("active"); currentFilter = e.target.dataset.filter; render(); };
-});
+document.querySelectorAll(".filterBtn").forEach(b => { b.onclick = (e) => { document.querySelectorAll(".filterBtn").forEach(x=>x.classList.remove("active")); e.target.classList.add("active"); currentFilter = e.target.dataset.filter; render(); }; });
 </script>
 </body>
 </html>
