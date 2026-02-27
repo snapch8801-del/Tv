@@ -3,21 +3,13 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>لوحة تسيير الاشتراكات - النسخة 2.4 (المكتملة)</title>
+<title>لوحة تسيير الاشتراكات - النسخة 2.5 (إدارة المدراء)</title>
 
 <style>
 :root{
-  --bg0:#070a12;
-  --bg1:#0b1020;
-  --card: rgba(255,255,255,.06);
-  --line: rgba(255,255,255,.10);
-  --text:#eaf0ff;
-  --muted: rgba(234,240,255,.70);
-  --accent:#7c5cff;
-  --warn:#f59e0b;
-  --err:#ef4444;
-  --radius:18px;
-  --shadow: 0 18px 45px rgba(0,0,0,.45);
+  --bg0:#070a12; --bg1:#0b1020; --card: rgba(255,255,255,.06); --line: rgba(255,255,255,.10);
+  --text:#eaf0ff; --muted: rgba(234,240,255,.70); --accent:#7c5cff; --warn:#f59e0b;
+  --err:#ef4444; --radius:18px; --shadow: 0 18px 45px rgba(0,0,0,.45);
 }
 
 *{box-sizing:border-box}
@@ -27,7 +19,6 @@ body{
   padding: 18px;
 }
 .container{max-width:1200px;margin:0 auto}
-
 .header{margin-bottom:14px}
 .header h1{margin:0;font-size:20px}
 .header .sub{margin-top:6px;font-size:13px;color:var(--muted);line-height:1.7}
@@ -50,22 +41,14 @@ body{
 .filterBtn{ padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: rgba(0,0,0,.18); color: var(--muted); font-size: 13px; font-weight: 800; cursor: pointer; }
 .filterBtn.active{ background: var(--text); color: var(--bg0); border-color: var(--text); }
 
-.bulkBar{ 
-  display: none; align-items: center; gap: 10px; padding: 12px 14px; 
-  background: rgba(124,92,255,.15); border-bottom: 1px solid rgba(124,92,255,.3); 
-  animation: slideDown 0.2s ease-out;
-}
-@keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+.bulkBar{ display: none; align-items: center; gap: 10px; padding: 12px 14px; background: rgba(124,92,255,.15); border-bottom: 1px solid rgba(124,92,255,.3); }
 .bulkBar .selCount{ font-weight: 900; color: #fff; background: var(--accent); padding: 4px 10px; border-radius: 99px; font-size: 12px; }
 
 #statsBar{ margin-inline-start:auto; display:flex; gap:8px; flex-wrap:wrap; align-items:center; }
 .statChip{ display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:999px; border:1px solid var(--line); background: rgba(0,0,0,.18); font-size:12px; font-weight:900; color: var(--text); }
 .statChip.sync{ border-color: rgba(124,92,255,.45); background: rgba(124,92,255,.10); }
 
-input[type="checkbox"] {
-  appearance: none; width: 18px; height: 18px; border: 2px solid var(--muted); border-radius: 4px; 
-  background: rgba(0,0,0,.2); cursor: pointer; position: relative; display: inline-block; vertical-align: middle;
-}
+input[type="checkbox"] { appearance: none; width: 18px; height: 18px; border: 2px solid var(--muted); border-radius: 4px; background: rgba(0,0,0,.2); cursor: pointer; position: relative; display: inline-block; vertical-align: middle; }
 input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
 input[type="checkbox"]:checked::after { content: "✔"; position: absolute; color: white; font-size: 12px; left: 3px; top: -1px; font-weight: bold; }
 
@@ -110,12 +93,15 @@ tr.expiring-row{ background: rgba(245,158,11,.08); }
 <div class="container">
   <div class="header">
     <h1>🧾 لوحة تسيير الاشتراكات</h1>
-    <div class="sub">⚡ النسخة 2.4: مكتملة مع كافة الفلاتر والإجراءات الجماعية</div>
+    <div class="sub">⚡ النسخة 2.5: إدارة متقدمة وإضافة المدراء من اللوحة</div>
   </div>
 
   <div class="card">
     <div class="topbar">
-      <button class="btn primary" id="openAdd">➕ إضافة</button>
+      <button class="btn primary" id="openAdd">➕ إضافة عميل</button>
+      
+      <button class="btn soft" id="openAddAdminBtn" style="border-color:var(--accent); color:var(--accent);">👥 إضافة أدمن</button>
+      
       <button class="btn soft" id="openAuth">👤 حساب</button>
 
       <div class="searchWrap">
@@ -157,6 +143,24 @@ tr.expiring-row{ background: rgba(245,158,11,.08); }
   </div>
 </div>
 
+<div class="modal" id="addAdminModal" aria-hidden="true">
+  <div class="box" style="width: 380px">
+    <div class="modalHeader"><h2 id="extendTitle">👥 إضافة مدير جديد</h2><button class="btn" onclick="closeModal('addAdminModal')">✕</button></div>
+    <div class="modalBody">
+      <p style="font-size:12px; color:var(--warn); margin-top:0;">سيتمكن هذا المدير من قراءة وتعديل قاعدة البيانات بالكامل.</p>
+      <div class="field" style="margin-bottom:15px">
+        <label>البريد الإلكتروني الجديد</label>
+        <input id="newAdminEmail" type="email" placeholder="admin@example.com" style="background:#000;">
+      </div>
+      <div class="field" style="margin-bottom:20px">
+        <label>كلمة المرور</label>
+        <input id="newAdminPass" type="password" placeholder="يجب أن تتكون من 6 أحرف على الأقل" style="background:#000;">
+      </div>
+      <button class="btn primary" id="confirmAddAdminBtn" style="width:100%">تأكيد وإعطاء الصلاحية</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal" id="extendModal" aria-hidden="true">
   <div class="box" style="width: 350px">
     <div class="modalHeader"><h2 id="extendTitle">تجديد الاشتراك</h2><button class="btn" onclick="closeModal('extendModal')">✕</button></div>
@@ -184,23 +188,15 @@ tr.expiring-row{ background: rgba(245,158,11,.08); }
       <div class="formGrid">
         <div class="field"><label>الاسم</label><input id="name"></div>
         <div class="field"><label>الإيميل</label><input id="email"></div>
-        
         <div class="field" style="grid-column: span 2;">
           <label>رقم الهاتف</label>
           <div style="display: flex; gap: 8px;">
             <select id="countryCode" style="width: 120px; direction: ltr; background: #000;">
-              <option value="+213">🇩🇿 +213</option>
-              <option value="+212">🇲🇦 +212</option>
-              <option value="+216">🇹🇳 +216</option>
-              <option value="+20">🇪🇬 +20</option>
-              <option value="+966">🇸🇦 +966</option>
-              <option value="+971">🇦🇪 +971</option>
-              <option value="">بدون رمز</option>
+              <option value="+213">🇩🇿 +213</option><option value="+212">🇲🇦 +212</option><option value="+216">🇹🇳 +216</option><option value="+20">🇪🇬 +20</option><option value="+966">🇸🇦 +966</option><option value="+971">🇦🇪 +971</option><option value="">بدون رمز</option>
             </select>
             <input id="phone" type="tel" placeholder="مثال: 555000000" style="flex: 1; direction: ltr; text-align: right; background: #000;">
           </div>
         </div>
-
         <div class="field"><label>السعر بالدينار</label><input id="price" type="number"></div>
         <div class="field"><label>البداية</label><input id="start" type="date"></div>
       </div>
@@ -273,6 +269,41 @@ async function firebasePush() {
   try { setSyncState("saving"); await db.ref("subscriptions").set(data); setSyncState("ok"); } catch(e) { showToast("خطأ في المزامنة", "err"); }
 }
 
+// === منطق إضافة أدمن جديد (Secondary Connection) ===
+$("openAddAdminBtn").onclick = () => { openModal("addAdminModal"); };
+
+$("confirmAddAdminBtn").onclick = async () => {
+  const email = $("newAdminEmail").value.trim();
+  const pass = $("newAdminPass").value;
+  if(!email || pass.length < 6) return showToast("يرجى التأكد من الإيميل وكلمة المرور (6 أحرف على الأقل)", "err");
+
+  try {
+    setSyncState("saving");
+    // إنشاء تطبيق ثانوي لإنشاء الحساب بدون طرد الأدمن الحالي
+    const secondaryApp = firebase.initializeApp(FIREBASE_CONFIG, "SecondaryApp");
+    const userCredential = await secondaryApp.auth().createUserWithEmailAndPassword(email, pass);
+    const newAdminUid = userCredential.user.uid;
+
+    // إعطاء الحساب الجديد صلاحية أدمن في الداتابيز باستخدام التطبيق الرئيسي
+    await db.ref("admins/" + newAdminUid).set(true);
+
+    // إغلاق التطبيق الثانوي
+    await secondaryApp.auth().signOut();
+    await secondaryApp.delete();
+
+    closeModal("addAdminModal");
+    $("newAdminEmail").value = ""; $("newAdminPass").value = "";
+    showToast("✅ تم إنشاء حساب المدير بنجاح وإعطاؤه الصلاحيات!");
+    setSyncState("ok");
+
+  } catch (error) {
+    showToast("حدث خطأ: " + error.message, "err");
+    setSyncState("fail");
+    // تنظيف في حال حدوث خطأ
+    try { const app = firebase.app("SecondaryApp"); if(app) await app.delete(); } catch(e){}
+  }
+};
+
 function updateBulkUI() {
   const bar = $("bulkBar");
   if(selectedIds.size > 0) { bar.style.display = "flex"; $("selCount").textContent = `${selectedIds.size} محدد`; } 
@@ -305,7 +336,6 @@ $("bulkExtend").onclick = () => {
   $("extendValue").value = 1; $("extendUnit").value = "months"; openModal("extendModal");
 };
 
-// الدالة المسؤولة عن تقييم حالة الاشتراك لتسهيل الفلترة
 function getStatus(endISO) {
   const left = Math.round((new Date(endISO) - new Date().setHours(0,0,0,0))/(1000*60*60*24));
   if(left < 0) return {key:"expired", label:"منتهي", cls:"err", left};
@@ -330,7 +360,6 @@ function render(){
     const isChecked = selectedIds.has(r.id) ? "checked" : "";
     const tr = document.createElement("tr");
     
-    // إضافة لون التمييز بناءً على الحالة
     if(st.key === "expired") tr.className = "expired-row";
     else if(st.key === "expiring") tr.className = "expiring-row";
     
@@ -380,12 +409,7 @@ $("actCopyEmail").onclick = () => {
 
 $("actWhatsApp").onclick = () => {
   const rec = data.find(x => x.id === currentRowId);
-  
-  if(!rec || !rec.phone) {
-    closeModal("rowActionsModal");
-    return showToast("لا يوجد رقم لهذا العميل، يرجى إضافته أولاً.", "err");
-  }
-  
+  if(!rec || !rec.phone) { closeModal("rowActionsModal"); return showToast("لا يوجد رقم لهذا العميل، يرجى إضافته أولاً.", "err"); }
   let fullPhone = (rec.countryCode || '') + rec.phone;
   let cleanPhone = fullPhone.replace(/[^0-9+]/g, '');
   let message = `مرحباً ${rec.name}،\nنود تذكيرك بأن اشتراكك سينتهي بتاريخ ${rec.end}.\nيرجى التجديد لضمان استمرار الخدمة.`;
@@ -412,27 +436,19 @@ $("confirmExtendBtn").onclick = async () => {
 $("saveBtn").onclick = async () => {
   const start = $("start").value; 
   if(!$("name").value || !start) return showToast("بيانات ناقصة", "err");
-  
   const endD = new Date(start); endD.setMonth(endD.getMonth() + 1);
-  
   const rec = { 
     id: editingId || Date.now().toString(), 
     name: $("name").value, email: $("email").value, 
     phone: $("phone").value, countryCode: $("countryCode").value,
     price: $("price").value, start, end: editingId ? data.find(x=>x.id===editingId).end : endD.toISOString().split('T')[0] 
   };
-  
   if(editingId) data = data.map(x => x.id === editingId ? rec : x); else data.unshift(rec);
   await firebasePush(); render(); closeModal("formModal"); showToast("تم الحفظ ✨");
 };
 
 $("authLogin").onclick = () => { auth.signInWithEmailAndPassword($("authEmail").value, $("authPass").value).catch(e => showToast(e.message, "err")); };
-$("openAdd").onclick = () => { 
-  editingId=null; $("formTitle").textContent="إضافة اشتراك"; 
-  $("name").value=""; $("email").value=""; $("phone").value=""; $("countryCode").value="+213";
-  $("start").value=new Date().toISOString().split('T')[0]; 
-  openModal("formModal"); 
-};
+$("openAdd").onclick = () => { editingId=null; $("formTitle").textContent="إضافة اشتراك"; $("name").value=""; $("email").value=""; $("phone").value=""; $("countryCode").value="+213"; $("start").value=new Date().toISOString().split('T')[0]; openModal("formModal"); };
 $("search").oninput = render;
 
 function openModal(id){ $(id).setAttribute("aria-hidden","false"); }
