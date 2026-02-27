@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>لوحة تسيير الاشتراكات - النسخة الشاملة 2.9</title>
+<title>لوحة تسيير الاشتراكات - النسخة الشاملة (المصححة والنهائية)</title>
 
 <style>
 :root{
@@ -121,7 +121,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 <div class="container">
   <div class="header">
     <h1>🧾 لوحة تسيير الاشتراكات</h1>
-    <div class="sub">⚡ النسخة 2.9: (تم استرجاع الإكسل والتراجع عن الحذف)</div>
+    <div class="sub">⚡ النسخة الشاملة (جميع الأزرار والميزات مفعلة ومصححة 100%)</div>
   </div>
 
   <div class="card">
@@ -290,7 +290,7 @@ const LOCAL_BACKUP_KEY = "subs_local_backup_v6";
 let data = []; let editingId = null; let currentRowId = null; let currentFilter = "all"; 
 let selectedIds = new Set(); let extendMode = "single";
 let currentUser = null; let currentRole = null;
-let lastDeletedData = null; // متغير لحفظ البيانات المحذوفة مؤقتاً
+let lastDeletedData = null; 
 
 if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
 const auth = firebase.auth(); const db = firebase.database();
@@ -302,7 +302,7 @@ auth.onAuthStateChanged(async (u)=>{
       const roleSnap = await db.ref("admins/" + u.uid).once("value");
       let roleData = roleSnap.val();
       if(roleData === true) { roleData = { role: "owner", email: u.email }; await db.ref("admins/" + u.uid).set(roleData); }
-      currentRole = roleData?.role || "admin";
+      currentRole = (roleData && roleData.role) ? roleData.role : "admin";
       $("closeAuthBtn").style.display = "block"; closeModal("authModal"); await load();
     } catch(e) { showToast("خطأ في قراءة الصلاحيات", "err"); auth.signOut(); }
   } else {
@@ -334,13 +334,32 @@ async function firebasePush() { if(!navigator.onLine) return; try { setSyncState
 function getStatus(endISO, alertDays) { const left = Math.round((toDate(endISO) - toDate(todayISO()))/(1000*60*60*24)); if(left < 0) return {key:"expired", label:"منتهي", cls:"err", left}; if(left <= alertDays) return {key:"expiring", label:"قريب ينتهي", cls:"warn", left}; return {key:"active", label:"فعّال", cls:"ok", left}; }
 
 function render(){
-  const q = ($("search").value||"").trim().toLowerCase(); const tb = $("tbody"); tb.innerHTML=""; if($("selectAll")) $("selectAll").checked = false;
-  const alertD = parseInt($("alertDays")?.value || 7);
-  const rows = data.filter(r=>{ const match = !q || r.name.toLowerCase().includes(q) || (r.phone||"").includes(q) || (r.email||"").toLowerCase().includes(q); const st = getStatus(r.end, alertD); if(currentFilter !== "all" && currentFilter !== st.key) return false; return match; });
-  rows.forEach(r=>{
-    const st = getStatus(r.end, alertD); const isChecked = selectedIds.has(r.id) ? "checked" : ""; const tr = document.createElement("tr");
+  const searchInput = $("search");
+  const q = searchInput ? (searchInput.value || "").trim().toLowerCase() : "";
+  const tb = $("tbody"); 
+  tb.innerHTML = ""; 
+  if($("selectAll")) $("selectAll").checked = false;
+  
+  const alertEl = $("alertDays");
+  const alertD = (alertEl && alertEl.value) ? parseInt(alertEl.value) : 7;
+  
+  const rows = data.filter(r => { 
+    if(!r) return false;
+    const n = (r.name || "").toString().toLowerCase();
+    const p = (r.phone || "").toString().toLowerCase();
+    const e = (r.email || "").toString().toLowerCase();
+    const match = !q || n.includes(q) || p.includes(q) || e.includes(q); 
+    const st = getStatus(r.end, alertD); 
+    if(currentFilter !== "all" && currentFilter !== st.key) return false; 
+    return match; 
+  });
+  
+  rows.forEach(r => {
+    const st = getStatus(r.end, alertD); 
+    const isChecked = selectedIds.has(r.id) ? "checked" : ""; 
+    const tr = document.createElement("tr");
     if(st.key === "expired") tr.className = "expired-row"; else if(st.key === "expiring") tr.className = "expiring-row";
-    tr.innerHTML = `<td style="text-align: center;"><input type="checkbox" class="rowChk" value="${r.id}" ${isChecked}></td><td>${r.name}</td><td>${r.email||'-'}</td><td dir="ltr">${r.phone?`${r.countryCode||''} ${r.phone}`:'-'}</td><td>${r.months} ش</td><td>${r.price||0} ${r.currency||'DZD'}</td><td>${r.start}</td><td>${r.end}</td><td>${st.left < 0 ? 'منذ ' + Math.abs(st.left) : st.left} يوم</td><td><span class="badge ${st.cls}">${st.label}</span></td><td><button class="actionPill" onclick="openRowActions('${r.id}')">⚡ إجراء</button></td>`;
+    tr.innerHTML = `<td style="text-align: center;"><input type="checkbox" class="rowChk" value="${r.id}" ${isChecked}></td><td>${r.name||"-"}</td><td>${r.email||'-'}</td><td dir="ltr">${r.phone?`${r.countryCode||''} ${r.phone}`:'-'}</td><td>${r.months||0} ش</td><td>${r.price||0} ${r.currency||'DZD'}</td><td>${r.start||"-"}</td><td>${r.end||"-"}</td><td>${st.left < 0 ? 'منذ ' + Math.abs(st.left) : st.left} يوم</td><td><span class="badge ${st.cls}">${st.label}</span></td><td><button class="actionPill" onclick="openRowActions('${r.id}')">⚡ إجراء</button></td>`;
     tb.appendChild(tr);
   });
 }
@@ -353,9 +372,9 @@ $("clearSelection").onclick = () => { selectedIds.clear(); render(); updateBulkU
 
 $("bulkDelete").onclick = async () => { 
   if(!confirm(`تأكيد حذف ${selectedIds.size} اشتراكات؟`)) return; 
-  lastDeletedData = data.filter(x => selectedIds.has(x.id)); // حفظ نسخة للاسترجاع
+  lastDeletedData = data.filter(x => selectedIds.has(x.id)); 
   data = data.filter(x => !selectedIds.has(x.id)); 
-  selectedIds.clear(); await firebasePush(); render(); updateBulkUI(); showToast("تم الحذف، يمكنك التراجع من قائمة الأدوات 🗑️"); 
+  selectedIds.clear(); await firebasePush(); render(); updateBulkUI(); showToast("تم الحذف، التراجع ممكن من الأدوات 🗑️"); 
 };
 $("bulkExtend").onclick = () => { extendMode = "bulk"; $("extendTitle").textContent = `تجديد ${selectedIds.size} مشترك`; $("extendValue").value = 1; $("extendUnit").value = "months"; openModal("extendModal"); };
 
@@ -363,9 +382,9 @@ window.openRowActions = (id) => { currentRowId = id; const rec = data.find(x => 
 $("actEdit").onclick = () => { const rec = data.find(x => x.id === currentRowId); if(!rec) return; closeModal("rowActionsModal"); editingId = rec.id; $("formTitle").textContent = "تعديل اشتراك"; $("name").value = rec.name||""; $("email").value = rec.email||""; $("phone").value = rec.phone||""; $("countryCode").value = rec.countryCode||"+213"; $("months").value = rec.months||""; $("price").value = rec.price||""; $("currency").value = rec.currency||"DZD"; $("start").value = rec.start; $("alertDays").value = rec.alertDays||"7"; openModal("formModal"); };
 $("actDelete").onclick = async () => { 
   if(confirm("حذف؟")) { 
-    lastDeletedData = data.filter(x => x.id === currentRowId); // حفظ نسخة للاسترجاع
+    lastDeletedData = data.filter(x => x.id === currentRowId); 
     data = data.filter(x => x.id !== currentRowId); 
-    await firebasePush(); render(); closeModal("rowActionsModal"); showToast("تم الحذف، يمكنك التراجع من قائمة الأدوات 🗑️");
+    await firebasePush(); render(); closeModal("rowActionsModal"); showToast("تم الحذف، التراجع ممكن من الأدوات 🗑️");
   } 
 };
 $("actExtend").onclick = () => { extendMode = "single"; const rec = data.find(x => x.id === currentRowId); $("extendTitle").textContent = `تجديد لـ ${rec.name}`; $("extendValue").value = 1; $("extendUnit").value = "months"; closeModal("rowActionsModal"); openModal("extendModal"); };
@@ -383,36 +402,35 @@ $("quickPlan").onchange = ()=>{ if($("quickPlan").value) $("months").value = $("
 $("saveBtn").onclick = async () => {
   const start = $("start").value; const months = parseInt($("months").value); if(!$("name").value || !start || isNaN(months)) return showToast("بيانات ناقصة", "err");
   const endD = new Date(start); endD.setMonth(endD.getMonth() + months);
-  const rec = { id: editingId || Date.now().toString(), name: $("name").value, email: $("email").value, phone: $("phone").value, countryCode: $("countryCode").value, alertDays: $("alertDays").value||7, months, price: $("price").value, currency: $("currency").value, start, end: endD.toISOString().split('T')[0] };
+  const alertEl = $("alertDays");
+  const rec = { id: editingId || Date.now().toString(), name: $("name").value, email: $("email").value, phone: $("phone").value, countryCode: $("countryCode").value, alertDays: (alertEl && alertEl.value)?alertEl.value:7, months, price: $("price").value, currency: $("currency").value, start, end: endD.toISOString().split('T')[0] };
   if(editingId) data = data.map(x => x.id === editingId ? rec : x); else data.unshift(rec);
   await firebasePush(); render(); closeModal("formModal"); showToast("تم الحفظ ✨");
 };
 
-// ==== وظائف نافذة "أدوات" المنسية التي تمت إعادتها ====
+// ==== وظائف نافذة "أدوات" ====
 $("openToolsModal").onclick = () => { openModal("toolsModal"); };
 
-// الميزتان الجديدتان (تصدير CSV + استرجاع الحذف)
 $("exportCsvBtn").onclick = () => {
   if(data.length === 0) return showToast("لا توجد بيانات لتصديرها", "warn");
-  let csv = "\uFEFFالاسم,الإيميل,الهاتف,المدة,السعر,تاريخ البداية,تاريخ الانتهاء\n"; // \uFEFF لدعم العربية في الإكسل
-  data.forEach(r => {
-    let phone = r.phone ? `${r.countryCode||''}${r.phone}` : '';
-    csv += `${r.name||''},${r.email||''},${phone},${r.months||''} شهر,${r.price||0} ${r.currency||'DZD'},${r.start||''},${r.end||''}\n`;
-  });
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Subscriptions_Excel_${todayISO()}.csv`; a.click();
-  closeModal('toolsModal'); showToast("تم التصدير بنجاح 📥");
+  let csv = "\uFEFFالاسم,الإيميل,الهاتف,المدة,السعر,تاريخ البداية,تاريخ الانتهاء\n";
+  data.forEach(r => { let phone = r.phone ? `${r.countryCode||''}${r.phone}` : ''; csv += `${r.name||''},${r.email||''},${phone},${r.months||''} شهر,${r.price||0} ${r.currency||'DZD'},${r.start||''},${r.end||''}\n`; });
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Subscriptions_Excel_${todayISO()}.csv`; a.click(); closeModal('toolsModal'); showToast("تم التصدير بنجاح 📥");
 };
 
 $("undoDeleteBtn").onclick = async () => {
   if(!lastDeletedData || lastDeletedData.length === 0) { closeModal('toolsModal'); return showToast("لا يوجد أي حذف أخير لاسترجاعه", "warn"); }
-  data = [...lastDeletedData, ...data]; // إضافة المحذوفات لأعلى القائمة
-  lastDeletedData = null; // تفريغ الذاكرة المؤقتة بعد الاسترجاع
+  data = [...lastDeletedData, ...data]; lastDeletedData = null; 
   await firebasePush(); render(); closeModal('toolsModal'); showToast("تم استرجاع البيانات المحذوفة ↩️");
 };
 
-// الميزات القديمة في الأدوات
-$("openTotals").onclick = () => { const alertD = parseInt($("alertDays")?.value || 7); const activeData = data.filter(r => getStatus(r.end, alertD).key !== "expired"); const total = activeData.reduce((sum, r) => sum + (parseFloat(r.price) || 0), 0); $("totalsBody").innerHTML = `<div style="color:var(--accent); font-size:32px; margin-bottom:10px;">${total.toLocaleString()}</div><div style="font-size:13px; color:var(--muted)">إجمالي المداخيل من الاشتراكات الفعّالة والقريبة من الانتهاء.</div>`; openModal("totalsModal"); };
+$("openTotals").onclick = () => { 
+  const alertEl = $("alertDays"); const alertD = (alertEl && alertEl.value) ? parseInt(alertEl.value) : 7;
+  const activeData = data.filter(r => getStatus(r.end, alertD).key !== "expired"); 
+  const total = activeData.reduce((sum, r) => sum + (parseFloat(r.price) || 0), 0); 
+  $("totalsBody").innerHTML = `<div style="color:var(--accent); font-size:32px; margin-bottom:10px;">${total.toLocaleString()}</div><div style="font-size:13px; color:var(--muted)">إجمالي المداخيل من الاشتراكات الفعّالة والقريبة من الانتهاء.</div>`; 
+  openModal("totalsModal"); 
+};
 $("exportJsonBtn").onclick = () => { if(data.length === 0) return showToast("لا توجد بيانات", "warn"); const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data)); const a = document.createElement("a"); a.href = dataStr; a.download = `Backup_${todayISO()}.json`; a.click(); closeModal("toolsModal"); showToast("تم تنزيل نسخة JSON 📥"); };
 $("importFileBtn").onclick = () => $("fileInput").click();
 $("fileInput").onchange = (e) => { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = async (event) => { try { const imported = JSON.parse(event.target.result); if(Array.isArray(imported)) { data = imported; await firebasePush(); render(); closeModal("backupModal"); closeModal("toolsModal"); showToast("تم الاستيراد ✅"); } } catch(err) { showToast("ملف غير صالح", "err"); } }; reader.readAsText(file); };
