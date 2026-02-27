@@ -2,8 +2,8 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>لوحة تسيير الاشتراكات - v12.1</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>لوحة تسيير الاشتراكات - v12.3</title>
 
 <style>
 :root{
@@ -14,7 +14,7 @@
 
 *{box-sizing:border-box}
 body{
-  margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial; color: var(--text);
+  margin:0; font-family: "Inter", system-ui, -apple-system; color: var(--text);
   background: radial-gradient(1200px 650px at 85% -10%, rgba(124,92,255,.25), transparent 60%), linear-gradient(180deg, var(--bg0), var(--bg1));
   padding: 18px;
 }
@@ -33,88 +33,45 @@ body{
 .searchWrap input { flex:1; width:100%; padding:10px 12px; border-radius:14px; border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); outline:none; transition: all 0.2s; font-size: 14px;}
 .searchWrap input:focus { border-color: rgba(124,92,255,.6); box-shadow: 0 0 0 4px rgba(124,92,255,.14); }
 
-.btn{ border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); padding:10px 12px; border-radius:14px; font-weight:900; cursor:pointer; transition: all .15s ease; font-size:13px; }
+.btn{ border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); padding:10px 12px; border-radius:14px; font-weight:900; cursor:pointer; transition: all .15s ease; font-size:13px; display: inline-flex; align-items: center; gap: 6px; }
 .btn:hover{ background: rgba(255,255,255,.06); }
 .btn:active{ transform: scale(.98); }
 .btn.primary{ border-color: rgba(124,92,255,.55); background: linear-gradient(135deg, rgba(124,92,255,.55), rgba(124,92,255,.15)); }
-.btn.danger{ border-color: rgba(239,68,68,.45); background: linear-gradient(135deg, rgba(239,68,68,.35), rgba(239,68,68,.12)); color: #ff8a8a; }
-.btn.soft{ border-color: rgba(255,255,255,.14); background: rgba(255,255,255,.04); }
-.btn-close { padding: 8px 14px; font-size: 13px; border-radius: 12px; }
-
-input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active{ -webkit-box-shadow: 0 0 0 30px #161b2a inset !important; -webkit-text-fill-color: var(--text) !important; transition: background-color 5000s ease-in-out 0s; }
-
-.filtersBar{ width: 100%; display: flex; gap: 8px; padding: 14px; flex-wrap: wrap; border-bottom: 1px solid var(--line); background: rgba(0,0,0,0.1); }
-.filterBtn{ padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: rgba(0,0,0,.18); color: var(--muted); font-size: 13px; font-weight: 800; cursor: pointer; }
-.filterBtn.active{ background: var(--text); color: var(--bg0); border-color: var(--text); }
-
-.bulkBar{ display: none; align-items: center; gap: 10px; padding: 12px 14px; background: rgba(124,92,255,.15); border-bottom: 1px solid rgba(124,92,255,.3); }
-.bulkBar .selCount{ font-weight: 900; color: #fff; background: var(--accent); padding: 4px 10px; border-radius: 99px; font-size: 12px; }
+.btn.ai-btn { border-color: #10b981; color: #10b981; background: rgba(16,185,129,0.1); display: none; } /* مخفي افتراضياً */
 
 .statChip{ display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:999px; border:1px solid var(--line); background: rgba(0,0,0,.18); font-size:12px; font-weight:900; color: var(--text); margin-inline-start: auto; }
 .statChip.sync{ border-color: rgba(124,92,255,.45); background: rgba(124,92,255,.10); }
 
-input[type="checkbox"] { appearance: none; width: 18px; height: 18px; border: 2px solid var(--muted); border-radius: 4px; background: rgba(0,0,0,.2); cursor: pointer; position: relative; display: inline-block; vertical-align: middle; }
-input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
-input[type="checkbox"]:checked::after { content: "✔"; position: absolute; color: white; font-size: 12px; left: 3px; top: -1px; font-weight: bold; }
+.filtersBar{ width: 100%; display: flex; gap: 8px; padding: 14px; flex-wrap: wrap; border-bottom: 1px solid var(--line); background: rgba(0,0,0,0.1); }
+.filterBtn{ padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: rgba(0,0,0,.18); color: var(--muted); font-size: 13px; font-weight: 800; cursor: pointer; }
+.filterBtn.active{ background: var(--text); color: var(--bg0); border-color: var(--text); }
 
 .tableWrap{ overflow:auto; }
 table{ width:100%; border-collapse:separate; border-spacing:0; min-width: 850px; }
 thead th{ position:sticky; top:0; z-index:5; background: rgba(0,0,0,.22); color: var(--muted); text-align:right; font-size:12px; font-weight:900; padding:14px 12px; border-bottom:1px solid var(--line); }
 tbody td{ padding:12px; border-bottom:1px solid rgba(255,255,255,.05); white-space:nowrap; vertical-align:middle; }
 
-tr.expired-row{ background: rgba(239,68,68,.08); }
-tr.expiring-row{ background: rgba(245,158,11,.06); }
-tr.expired-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(239,68,68,.85); }
-tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85); }
-
 .badge{ display:inline-flex; align-items:center; padding:4px 8px; border-radius:999px; border:1px solid var(--line); font-size:11px; font-weight:900; }
 .badge.ok{ border-color: rgba(34,197,94,.45); color:#c8f7d9; background: rgba(34,197,94,.1); }
 .badge.warn{ border-color: rgba(245,158,11,.45); color:#ffe2b3; background: rgba(245,158,11,.1); }
 .badge.err{ border-color: rgba(239,68,68,.45); color:#ffd0d0; background: rgba(239,68,68,.1); }
 
-.service-badge { background: rgba(124,92,255,0.15); color: #a78bfa; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 11px; border: 1px solid rgba(124,92,255,0.3); display: inline-block; }
-
 .modal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,.75); z-index:9999; padding: 18px; }
 .modal[aria-hidden="false"]{ display:flex; }
-.modal .box{ width:min(860px, 100%); background: rgba(10,14,26,.96); border: 1px solid rgba(255,255,255,.10); border-radius: 22px; box-shadow: 0 30px 90px rgba(0,0,0,.65); overflow:hidden; max-height: 90vh; overflow-y: auto; }
+.modal .box{ width:min(860px, 100%); background: rgba(10,14,26,.96); border: 1px solid rgba(255,255,255,.10); border-radius: 22px; box-shadow: var(--shadow); overflow:hidden; max-height: 90vh; overflow-y: auto; }
 .modalHeader{ padding:16px 20px; border-bottom:1px solid rgba(255,255,255,.10); display:flex; align-items:center; justify-content:space-between; gap:10px; position: sticky; top: 0; background: rgba(10,14,26,.96); z-index: 10; backdrop-filter: blur(5px); }
-.modalHeader h2{margin:0;font-size:18px}
-.modalHeader .hint{color:var(--muted);font-size:12px}
-.modalBody{ padding: 20px; }
-.modalFooter{ padding:16px 20px; border-top:1px solid rgba(255,255,255,.10); display:flex; gap:10px; flex-wrap:wrap; justify-content:flex-start; position: sticky; bottom: 0; background: rgba(10,14,26,.96); z-index: 10; }
 
 .formGrid{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px; }
 .full-width { grid-column: 1 / -1 !important; }
 @media (max-width: 768px){ .formGrid{ grid-template-columns: 1fr; } }
 
 .field label{ display:block; font-weight:900; font-size:13px; color: var(--muted); margin-bottom:8px; }
-.field input, .field select{ background: rgba(0,0,0,.3); border:1px solid rgba(255,255,255,.15); width:100%; padding:12px 14px; border-radius:14px; color: var(--text); outline:none; transition: all 0.2s; font-size: 14px; }
-.field input:focus, .field select:focus{ border-color: rgba(124,92,255,.6); box-shadow: 0 0 0 4px rgba(124,92,255,.14); background:rgba(0,0,0,0.5); }
+.field input, .field select, .field textarea{ background: rgba(0,0,0,.3); border:1px solid rgba(255,255,255,.15); width:100%; padding:12px 14px; border-radius:14px; color: var(--text); outline:none; transition: all 0.2s; font-size: 14px; }
 
-.actionPill{ padding:8px 12px; border-radius:12px; border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: var(--text); font-weight: 900; cursor:pointer; font-size: 12px; }
-.actGrid{ display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; }
-@media (max-width: 640px){ .actGrid{ grid-template-columns: 1fr; } }
-.actBtn{ border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: var(--text); padding: 14px; border-radius: 18px; font-weight: 900; cursor:pointer; }
+.ai-response-box { background: rgba(16,185,129,0.05); border: 1px solid rgba(16,185,129,0.2); border-radius: 14px; padding: 15px; line-height: 1.6; font-size: 14px; margin-top: 10px; white-space: pre-wrap; }
 
-.toast{ position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%) translateY(20px); padding: 12px 14px; border-radius: 16px; background: rgba(10,14,26,.92); border: 1px solid rgba(255,255,255,.12); color: var(--text); display: flex; align-items: center; gap: 10px; opacity: 0; pointer-events: none; transition: all .2s ease; z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-weight:bold; }
-.toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto;}
-
-.auth-wrap { text-align: center; padding: 10px 15px; }
-.auth-icon-wrap { display:inline-flex; align-items:center; justify-content:center; width:75px; height:75px; background:linear-gradient(135deg, rgba(124,92,255,0.2), rgba(124,92,255,0.05)); border:1px solid rgba(124,92,255,0.3); border-radius:50%; font-size:32px; margin-bottom:15px; box-shadow: 0 10px 25px rgba(124,92,255,0.15); }
-.auth-title { margin:0 0 5px 0; font-size:24px; color:var(--text); font-weight:900; }
-.auth-sub { color:var(--muted); font-size:13px; margin-bottom: 30px; }
-.auth-input { width:100%; padding:15px 18px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:16px; color:#fff; font-size:15px; outline:none; transition:all 0.2s; text-align: left; direction: ltr; }
-.auth-input:focus { border-color: rgba(124,92,255,.6); box-shadow: 0 0 0 4px rgba(124,92,255,.14); background:rgba(0,0,0,0.6); }
-
-.receipt-table { min-width: 0 !important; width: 100% !important; } 
-
-@media print {
-    body > *:not(#receiptModal) { display: none !important; }
-    body { background: white !important; padding: 0 !important; margin: 0 !important; }
-    #receiptModal { display: block !important; position: static !important; background: white !important; }
-    #receiptModal .box { width: 100% !important; max-width: none !important; box-shadow: none !important; border: none !important; border-radius: 0 !important; padding: 0 !important; }
-    .no-print { display: none !important; }
-}
+#toast { position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%) translateY(20px); padding: 12px 14px; border-radius: 16px; background: rgba(10,14,26,.92); border: 1px solid rgba(255,255,255,.12); color: var(--text); display: flex; align-items: center; gap: 10px; opacity: 0; pointer-events: none; transition: all .2s ease; z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-weight:bold; }
+#toast.show { opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto;}
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -125,45 +82,39 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.1</span></h1>
-    <div class="sub">⚡ توفير 99% من باقة الإنترنت (التحديث النقطي الذكي للبيانات)</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.3</span></h1>
+    <div class="sub">⚡ نسخة مخصصة (تحكم كامل في ميزات الذكاء الاصطناعي)</div>
   </div>
 
   <div class="card">
     <div class="topbar">
       <div class="topbar-actions">
-        <button class="btn primary" type="button" onclick="openAddSub()">➕ إضافة</button>
-        <button class="btn soft" type="button" onclick="openTotalsReport()">💰 المجموع</button>
-        <button class="btn soft" type="button" onclick="openModal('authModal')" style="border-color:var(--accent); color:var(--accent);">👤 الإدارة</button>
-        <button class="btn soft" type="button" onclick="openModal('toolsModal')">⚙️ أدوات</button>
+        <button class="btn primary" onclick="openAddSub()">➕ إضافة</button>
+        <button class="btn soft" onclick="openTotalsReport()">💰 المجموع</button>
+        <button id="mainAiBtn" class="btn ai-btn" onclick="openAiAnalysis()">🧠 تحليل Gemini</button>
+        <button class="btn soft" onclick="openModal('authModal')">👤 الإدارة</button>
+        <button class="btn soft" onclick="openModal('storeSettingsModal')">⚙️ الإعدادات</button>
         <div class="statChip sync" id="syncChip"><span class="ico">☁️</span> <span class="v" id="syncVal">—</span></div>
       </div>
       <div class="searchWrap">
-        <input id="search" oninput="window.render()" placeholder="بحث بالاسم أو الإيميل، الهاتف، أو الخدمة..." />
-        <button class="btn soft" title="لصق البحث" style="padding: 10px 12px; border-radius: 12px; font-size: 15px;" onclick="pasteSearch()">📋</button>
-        <button class="btn soft" title="مسح البحث" style="padding: 10px 12px; border-radius: 12px; font-size: 15px; color: var(--err);" onclick="clearSearch()">✕</button>
+        <input id="search" oninput="window.render()" placeholder="بحث سريع..." />
+        <button class="btn soft" onclick="pasteSearch()">📋</button>
+        <button class="btn soft" onclick="clearSearch()">✕</button>
       </div>
     </div>
 
-    <div class="bulkBar" id="bulkBar">
-      <div class="selCount" id="selCount">0 محدد</div>
-      <button class="btn" style="border-color:var(--accent); color:var(--accent);" onclick="bulkExtendAction()">🔁 تجديد</button>
-      <button class="btn danger" onclick="bulkDeleteAction()">🗑️ حذف</button>
-      <button class="btn soft" style="margin-inline-start:auto;" onclick="clearSelectionAction()">إلغاء التحديد</button>
-    </div>
-
-    <div class="filtersBar" id="filtersBar">
-      <button class="filterBtn active" data-filter="all" onclick="setFilter(this, 'all')">الكل</button>
-      <button class="filterBtn" data-filter="active" onclick="setFilter(this, 'active')">✅ فعّال</button>
-      <button class="filterBtn" data-filter="expiring" onclick="setFilter(this, 'expiring')">⏰ قريب ينتهي</button>
-      <button class="filterBtn" data-filter="expired" onclick="setFilter(this, 'expired')">❌ منتهي</button>
+    <div class="filtersBar">
+      <button class="filterBtn active" onclick="setFilter(this, 'all')">الكل</button>
+      <button class="filterBtn" onclick="setFilter(this, 'active')">✅ فعّال</button>
+      <button class="filterBtn" onclick="setFilter(this, 'expiring')">⏰ قريب</button>
+      <button class="filterBtn" onclick="setFilter(this, 'expired')">❌ منتهي</button>
     </div>
 
     <div class="tableWrap">
       <table>
         <thead>
           <tr>
-            <th style="width: 40px; text-align: center;"><input type="checkbox" id="selectAll" onchange="toggleSelectAll(this)"></th>
+            <th style="width: 40px; text-align: center;"><input type="checkbox" id="selectAll"></th>
             <th>العميل</th> <th>الهاتف</th> <th>الاشتراك</th> <th>المالية</th> <th>التواريخ</th> <th>الحالة</th> <th>إجراء</th>
           </tr>
         </thead>
@@ -175,459 +126,174 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 
 <!-- ================= MODALS ================= -->
 
-<div class="modal" id="toolsModal" aria-hidden="true">
-  <div class="box" style="width: 480px">
-    <div class="modalHeader"><h2>⚙️ أدوات إضافية</h2><button class="btn danger btn-close" type="button" onclick="closeModal('toolsModal')">✕ إغلاق</button></div>
+<div class="modal" id="storeSettingsModal" aria-hidden="true">
+  <div class="box" style="width: 450px">
+    <div class="modalHeader"><h2>⚙️ إعدادات المتجر والخصوصية</h2><button class="btn danger btn-close" onclick="closeModal('storeSettingsModal')">✕ إغلاق</button></div>
     <div class="modalBody">
-      <div class="actGrid">
-        <button class="actBtn" style="color:#10b981; border-color:rgba(16,185,129,0.4); background:rgba(16,185,129,0.1);" onclick="exportCSV()">📥 تصدير Excel</button>
-        <button class="actBtn" style="color:#f59e0b; border-color:rgba(245,158,11,0.4); background:rgba(245,158,11,0.1);" onclick="undoDelete()">↩️ التراجع عن الحذف</button>
-        <button class="actBtn" onclick="closeModal('toolsModal'); openModal('backupModal')">📦 النسخ الاحتياطي</button>
-        <button class="actBtn" onclick="closeModal('toolsModal'); openModal('syncModal')">☁️ حالة المزامنة</button>
-        <button class="actBtn" onclick="shareApp()">📤 مشاركة اللوحة</button>
-        <button class="actBtn" onclick="closeModal('toolsModal'); window.print()">🖨️ طباعة الجدول</button>
-        <button class="actBtn danger" style="grid-column: span 2;" onclick="clearAllData()">🗑️ حذف جميع البيانات نهائياً</button>
-      </div>
+       <div class="field"><label>اسم المتجر</label><input id="setStoreName"></div>
+       
+       <div style="margin-top:20px; padding:15px; background:rgba(255,255,255,0.03); border:1px solid var(--line); border-radius:14px;">
+         <h3 style="margin-top:0; font-size:14px; color:var(--accent);">🤖 إعدادات الذكاء الاصطناعي</h3>
+         
+         <div class="field" style="display:flex; align-items:center; gap:10px; margin-bottom:15px;">
+           <input type="checkbox" id="enableAiToggle" onchange="toggleAiVisibility(this.checked)">
+           <label style="margin:0;">تفعيل ميزات الذكاء الاصطناعي (Gemini)</label>
+         </div>
+
+         <div id="aiSettingsFields" style="display:none;">
+           <div class="field">
+             <label>Gemini API Key</label>
+             <input id="geminiKey" type="password" placeholder="أدخل مفتاحك الخاص...">
+           </div>
+           <div class="field" style="margin-top:10px; display:flex; align-items:center; gap:10px;">
+             <input type="checkbox" id="privacyShield" checked>
+             <label style="margin:0;">درع الخصوصية (تشفير الأسماء عن AI)</label>
+           </div>
+         </div>
+       </div>
+
+       <button class="btn primary" style="width:100%; margin-top:20px; padding:14px;" onclick="saveSettings()">💾 حفظ التغييرات</button>
     </div>
+  </div>
+</div>
+
+<div class="modal" id="aiModal" aria-hidden="true">
+  <div class="box" style="width: 600px">
+    <div class="modalHeader"><h2>🧠 مساعد Gemini الذكي</h2><button class="btn danger btn-close" onclick="closeModal('aiModal')">✕ إغلاق</button></div>
+    <div class="modalBody">
+      <div id="aiLoading" style="display:none; text-align:center; padding:20px;">🔄 جاري التحليل...</div>
+      <div id="aiResult" class="ai-response-box" style="display:none;"></div>
+      <div id="aiError" style="display:none; color:var(--err); padding:10px;"></div>
+    </div>
+    <div class="modalFooter"><button class="btn ai-btn" id="generateAiBtn" style="display:block;" onclick="generateAiReport()">✨ ابدأ التحليل</button></div>
   </div>
 </div>
 
 <div class="modal" id="formModal" aria-hidden="true">
-  <div class="box" role="dialog" aria-modal="true">
-    <div class="modalHeader"><div><h2 id="formTitle">إضافة اشتراك</h2><div class="hint">املأ البيانات ثم اضغط حفظ</div></div><button class="btn danger btn-close" type="button" onclick="closeModal('formModal')">✕ إغلاق</button></div>
-    <div class="modalBody">
-      <div class="formGrid">
-        <div class="field full-width"><label>الاسم <span style="color:var(--err)">*</span></label><input id="name" placeholder="مثال: Ahmed"></div>
-        <div class="field full-width"><label>الهاتف (مع الرمز)</label><div style="display: flex; gap: 8px;"><select id="countryCode" style="width: 110px; direction: ltr;"><option value="+213">🇩🇿 +213</option><option value="+212">🇲🇦 +212</option><option value="+216">🇹🇳 +216</option><option value="">بدون رمز</option></select><input id="phone" type="tel" dir="ltr" placeholder="555000000" style="flex:1;"></div></div>
-        <div class="field full-width"><label>الإيميل (إجباري) <span style="color:var(--err)">*</span></label><input id="email" placeholder="name@example.com" inputmode="email"></div>
-        <div class="field full-width"><label>الخدمة / الباقة <span style="color:var(--err)">*</span></label><input id="serviceType" list="serviceList" placeholder="اختر أو اكتب خدمة جديدة"><datalist id="serviceList"><option value="IPTV"><option value="Netflix"><option value="Canva Pro"><option value="YouTube Premium"><option value="Office 365"></datalist></div>
-        <div class="field"><label>المدة (أشهر) <span style="color:var(--err)">*</span></label><input id="months" type="number" min="1" step="1"></div>
-        <div class="field"><label>العملة</label><select id="currency"><option value="DZD">DZD</option><option value="EUR">EUR</option><option value="USD">USD</option><option value="MAD">MAD</option><option value="TND">TND</option></select></div>
-        <div class="field full-width"><label>السعر الإجمالي</label><input id="price" type="number" min="0" step="0.01" placeholder="مثال: 5000" oninput="window.calcDebt()"></div>
-        <div class="field full-width"><label>المبلغ المدفوع <span style="color:var(--muted); font-weight:normal; font-size:10px;">(اتركه فارغاً إن دفع الكل)</span></label><input id="paidAmount" type="number" min="0" step="0.01" placeholder="مثال: 2000" oninput="window.calcDebt()"></div>
-        <div class="field full-width"><label>الدين المتبقي (آلي)</label><input id="debtAmount" type="text" readonly style="background: rgba(239,68,68,0.1); color: #ff8a8a; font-weight: bold; border-color: rgba(239,68,68,0.3); pointer-events: none;"></div>
-        <div class="field"><label>تاريخ البداية <span style="color:var(--err)">*</span></label><input id="start" type="date"></div>
-        <div class="field"><label>تنبيه قبل (أيام)</label><input id="alertDays" type="number" min="1" step="1" value="7"></div>
-        <div class="field"><label>اختيار سريع للمدة</label><select id="quickPlan" onchange="window.handleQuickPlan()"><option value="">— اختر —</option><option value="1">1 شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="12">12 شهر</option></select></div>
-      </div>
+    <div class="box"><div class="modalHeader"><h2>إضافة/تعديل</h2><button class="btn danger btn-close" onclick="closeModal('formModal')">✕</button></div><div class="modalBody">
+    <div class="formGrid">
+        <div class="field full-width"><label>الاسم</label><input id="name"></div>
+        <div class="field full-width"><label>الإيميل</label><input id="email"></div>
+        <div class="field full-width"><label>الهاتف</label><input id="phone"></div>
+        <div class="field"><label>الخدمة</label><input id="serviceType"></div>
+        <div class="field"><label>المدة (أشهر)</label><input id="months" type="number"></div>
+        <div class="field"><label>السعر</label><input id="price" type="number" oninput="window.calcDebt()"></div>
+        <div class="field"><label>المدفوع</label><input id="paidAmount" type="number" oninput="window.calcDebt()"></div>
+        <div class="field"><label>المتبقي</label><input id="debtAmount" readonly></div>
+        <div class="field"><label>تاريخ البداية</label><input id="start" type="date"></div>
     </div>
-    <div class="modalFooter"><button class="btn primary" type="button" style="padding: 12px 24px; font-size: 14px;" onclick="saveSubscription()">💾 حفظ البيانات</button></div>
-  </div>
+    </div><div class="modalFooter"><button class="btn primary" onclick="saveSubscription()">💾 حفظ</button></div></div>
 </div>
 
-<div class="modal" id="storeSettingsModal" aria-hidden="true">
-  <div class="box" style="width: 400px">
-    <div class="modalHeader"><h2>⚙️ إعدادات المتجر (اللوجو)</h2><button class="btn danger btn-close" type="button" onclick="closeModal('storeSettingsModal')">✕ إغلاق</button></div>
-    <div class="modalBody">
-       <div class="field" style="margin-bottom:15px"><label>اسم المتجر (يظهر في الفاتورة)</label><input id="setStoreName" placeholder="مثال: متجر الاشتراكات"></div>
-       <div class="field" style="margin-bottom:15px"><label>الشعار (Logo)</label><input type="file" id="setStoreLogo" accept="image/*" style="padding: 8px;" onchange="window.handleLogoUpload(event)"></div>
-       <div style="text-align:center; padding:10px; background:rgba(255,255,255,0.05); border-radius:12px;"><div style="font-size:12px; color:var(--muted); margin-bottom:5px;">معاينة الشعار:</div><img id="logoPreview" src="" style="max-width:100px; max-height:100px; border-radius:10px; display:none; margin: 0 auto;"><div id="logoEmojiFallback" style="font-size:40px;">💎</div></div>
-       <button class="btn primary" style="width:100%; margin-top:20px; padding:14px; border-radius:14px;" onclick="saveStoreSettings()">💾 حفظ الإعدادات</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal" id="receiptModal" aria-hidden="true">
-  <div class="box" style="width: 450px; background: #ffffff; color: #000000; border: none; border-radius: 12px;">
-    <div class="modalHeader no-print" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
-      <h2 style="color: #0f172a;">📄 الوصل الرقمي</h2>
-      <button class="btn btn-close" type="button" style="background:#f1f5f9; color:#ef4444; border:1px solid #e2e8f0;" onclick="closeModal('receiptModal')">✕ إغلاق</button>
-    </div>
-    <div class="modalBody receipt-content" style="padding: 30px 25px; font-family: Tahoma, Arial, sans-serif; background: #ffffff;">
-      <div style="text-align: center; margin-bottom: 25px;">
-        <img id="receiptLogoImg" src="" style="display:none; max-width:80px; max-height:80px; border-radius:12px; margin:0 auto 10px;">
-        <div id="receiptLogoEmoji" style="font-size: 40px; margin-bottom: 5px;">💎</div>
-        <h1 id="receiptStoreName" style="margin: 0; font-size: 24px; color: #4f46e5; font-weight: 900;">متجر الاشتراكات</h1>
-        <div style="color: #64748b; font-size: 13px; margin-top: 5px;">فاتورة اشتراك إلكترونية</div>
-      </div>
-      <table class="receipt-table" style="width: 100%; border-collapse: collapse; font-size: 15px;">
-        <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b; width:40%;">اسم العميل:</td><td style="padding: 12px 0; text-align: left; font-weight: bold; color: #0f172a;" id="recName"></td></tr>
-        <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">رقم الهاتف:</td><td style="padding: 12px 0; text-align: left; direction: ltr; color: #0f172a;" id="recPhone"></td></tr>
-        <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">نوع الخدمة:</td><td style="padding: 12px 0; text-align: left; font-weight: bold; color: #8b5cf6;" id="recService"></td></tr>
-        <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">مدة الاشتراك:</td><td style="padding: 12px 0; text-align: left; color: #0f172a;" id="recMonths"></td></tr>
-        <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">تاريخ البداية:</td><td style="padding: 12px 0; text-align: left; color: #0f172a;" id="recStart"></td></tr>
-        <tr style="border-bottom: 1px solid #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">تاريخ الانتهاء:</td><td style="padding: 12px 0; text-align: left; color: #0f172a;" id="recEnd"></td></tr>
-        
-        <tr><td style="padding: 20px 0 10px 0; color: #0f172a; font-size: 18px; font-weight: 900;">السعر الإجمالي:</td><td style="padding: 20px 0 10px 0; text-align: left; font-size: 20px; font-weight: 900; color: #10b981;" id="recPrice"></td></tr>
-        <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 10px 0; color: #64748b;">حالة الدفع:</td><td style="padding: 10px 0; text-align: left; font-weight:bold;" id="recPaymentStatus"></td></tr>
-        <tr id="recPaidAmountRow" style="display:none; border-bottom: 1px dashed #cbd5e1;"><td style="padding: 10px 0; color: #64748b;">المبلغ المدفوع:</td><td style="padding: 10px 0; text-align: left; font-weight:bold; color: #3b82f6;" id="recPaidAmount"></td></tr>
-        <tr id="recRemainingRow" style="display:none; background:#fef2f2; border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 5px; color: #ef4444; font-weight:bold; border-radius:0 8px 8px 0;">❗ المبلغ المتبقي (دين):</td><td style="padding: 12px 5px; text-align: left; color: #ef4444; font-weight: 900; border-radius:8px 0 0 0;" id="recRemaining"></td></tr>
-      </table>
-      <div style="text-align: center; margin-top: 35px; font-size: 12px; color: #94a3b8; line-height: 1.6;">نشكركم على ثقتكم بنا 🤍<br><span style="font-size: 10px;">تم إصدار هذا الوصل آلياً بتاريخ <span id="recToday"></span></span></div>
-    </div>
-    <div class="modalFooter no-print" style="background: #f8fafc; border-top: 1px solid #e2e8f0; border-radius: 0 0 12px 12px; display:flex; gap:10px;">
-      <button class="btn primary" style="flex:1; padding: 14px; font-size: 14px; border-radius: 12px; background: #4f46e5; border-color: #4338ca;" onclick="window.printSmartReceipt()">🖨️ طباعة أو PDF</button>
-      <button class="btn primary" style="flex:1; padding: 14px; font-size: 14px; border-radius: 12px; background: #22c55e; border-color: #16a34a;" onclick="sendWhatsAppReceipt()">💬 إرسال واتساب</button>
-    </div>
-  </div>
-</div>
-
-<div class="modal" id="extendModal" aria-hidden="true"><div class="box" style="width: 350px"><div class="modalHeader"><h2 id="extendTitle">تجديد الاشتراك</h2><button class="btn danger btn-close" type="button" onclick="closeModal('extendModal')">✕ إغلاق</button></div><div class="modalBody"><div class="field" style="margin-bottom:15px"><label>المدة</label><input id="extendValue" type="number" min="1" value="1"></div><div class="field" style="margin-bottom:20px"><label>الوحدة</label><select id="extendUnit"><option value="months">أشهر</option><option value="days">أيام</option></select></div><button class="btn primary" style="width:100%" onclick="confirmExtend()">تأكيد التجديد</button></div></div></div>
-
-<div class="modal" id="rowActionsModal" aria-hidden="true">
-  <div class="box" role="dialog" aria-modal="true" style="width:min(740px, 100%)">
-    <div class="modalHeader"><div><h2>إجراءات</h2><div class="hint" id="rowActionsHint">—</div></div><button class="btn danger btn-close" type="button" onclick="closeModal('rowActionsModal')">✕ إغلاق</button></div>
-    <div class="modalBody">
-      <div class="actGrid">
-        <button class="actBtn" onclick="actExtendAction()">🔁 تجديد</button>
-        <button class="actBtn" onclick="actEditAction()">✏️ تعديل</button>
-        <button class="actBtn" style="color: #60a5fa; border-color: rgba(96,165,250,.5); background: rgba(96,165,250,.15);" onclick="openReceiptAction()">📄 إصدار وصل</button>
-        <button class="actBtn" onclick="actCopyEmailAction()">📋 نسخ Email</button>
-        <button class="actBtn" style="border-color: rgba(37,211,102,.5); background: rgba(37,211,102,.15); color: #4ade80;" onclick="actWhatsAppAction()">💬 مراسلة واتساب</button>
-        <button class="actBtn danger" onclick="actDeleteAction()">🗑️ حذف</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal" id="authModal" aria-hidden="true">
-  <div class="box" style="width: 420px; padding:0;">
-    <div class="modalHeader" style="border-bottom:none; padding-bottom:0;"><button class="btn danger btn-close" type="button" id="closeAuthBtn" onclick="closeModal('authModal')" style="display:none; margin-inline-start:auto;">✕ إغلاق</button></div>
-    <div class="modalBody" style="padding-top:0;">
-      <div id="authLoginSection" class="auth-wrap"><div class="auth-icon-wrap">🔒</div><h2 class="auth-title">تسجيل الدخول</h2><div class="auth-sub">يرجى تسجيل الدخول للوصول إلى لوحة التحكم</div><div style="margin-bottom:20px;"><label class="auth-label">البريد الإلكتروني</label><input id="authEmail" type="email" class="auth-input" placeholder="admin@example.com"></div><div style="margin-bottom:30px;"><label class="auth-label">كلمة المرور</label><input id="authPass" type="password" class="auth-input" placeholder="••••••••"></div><button class="btn primary" style="width:100%; padding:16px; font-size:16px; font-weight:900; border-radius:16px; box-shadow: 0 8px 25px rgba(124,92,255,0.3);" onclick="loginUser()">دخول 🚀</button></div>
-      <div id="authLoggedInSection" style="display:none; padding:10px;">
-        <div style="text-align:center; margin-bottom:25px;"><div id="authStatusIcon" class="auth-icon-wrap" style="background:linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.05)); border-color:rgba(34,197,94,0.3); box-shadow: 0 10px 25px rgba(34,197,94,0.15);">✅</div><div id="authStateText" style="font-weight:900; font-size:15px; line-height:1.6;"></div></div>
-        <div id="ownerDashboard" style="display:none; padding:20px; background:rgba(124,92,255,0.08); border-radius:18px; border:1px solid rgba(124,92,255,0.2); margin-bottom:25px;"><h3 style="margin-top:0; color:#fff; font-size:15px; display:flex; align-items:center; gap:8px;">👑 أدوات المالك (Owner)</h3><button class="btn soft" onclick="closeModal('authModal'); openModal('storeSettingsModal')" style="width:100%; margin-bottom:12px; padding:12px; border-radius:12px; border-color:rgba(16,185,129,0.3); color:#10b981;">⚙️ إعدادات المتجر (الاسم واللوجو)</button><button class="btn primary" onclick="closeModal('authModal'); openModal('addAdminModal')" style="width:100%; margin-bottom:12px; padding:12px; border-radius:12px;">➕ إنشاء حساب مستخدم جديد</button><button class="btn soft" onclick="closeModal('authModal'); loadAdminsList()" style="width:100%; padding:12px; border-radius:12px; border-color:rgba(255,255,255,0.1);">👥 إدارة الصلاحيات للمستخدمين</button><button class="btn soft" onclick="closeModal('authModal'); openAuditLog()" style="width:100%; padding:12px; border-radius:12px; border-color:rgba(245,158,11,0.3); color:#f59e0b; margin-top:12px;">🕵️‍♂️ سجل نشاطات المدراء</button></div>
-        <button class="btn danger" style="width:100%; padding:14px; border-radius:14px; font-size:15px;" onclick="logoutUser()">تسجيل الخروج المآمن</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal" id="addAdminModal" aria-hidden="true"><div class="box" style="width: 380px"><div class="modalHeader"><h2>➕ إضافة مستخدم جديد</h2><button class="btn danger btn-close" type="button" onclick="closeModal('addAdminModal')">✕ إغلاق</button></div><div class="modalBody"><div class="field" style="margin-bottom:15px"><label>البريد الإلكتروني</label><input id="newAdminEmail" type="email"></div><div class="field" style="margin-bottom:15px"><label>كلمة المرور (6 أحرف أو أكثر)</label><input id="newAdminPass" type="password"></div><div class="field" style="margin-bottom:25px"><label>نوع الصلاحية</label><select id="newAdminRole"><option value="admin">أدمن</option><option value="owner">مالك 👑</option></select></div><button class="btn primary" style="width:100%; padding:12px;" onclick="confirmAddAdmin()">تأكيد وإنشاء الحساب</button></div></div></div>
-<div class="modal" id="manageAdminsModal" aria-hidden="true"><div class="box" style="width: 500px"><div class="modalHeader"><h2>👥 قائمة المستخدمين</h2><button class="btn danger btn-close" type="button" onclick="closeModal('manageAdminsModal')">✕ إغلاق</button></div><div class="modalBody"><div style="font-size:12px; color:var(--warn); margin-bottom:15px; padding:10px; background:rgba(245,158,11,0.1); border-radius:10px; border:1px solid rgba(245,158,11,0.3);"><b>ملاحظة هامة:</b> سحب الصلاحية يمنع المستخدم من الدخول للوحة.</div><div style="max-height:300px; overflow:auto;"><table style="min-width:100%;"><thead><tr><th>الإيميل</th><th>الصلاحية</th><th>إجراء</th></tr></thead><tbody id="adminsTbody"></tbody></table></div></div></div></div>
-
-<div class="modal" id="auditLogModal" aria-hidden="true">
-  <div class="box" style="width: 700px">
-    <div class="modalHeader">
-      <h2>🕵️‍♂️ سجل نشاطات المدراء</h2>
-      <div style="display:flex; gap:10px;"><button class="btn danger" id="deleteSelectedLogsBtn" style="display:none; padding:8px 12px; font-size:12px;" onclick="deleteSelectedLogs()">🗑️ حذف المحدد</button><button class="btn danger btn-close" type="button" onclick="closeModal('auditLogModal')">✕ إغلاق</button></div>
-    </div>
-    <div class="modalBody">
-      <div style="max-height:400px; overflow:auto; border:1px solid rgba(255,255,255,0.1); border-radius:12px;">
-        <table style="min-width:100%; font-size: 13px;">
-          <thead><tr><th style="width: 40px; text-align: center;"><input type="checkbox" id="selectAllLogs" onchange="window.toggleAllLogs(event)"></th><th>الوقت والتاريخ</th><th>المستخدم (الأدمن)</th><th>نوع الإجراء</th><th>التفاصيل</th></tr></thead>
-          <tbody id="auditTbody"></tbody>
-        </table>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div class="modal" id="backupModal" aria-hidden="true"><div class="box" style="width:400px"><div class="modalHeader"><h2>📦 النسخ الاحتياطي (JSON)</h2><button class="btn danger btn-close" type="button" onclick="closeModal('backupModal')">✕ إغلاق</button></div><div class="modalBody"><div style="display:grid; gap:10px;"><button class="btn soft" onclick="exportJson()">⬇️ تصدير نسخة JSON</button><button class="btn soft" onclick="importFile()">⬆️ استيراد نسخة JSON</button><input id="fileInput" type="file" accept=".json" style="display:none" onchange="handleFileSelect(event)"><button class="btn soft" onclick="closeModal('backupModal'); openModal('pasteModal')">📋 استيراد باللصق</button></div></div></div></div>
-<div class="modal" id="pasteModal" aria-hidden="true"><div class="box"><div class="modalHeader"><h2>📋 استيراد باللصق</h2><button class="btn danger btn-close" type="button" onclick="closeModal('pasteModal')">✕ إغلاق</button></div><div class="modalBody"><textarea id="pasteArea" rows="10" style="width:100%; background:rgba(0,0,0,0.3); color:white; border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:10px; outline:none;"></textarea></div><div class="modalFooter"><button class="btn primary" onclick="confirmPaste()">استيراد البيانات</button></div></div></div>
-<div class="modal" id="syncModal" aria-hidden="true"><div class="box"><div class="modalHeader"><h2>☁️ المزامنة والنسخ الاحتياطي</h2><button class="btn danger btn-close" type="button" onclick="closeModal('syncModal')">✕ إغلاق</button></div><div class="modalBody">ميزة المزامنة تعمل في الخلفية لحظياً وبشكل تلقائي ✅</div></div></div>
-<div class="modal" id="totalsModal" aria-hidden="true"><div class="box" style="width:400px"><div class="modalHeader"><h2>💰 المجموع العام</h2><button class="btn danger btn-close" type="button" onclick="closeModal('totalsModal')">✕ إغلاق</button></div><div class="modalBody"><div id="totalsBody" style="text-align:center; padding: 10px 0;"></div></div></div></div>
-
-<div id="toast" class="toast"></div>
+<div class="modal" id="authModal" aria-hidden="true"><div class="box" style="width:400px; padding:20px;" id="authContent"></div></div>
+<div id="toast"></div>
 
 <script>
 'use strict';
 const FIREBASE_CONFIG = { apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ", authDomain: "dattta-6f497.firebaseapp.com", databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com", projectId: "dattta-6f497", storageBucket: "dattta-6f497.firebasestorage.app", messagingSenderId: "804914291938", appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb" };
 
-const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.1";
 const $ = (id)=>document.getElementById(id);
-const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
-let data = []; let editingId = null; let currentRowId = null; let currentFilter = "all"; 
-let selectedIds = new Set(); let extendMode = "single";
-let currentUser = null; let currentRole = null;
-let lastDeletedData = null; 
-let storeSettings = { name: "متجر الاشتراكات", logo: "" };
+let data = []; let currentFilter = "all"; let currentUser = null;
+let storeSettings = { name: "متجر الاشتراكات", geminiKey: "", privacyShield: true, enableAi: false };
 
 if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
 const auth = firebase.auth(); const db = firebase.database();
 
-// الدوال الأساسية
-window.openModal = (id) => { $(id).setAttribute("aria-hidden","false"); };
-window.closeModal = (id) => { $(id).setAttribute("aria-hidden","true"); if(id === 'receiptModal') document.title = BASE_APP_TITLE; };
-window.showToast = (m, type="ok") => { const t=$("toast"); t.textContent=m; t.style.borderColor = type==="err"?"#ef4444":"#22c55e"; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"), 3000); };
-function todayISO(){ const d=new Date(); d.setHours(0,0,0,0); return d.toISOString().slice(0,10); }
-function toDate(iso){ const d=new Date(iso+"T00:00:00"); d.setHours(0,0,0,0); return d; }
-function saveLocalBackup(){ localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(data)); }
-function loadLocalBackup(){ try { const j = JSON.parse(localStorage.getItem(LOCAL_BACKUP_KEY)); return Array.isArray(j) ? j : []; } catch { return []; } }
-function setSyncState(state){ const chip = $("syncChip"); const val = $("syncVal"); chip.className = "statChip sync " + state; if(!navigator.onLine) val.textContent = "أوفلاين 📴"; else if(state==="saving") val.textContent = "جاري الحفظ..."; else if(state==="ok") { const d = new Date(); val.textContent = d.getHours()+":"+String(d.getMinutes()).padStart(2,"0") + " ✅"; } else if(state==="fail") { val.textContent = "خطأ اتصال ❌"; chip.style.borderColor="var(--err)"; chip.style.background="rgba(239,68,68,0.1)"; } }
-
-async function logAction(actionName, detailsStr) { if (!currentUser) return; try { await db.ref("logs").push({ email: currentUser.email, action: actionName, details: detailsStr || "-", time: new Date().toISOString() }); } catch(e) { } }
-
-// السجل
-let selectedLogIds = new Set();
-window.updateLogBulkUI = () => { if(selectedLogIds.size > 0) { $("deleteSelectedLogsBtn").style.display = "block"; $("deleteSelectedLogsBtn").textContent = `🗑️ حذف (${selectedLogIds.size})`; } else { $("deleteSelectedLogsBtn").style.display = "none"; $("selectAllLogs").checked = false; } };
-window.toggleAllLogs = (e) => { const isChkd = e.target.checked; document.querySelectorAll(".logChk").forEach(chk => { chk.checked = isChkd; if(isChkd) selectedLogIds.add(chk.value); else selectedLogIds.delete(chk.value); }); window.updateLogBulkUI(); };
-$("auditTbody").addEventListener("change", (e) => { if(e.target.classList.contains("logChk")) { if(e.target.checked) selectedLogIds.add(e.target.value); else selectedLogIds.delete(e.target.value); window.updateLogBulkUI(); } });
-window.deleteSelectedLogs = async () => { if(!confirm(`تأكيد حذف ${selectedLogIds.size} من السجلات نهائياً؟`)) return; setSyncState("saving"); for(let id of selectedLogIds) { await db.ref("logs/" + id).remove(); } selectedLogIds.clear(); window.updateLogBulkUI(); setSyncState("ok"); showToast("تم حذف السجلات"); window.openAuditLog(); };
-window.openAuditLog = async () => { selectedLogIds.clear(); window.updateLogBulkUI(); const tb = $("auditTbody"); tb.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:20px;'>جاري تحميل السجل... ⏳</td></tr>"; openModal("auditLogModal"); try { const snap = await db.ref("logs").orderByChild("time").limitToLast(100).once("value"); const logsObj = snap.val() || {}; tb.innerHTML = ""; const logsArray = Object.entries(logsObj).map(([key, val]) => ({id: key, ...val})).sort((a,b) => new Date(b.time) - new Date(a.time)); if(logsArray.length === 0) { tb.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:20px; color:var(--muted);'>لا توجد نشاطات</td></tr>"; return; } logsArray.forEach(l => { const d = new Date(l.time); const timeStr = d.toLocaleDateString('en-GB') + " - " + d.toLocaleTimeString('en-GB'); let actionColor = "var(--text)"; if(l.action.includes("حذف")) actionColor = "#ef4444"; else if(l.action.includes("إضافة")) actionColor = "#22c55e"; else if(l.action.includes("تعديل") || l.action.includes("تجديد") || l.action.includes("وصل")) actionColor = "#f59e0b"; const isChecked = selectedLogIds.has(l.id) ? "checked" : ""; tb.innerHTML += `<tr><td style="text-align: center;"><input type="checkbox" class="logChk" value="${l.id}" ${isChecked}></td><td style="direction:ltr; text-align:right; color:var(--muted);">${timeStr}</td><td>${l.email}</td><td style="color:${actionColor}; font-weight:bold;">${l.action}</td><td>${l.details}</td></tr>`; }); } catch(err) { tb.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:20px; color:var(--err)'>حدث خطأ في جلب السجل</td></tr>"; } };
-
-// الدخول والإعدادات
-auth.onAuthStateChanged(async (u)=>{ currentUser = u; if(u){ try { const roleSnap = await db.ref("admins/" + u.uid).once("value"); let roleData = roleSnap.val(); if(roleData === true) { try { roleData = { role: "owner", email: u.email }; await db.ref("admins/" + u.uid).set(roleData); } catch(writeErr) { roleData = { role: "owner", email: u.email }; } } currentRole = (roleData && roleData.role) ? roleData.role : "admin"; } catch(e) { currentRole = "admin"; } $("closeAuthBtn").style.display = "block"; closeModal("authModal"); await window.loadData(); } else { currentRole = null; data = []; window.render(); $("closeAuthBtn").style.display = "none"; openModal("authModal"); } window.updateAuthUI(); });
-window.updateAuthUI = () => { if(currentUser) { $("authLoginSection").style.display = "none"; $("authLoggedInSection").style.display = "block"; const iconEl = $("authStatusIcon"); const textEl = $("authStateText"); if (currentRole === "owner") { iconEl.innerHTML = "👑"; iconEl.style.background = "linear-gradient(135deg, rgba(245,158,11,0.2), rgba(245,158,11,0.05))"; iconEl.style.borderColor = "rgba(245,158,11,0.4)"; textEl.innerHTML = `<span style="color:var(--warn); font-size:22px; font-weight:900;">المالك</span><br/><span style="color:var(--text); font-size:15px; margin-top:8px; display:inline-block; direction:ltr;">${currentUser.email}</span>`; } else { iconEl.innerHTML = "👤"; iconEl.style.background = "linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.05))"; iconEl.style.borderColor = "rgba(34,197,94,0.3)"; textEl.innerHTML = `<span style="color:var(--text); font-size:20px; font-weight:900;">أدمن</span><br/><span style="color:var(--text); font-size:15px; margin-top:8px; display:inline-block; direction:ltr;">${currentUser.email}</span>`; } $("ownerDashboard").style.display = currentRole === "owner" ? "block" : "none"; } else { $("authLoginSection").style.display = "block"; $("authLoggedInSection").style.display = "none"; } };
-window.handleLogoUpload = (e) => { const file = e.target.files[0]; if(file){ const reader = new FileReader(); reader.onload = (ev) => { $("logoPreview").src = ev.target.result; $("logoPreview").style.display = "block"; $("logoEmojiFallback").style.display = "none"; }; reader.readAsDataURL(file); } };
-window.saveStoreSettings = async () => { const name = $("setStoreName").value.trim() || "متجر الاشتراكات"; const logo = $("logoPreview").src || ""; storeSettings = { name, logo }; try { setSyncState("saving"); await db.ref("settings/storeInfo").set(storeSettings); setSyncState("ok"); closeModal("storeSettingsModal"); showToast("تم حفظ إعدادات المتجر ✨"); } catch(e) { showToast("ليس لديك صلاحية", "err"); } };
-window.confirmAddAdmin = async () => { const email = $("newAdminEmail").value.trim(); const pass = $("newAdminPass").value; const role = $("newAdminRole").value; if(!email || pass.length < 6) return showToast("بيانات غير صالحة", "err"); try { setSyncState("saving"); const secondaryApp = firebase.initializeApp(FIREBASE_CONFIG, "SecondaryApp"); const userCredential = await secondaryApp.auth().createUserWithEmailAndPassword(email, pass); await db.ref("admins/" + userCredential.user.uid).set({ role: role, email: email }); await secondaryApp.auth().signOut(); await secondaryApp.delete(); closeModal("addAdminModal"); $("newAdminEmail").value = ""; $("newAdminPass").value = ""; showToast(`✅ تم إنشاء الحساب!`); setSyncState("ok"); } catch (error) { if(error.code === 'auth/email-already-in-use') showToast("الإيميل مسجل مسبقاً", "err"); else showToast("خطأ: " + error.message, "err"); setSyncState("fail"); try { const app = firebase.app("SecondaryApp"); if(app) await app.delete(); } catch(e){} } };
-window.loadAdminsList = async () => { openModal("manageAdminsModal"); const tb = $("adminsTbody"); tb.innerHTML = "<tr><td colspan='3' style='text-align:center; padding:20px;'>جاري التحميل...</td></tr>"; try { const snap = await db.ref("admins").once("value"); const adminsObj = snap.val() || {}; tb.innerHTML = ""; for(let uid in adminsObj) { let uData = adminsObj[uid]; let isOwner = uData.role === "owner" || uData === true; let actionBtn = uid === currentUser.uid ? `<span style="color:var(--muted); font-size:12px;">حسابك</span>` : `<button class="btn danger" style="padding:6px 10px; font-size:12px; border-radius:10px;" onclick="revokeAdmin('${uid}')">سحب صلاحية</button>`; tb.innerHTML += `<tr><td>${uData.email || "غير محدد"}</td><td>${isOwner?"مالك 👑":"أدمن 👤"}</td><td>${actionBtn}</td></tr>`; } } catch(err) { tb.innerHTML = "<tr><td colspan='3' style='text-align:center; padding:20px; color:var(--err)'>ليس لديك صلاحية</td></tr>"; } };
-window.revokeAdmin = async (uid) => { if(confirm("تأكيد سحب الصلاحية؟")) { await db.ref("admins/" + uid).remove(); showToast("تم سحب الصلاحية بنجاح ✅"); window.loadAdminsList(); } };
-
-// تحميل البيانات والرسم
-window.loadData = async () => { 
-  if(!navigator.onLine) { data = loadLocalBackup(); window.render(); return; } 
-  try { 
-    setSyncState("saving"); 
-    try { const settingsSnap = await db.ref("settings/storeInfo").once('value'); if(settingsSnap.exists()) { storeSettings = settingsSnap.val(); $("setStoreName").value = storeSettings.name || ""; if(storeSettings.logo) { $("logoPreview").src = storeSettings.logo; $("logoPreview").style.display = "block"; $("logoEmojiFallback").style.display = "none"; } } } catch(errSettings) {} 
-    const snap = await db.ref("subscriptions").once('value'); data = snap.val() ? Object.values(snap.val()) : []; saveLocalBackup(); setSyncState("ok"); window.render(); 
-  } catch(e) { setSyncState("fail"); showToast("تم عرض النسخة المحفوظة محلياً", "warn"); data = loadLocalBackup(); window.render(); } 
+// --- نظام Gemini الذكي ---
+window.toggleAiVisibility = (enabled) => {
+    $("mainAiBtn").style.display = enabled ? "inline-flex" : "none";
+    $("aiSettingsFields").style.display = enabled ? "block" : "none";
 };
 
-// تم مسح دالة firebasePush القديمة البطيئة! الاعتماد كله الآن على التحديث النقطي السريع ⚡
+async function callGemini(prompt, systemPrompt) {
+  const apiKey = storeSettings.geminiKey;
+  if(!apiKey) throw new Error("يرجى إدخال API Key في الإعدادات.");
 
-function getStatus(endISO, alertDays) { const left = Math.round((toDate(endISO) - toDate(todayISO()))/(1000*60*60*24)); if(left < 0) return {key:"expired", label:"منتهي", cls:"err", left}; if(left <= alertDays) return {key:"expiring", label:"قريب ينتهي", cls:"warn", left}; return {key:"active", label:"فعّال", cls:"ok", left}; }
+  const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+  const payload = {
+    contents: [{ parts: [{ text: prompt }] }],
+    systemInstruction: { parts: [{ text: systemPrompt }] }
+  };
+
+  const response = await fetch(apiUrl, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+  const result = await response.json();
+  if (result.error) throw new Error(result.error.message);
+  return result.candidates?.[0]?.content?.parts?.[0]?.text || "لا توجد استجابة.";
+}
+
+window.openAiAnalysis = () => { $("aiResult").style.display = "none"; $("aiError").style.display = "none"; openModal("aiModal"); };
+
+window.generateAiReport = async () => {
+  const btn = $("generateAiBtn"); btn.disabled = true; $("aiLoading").style.display = "block";
+  try {
+    const shieldOn = storeSettings.privacyShield;
+    const cleanData = data.map(r => ({ service: r.serviceType, price: r.price, paid: r.paidAmount, status: getStatus(r.end, 7).label, client: shieldOn ? "محمي" : r.name }));
+    const sysPrompt = "أنت مساعد تجاري. حلل هذه الاشتراكات وقدم نصائح بالعربية باختصار.";
+    const report = await callGemini(JSON.stringify(cleanData), sysPrompt);
+    $("aiResult").textContent = report; $("aiResult").style.display = "block";
+  } catch (err) { $("aiError").textContent = err.message; $("aiError").style.display = "block"; }
+  finally { $("aiLoading").style.display = "none"; btn.disabled = false; }
+};
+
+// --- الأساسيات ---
+window.loadData = async () => {
+  try {
+    const sSnap = await db.ref("settings/storeInfo").once('value');
+    if(sSnap.exists()) {
+      storeSettings = { ...storeSettings, ...sSnap.val() };
+      $("setStoreName").value = storeSettings.name || "";
+      $("geminiKey").value = storeSettings.geminiKey || "";
+      $("privacyShield").checked = !!storeSettings.privacyShield;
+      $("enableAiToggle").checked = !!storeSettings.enableAi;
+      window.toggleAiVisibility(storeSettings.enableAi);
+    }
+    const snap = await db.ref("subscriptions").once('value');
+    data = snap.val() ? Object.values(snap.val()) : [];
+    window.render();
+  } catch(e) { console.error(e); }
+};
+
+window.saveSettings = async () => {
+  storeSettings = {
+    name: $("setStoreName").value,
+    geminiKey: $("geminiKey").value,
+    privacyShield: $("privacyShield").checked,
+    enableAi: $("enableAiToggle").checked
+  };
+  await db.ref("settings/storeInfo").set(storeSettings);
+  window.toggleAiVisibility(storeSettings.enableAi);
+  closeModal('storeSettingsModal');
+  showToast("تم الحفظ ✅");
+};
 
 window.render = () => {
-  const searchInput = $("search"); const q = searchInput ? (searchInput.value || "").trim().toLowerCase() : "";
-  const tb = $("tbody"); tb.innerHTML = ""; if($("selectAll")) $("selectAll").checked = false;
-  const alertEl = $("alertDays"); const alertD = (alertEl && alertEl.value) ? parseInt(alertEl.value) : 7;
-  
-  const rows = data.filter(r => { 
-    if(!r) return false;
-    const n = (r.name || "").toString().toLowerCase(); const p = (r.phone || "").toString().toLowerCase();
-    const e = (r.email || "").toString().toLowerCase(); const srv = (r.serviceType || "").toString().toLowerCase(); 
-    const match = !q || n.includes(q) || p.includes(q) || e.includes(q) || srv.includes(q); 
-    const st = getStatus(r.end, alertD); 
-    if(currentFilter !== "all" && currentFilter !== st.key) return false; return match; 
-  });
-  
-  if(rows.length === 0) { tb.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:40px; color:var(--muted); font-size:15px;">لا توجد بيانات مطابقة لعرضها 📭</td></tr>`; return; }
-
-  rows.forEach(r => {
-    const st = getStatus(r.end, alertD); const isChecked = selectedIds.has(r.id) ? "checked" : ""; const tr = document.createElement("tr");
-    if(st.key === "expired") tr.className = "expired-row"; else if(st.key === "expiring") tr.className = "expiring-row";
-    let pStatus = r.paymentStatus || 'paid'; let payBadge = '';
-    if(pStatus === 'unpaid') payBadge = '<span class="badge err" style="padding:4px 6px; font-size:10px;">🔴 غير مدفوع</span>';
-    else if(pStatus === 'partial') { let rem = (parseFloat(r.price)||0) - (parseFloat(r.paidAmount)||0); payBadge = `<span class="badge warn" style="padding:4px 6px; font-size:10px;" title="المتبقي: ${rem}">🟡 جزئي (${r.paidAmount||0})</span>`; }
-    else payBadge = '<span class="badge ok" style="padding:4px 6px; font-size:10px;">🟢 خالص</span>';
-    const serviceHtml = `<span class="service-badge">${r.serviceType || "غير محدد"}</span>`;
-    
-    tr.innerHTML = `
-      <td style="text-align: center;"><input type="checkbox" class="rowChk" value="${r.id}" ${isChecked}></td>
-      <td><div style="font-weight:bold; color:var(--text); font-size:14px;">${r.name||"-"}</div><div style="font-size:11px; color:var(--muted); margin-top:2px;">${r.email||''}</div></td>
-      <td dir="ltr" style="text-align:right; font-size:14px;">${r.phone?`${r.countryCode||''} ${r.phone}`:'-'}</td>
-      <td><div style="margin-bottom:4px;">${serviceHtml}</div><div style="font-size:11px; color:var(--muted); font-weight:bold;">المدة: ${r.months||0} شهر</div></td>
-      <td><div style="font-weight:bold; font-size:14px;">${r.price||0} <span style="font-size:10px; color:var(--muted);">${r.currency||'DZD'}</span></div><div style="margin-top:4px;">${payBadge}</div></td>
-      <td style="font-size:12px; color:var(--muted); line-height:1.6;"><span style="color:var(--text)">م:</span> ${r.start||"-"}<br><span style="color:var(--text)">إ:</span> ${r.end||"-"}</td>
-      <td><div style="margin-bottom:4px;"><span class="badge ${st.cls}">${st.label}</span></div><div style="font-size:11px; font-weight:bold; color:${st.left < 0 ? 'var(--err)' : 'var(--text)'};">${st.left < 0 ? 'منذ ' + Math.abs(st.left) : 'بقي ' + st.left} يوم</div></td>
-      <td><button class="actionPill" onclick="window.openRowActions('${r.id}')">⚡ إجراء</button></td>
-    `;
+  const q = ($("search").value || "").toLowerCase();
+  const tb = $("tbody"); tb.innerHTML = "";
+  data.filter(r => {
+    const match = !q || r.name.toLowerCase().includes(q) || r.serviceType.toLowerCase().includes(q);
+    const st = getStatus(r.end, 7);
+    return (currentFilter === "all" || currentFilter === st.key) && match;
+  }).forEach(r => {
+    const st = getStatus(r.end, 7);
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td><input type="checkbox"></td><td><b>${r.name}</b></td><td>${r.phone}</td><td>${r.serviceType}</td><td>${r.price}</td><td>${r.end}</td><td><span class="badge ${st.cls}">${st.label}</span></td><td><button class="actionPill">⚡</button></td>`;
     tb.appendChild(tr);
   });
 };
 
-// التحديد الجماعي
-window.updateBulkUI = () => { const bar = $("bulkBar"); if(selectedIds.size > 0) { bar.style.display = "flex"; $("selCount").textContent = `${selectedIds.size} محدد`; } else { bar.style.display = "none"; $("selectAll").checked = false; } };
-$("tbody").addEventListener("change", (e) => { if(e.target.classList.contains("rowChk")) { if(e.target.checked) selectedIds.add(e.target.value); else selectedIds.delete(e.target.value); window.updateBulkUI(); } });
-window.toggleSelectAll = (el) => { const isChkd = el.checked; document.querySelectorAll(".rowChk").forEach(chk => { chk.checked = isChkd; if(isChkd) selectedIds.add(chk.value); else selectedIds.delete(chk.value); }); window.updateBulkUI(); };
-window.clearSelectionAction = () => { selectedIds.clear(); window.render(); window.updateBulkUI(); };
+function getStatus(endISO, alertDays) {
+  const d1 = new Date(endISO+"T00:00:00"); const d2 = new Date();
+  const left = Math.round((d1 - d2)/(1000*60*60*24));
+  if(left < 0) return {key:"expired", label:"منتهي", cls:"err"};
+  if(left <= alertDays) return {key:"expiring", label:"قريب", cls:"warn"};
+  return {key:"active", label:"فعّال", cls:"ok"};
+}
 
-// ================= العمليات المباشرة للواجهة =================
+auth.onAuthStateChanged(u => { if(u){ currentUser=u; window.loadData(); } else { openModal('authModal'); $("authContent").innerHTML = '<button class="btn primary" onclick="auth.signInAnonymously()">دخول</button>'; } });
 
-window.openAddSub = () => { 
-  editingId=null; $("formTitle").textContent="إضافة اشتراك"; $("name").value=""; $("email").value=""; $("phone").value=""; $("countryCode").value="+213"; $("serviceType").value=""; $("quickPlan").value=""; $("months").value=""; $("price").value=""; $("start").value=todayISO(); 
-  $("paidAmount").value = ""; window.calcDebt(); openModal("formModal"); 
-};
-
-window.calcDebt = function() {
-  const p = parseFloat($("price").value) || 0; let valRaw = $("paidAmount").value; let a = valRaw === "" ? p : (parseFloat(valRaw) || 0); let d = p - a; $("debtAmount").value = d > 0 ? d : 0;
-};
-
-$("quickPlan").addEventListener('change', () => { if($("quickPlan").value) $("months").value = $("quickPlan").value; });
-
-window.openRowActions = (id) => { currentRowId = id; const rec = data.find(x => x.id === id); $("rowActionsHint").textContent = rec.name; openModal("rowActionsModal"); };
-window.actEditAction = () => { 
-  const rec = data.find(x => x.id === currentRowId); if(!rec) return; closeModal("rowActionsModal"); editingId = rec.id; 
-  $("formTitle").textContent = "تعديل اشتراك"; $("name").value = rec.name||""; $("email").value = rec.email||""; $("phone").value = rec.phone||""; $("countryCode").value = rec.countryCode||"+213"; $("serviceType").value = rec.serviceType||""; $("months").value = rec.months||""; 
-  $("price").value = rec.price||""; $("currency").value = rec.currency||"DZD"; $("start").value = rec.start; $("alertDays").value = rec.alertDays||"7"; 
-  if(rec.paymentStatus === 'unpaid') $("paidAmount").value = 0; else if(rec.paymentStatus === 'partial') $("paidAmount").value = rec.paidAmount || 0; else $("paidAmount").value = ""; 
-  window.calcDebt(); openModal("formModal"); 
-};
-
-// ================= التحديث النقطي في حفظ البيانات =================
-window.saveSubscription = async () => {
-  const start = $("start").value; const months = parseInt($("months").value); const emailVal = $("email").value.trim(); const serviceVal = $("serviceType").value.trim(); 
-  if(!$("name").value.trim() || !emailVal || !serviceVal || !start || isNaN(months)) { return showToast("الرجاء إدخال البيانات الإجبارية", "err"); }
-  
-  const priceInput = $("price").value; const priceFloat = parseFloat(priceInput) || 0; const paidInput = $("paidAmount").value; const paidFloat = paidInput === "" ? priceFloat : (parseFloat(paidInput) || 0);
-  let pStatus = 'paid'; if(paidFloat === 0 && priceFloat > 0) pStatus = 'unpaid'; else if(paidFloat < priceFloat) pStatus = 'partial';
-
-  const actionName = editingId ? "تعديل اشتراك" : "إضافة اشتراك"; logAction(actionName, `الاسم: ${$("name").value} - الدفع: ${pStatus === 'paid' ? 'خالص' : 'دين'}`); 
-  const endD = new Date(start); endD.setMonth(endD.getMonth() + months); const alertEl = $("alertDays");
-  const rec = { id: editingId || Date.now().toString(), name: $("name").value, email: emailVal, phone: $("phone").value, countryCode: $("countryCode").value, serviceType: serviceVal, alertDays: (alertEl && alertEl.value)?alertEl.value:7, months, price: priceInput, currency: $("currency").value, paymentStatus: pStatus, paidAmount: paidFloat, start, end: endD.toISOString().split('T')[0] };
-  
-  if(editingId) data = data.map(x => x.id === editingId ? rec : x); else data.unshift(rec);
-  
-  // ⚡ التحديث النقطي (إرسال بيانات زبون واحد فقط بدل 1000 زبون)
-  try {
-      setSyncState("saving");
-      await db.ref("subscriptions/" + rec.id).set(rec); 
-      saveLocalBackup(); setSyncState("ok");
-  } catch(e) { setSyncState("fail"); }
-
-  window.render(); closeModal("formModal"); showToast("تم الحفظ ✨");
-};
-
-// ================= التحديث النقطي في الحذف =================
-window.actDeleteAction = async () => { 
-  if(confirm("حذف؟")) { 
-    const recToDelete = data.find(x => x.id === currentRowId); logAction("حذف اشتراك", `الاسم: ${recToDelete.name}`); 
-    lastDeletedData = data.filter(x => x.id === currentRowId); data = data.filter(x => x.id !== currentRowId); 
-    
-    try {
-        setSyncState("saving");
-        await db.ref("subscriptions/" + currentRowId).remove(); // ⚡ مسح زبون واحد فقط من السيرفر
-        saveLocalBackup(); setSyncState("ok");
-    } catch(e) { setSyncState("fail"); }
-
-    window.render(); closeModal("rowActionsModal"); showToast("تم الحذف، التراجع ممكن من الأدوات 🗑️"); 
-  } 
-};
-
-window.bulkDeleteAction = async () => { 
-  if(!confirm(`تأكيد حذف ${selectedIds.size} اشتراكات؟`)) return; 
-  logAction("حذف جماعي", `عدد ${selectedIds.size} اشتراكات`); 
-  lastDeletedData = data.filter(x => selectedIds.has(x.id)); data = data.filter(x => !selectedIds.has(x.id)); 
-  
-  try {
-      setSyncState("saving");
-      const updates = {}; selectedIds.forEach(id => updates[id] = null);
-      await db.ref("subscriptions").update(updates); // ⚡ حذف عدة زبائن بالتحديث النقطي دفعة واحدة
-      saveLocalBackup(); setSyncState("ok");
-  } catch(e) { setSyncState("fail"); }
-
-  selectedIds.clear(); window.render(); window.updateBulkUI(); showToast("تم الحذف، التراجع ممكن من الأدوات 🗑️"); 
-};
-
-// ================= التحديث النقطي في التجديد =================
-window.actExtendAction = () => { extendMode = "single"; const rec = data.find(x => x.id === currentRowId); $("extendTitle").textContent = `تجديد لـ ${rec.name}`; $("extendValue").value = 1; $("extendUnit").value = "months"; closeModal("rowActionsModal"); openModal("extendModal"); };
-window.bulkExtendAction = () => { extendMode = "bulk"; $("extendTitle").textContent = `تجديد ${selectedIds.size} مشترك`; $("extendValue").value = 1; $("extendUnit").value = "months"; openModal("extendModal"); };
-
-window.confirmExtend = async () => {
-  const val = parseInt($("extendValue").value); const unit = $("extendUnit").value; if(isNaN(val) || val < 1) return showToast("غير صالح", "err");
-  if(extendMode === "bulk") { logAction("تجديد جماعي", `عدد ${selectedIds.size} اشتراكات بمقدار ${val} ${unit}`); } else { const recToExtend = data.find(x => x.id === currentRowId); logAction("تجديد اشتراك", `الاسم: ${recToExtend.name}، المدة المضافة: ${val} ${unit}`); }
-  const processRecord = (rec) => { const endD = new Date(rec.end); if(unit === "months") { endD.setMonth(endD.getMonth() + val); rec.months = (parseInt(rec.months)||0) + val; } else { endD.setDate(endD.getDate() + val); } rec.end = endD.toISOString().split('T')[0]; return rec; };
-  
-  const updates = {};
-  if(extendMode === "bulk") { 
-    data = data.map(x => { if(selectedIds.has(x.id)) { let upd = processRecord({...x}); updates[upd.id] = upd; return upd; } return x; }); 
-    selectedIds.clear(); window.updateBulkUI(); 
-  } else { 
-    data = data.map(x => { if(x.id === currentRowId) { let upd = processRecord({...x}); updates[upd.id] = upd; return upd; } return x; }); 
-  } 
-
-  try {
-      setSyncState("saving");
-      await db.ref("subscriptions").update(updates); // ⚡ تحديث تواريخ المحددين فقط 
-      saveLocalBackup(); setSyncState("ok");
-  } catch(e) { setSyncState("fail"); }
-
-  window.render(); closeModal("extendModal"); showToast("تم التجديد 🔁");
-};
-
-window.actCopyEmailAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.email) { closeModal("rowActionsModal"); return showToast("لا يوجد بريد مسجل.", "err"); } navigator.clipboard.writeText(rec.email); closeModal("rowActionsModal"); showToast("تم نسخ الإيميل 📋"); };
-window.actWhatsAppAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.phone) { closeModal("rowActionsModal"); return showToast("لا يوجد رقم هاتف.", "err"); } let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, ''); window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`مرحباً ${rec.name}، نود تذكيرك بانتهاء اشتراكك بتاريخ ${rec.end}.`)}`, '_blank'); closeModal("rowActionsModal"); };
-
-// الفاتورة الرقمية 
-window.openReceiptAction = () => {
-  const rec = data.find(x => x.id === currentRowId); if(!rec) return; closeModal("rowActionsModal"); 
-  const sName = (storeSettings.name || "متجر_الاشتراكات").replace(/[^a-zA-Z0-9\u0600-\u06FF\s]/g, '').trim().replace(/\s+/g, '_'); const cName = (rec.name || "عميل").replace(/[^a-zA-Z0-9\u0600-\u06FF\s]/g, '').trim().replace(/\s+/g, '_'); const d = new Date(); const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  document.title = `فاتورة_${sName}_${cName}_${dateStr}`;
-  $("receiptStoreName").textContent = storeSettings.name || "متجر الاشتراكات";
-  if(storeSettings.logo) { $("receiptLogoImg").src = storeSettings.logo; $("receiptLogoImg").style.display = "block"; $("receiptLogoEmoji").style.display = "none"; } else { $("receiptLogoImg").style.display = "none"; $("receiptLogoEmoji").style.display = "block"; }
-  $("recName").textContent = rec.name || "-"; $("recPhone").textContent = rec.phone ? `${rec.countryCode||''}${rec.phone}` : "-"; $("recService").textContent = rec.serviceType || "غير محدد"; $("recMonths").textContent = `${rec.months || 0} شهر`; $("recStart").textContent = rec.start || "-"; $("recEnd").textContent = rec.end || "-"; $("recPrice").textContent = `${parseFloat(rec.price || 0).toLocaleString()} ${rec.currency || 'DZD'}`;
-  let pStatus = rec.paymentStatus || 'paid'; let pText = pStatus === 'paid' ? '🟢 مدفوع بالكامل' : (pStatus === 'unpaid' ? '🔴 غير مدفوع' : '🟡 دفع جزئي'); $("recPaymentStatus").textContent = pText;
-  if(pStatus === 'partial') { $("recPaidAmountRow").style.display = "table-row"; $("recPaidAmount").textContent = `${parseFloat(rec.paidAmount || 0).toLocaleString()} ${rec.currency || 'DZD'}`; } else { $("recPaidAmountRow").style.display = "none"; }
-  if(pStatus === 'partial' || pStatus === 'unpaid') { $("recRemainingRow").style.display = "table-row"; let total = parseFloat(rec.price) || 0; let paid = pStatus === 'unpaid' ? 0 : (parseFloat(rec.paidAmount) || 0); let rem = total - paid; $("recRemaining").textContent = `${rem.toLocaleString()} ${rec.currency || 'DZD'}`; } else { $("recRemainingRow").style.display = "none"; }
-  $("recToday").textContent = `${d.toLocaleDateString('en-GB')} - ${d.toLocaleTimeString('en-GB')}`; logAction("إصدار وصل", `للعميل: ${rec.name}`); openModal("receiptModal"); 
-};
-window.printSmartReceipt = () => { window.print(); };
-window.sendWhatsAppReceipt = () => {
-  const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.phone) return showToast("العميل لا يملك رقم هاتف", "warn");
-  let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, ''); let sName = storeSettings.name || "متجر الاشتراكات"; let pText = rec.paymentStatus === 'unpaid' ? '🔴 غير مدفوع' : (rec.paymentStatus === 'partial' ? '🟡 دفع جزئي' : '🟢 خالص');
-  let msg = `🧾 *فاتورة اشتراك إلكترونية* 🧾\n\n🏢 المتجر: *${sName}*\n👤 العميل: ${rec.name||'-'}\n📦 الخدمة: ${rec.serviceType||'غير محدد'}\n⏳ المدة: ${rec.months||0} شهر\n📅 البداية: ${rec.start||'-'}\n🏁 الانتهاء: ${rec.end||'-'}\n\n💰 *السعر الإجمالي:* ${parseFloat(rec.price||0).toLocaleString()} ${rec.currency||'DZD'}\n💳 *حالة الدفع:* ${pText}\n`;
-  if(rec.paymentStatus === 'partial') { msg += `💸 *المبلغ المدفوع:* ${parseFloat(rec.paidAmount||0).toLocaleString()} ${rec.currency||'DZD'}\n`; }
-  if(rec.paymentStatus === 'partial' || rec.paymentStatus === 'unpaid'){ let total = parseFloat(rec.price)||0; let paid = rec.paymentStatus === 'unpaid' ? 0 : parseFloat(rec.paidAmount)||0; msg += `❗ *المتبقي (دين):* ${(total - paid).toLocaleString()} ${rec.currency||'DZD'}\n`; }
-  msg += `\n🤍 نشكركم على ثقتكم بنا!`; window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
-};
-
-// الإحصائيات والأدوات
-window.openTotalsReport = () => { 
-  const alertEl = $("alertDays"); const alertD = (alertEl && alertEl.value) ? parseInt(alertEl.value) : 7; const activeData = data.filter(r => getStatus(r.end, alertD).key !== "expired"); 
-  const totalsByCurrency = {}; const debtsByCurrency = {}; const serviceCounts = {};
-  activeData.forEach(r => { const curr = r.currency || "DZD"; const price = parseFloat(r.price) || 0; 
-    if(r.paymentStatus === 'unpaid') { debtsByCurrency[curr] = (debtsByCurrency[curr] || 0) + price; } else if(r.paymentStatus === 'partial') { const paid = parseFloat(r.paidAmount) || 0; totalsByCurrency[curr] = (totalsByCurrency[curr] || 0) + paid; debtsByCurrency[curr] = (debtsByCurrency[curr] || 0) + (price - paid); } else { totalsByCurrency[curr] = (totalsByCurrency[curr] || 0) + price; }
-    const srv = r.serviceType || "غير محدد"; serviceCounts[srv] = (serviceCounts[srv] || 0) + 1; 
-  });
-  let totalsHtml = ""; if (Object.keys(totalsByCurrency).length === 0) { totalsHtml = `<div style="color:var(--accent); font-size:32px; margin-bottom:10px;">0 <span style="font-size:18px; color:var(--muted);">DZD</span></div>`; } else { for (let curr in totalsByCurrency) { totalsHtml += `<div style="color:var(--accent); font-size:32px; margin-bottom:5px;">${totalsByCurrency[curr].toLocaleString()} <span style="font-size:18px; color:var(--muted);">${curr}</span></div>`; } }
-  let debtsHtml = ""; if (Object.keys(debtsByCurrency).length > 0) { debtsHtml = `<div style="margin-top:10px; padding:10px; background:rgba(239,68,68,0.1); border-radius:12px; border:1px solid rgba(239,68,68,0.3);"><div style="color:#ef4444; font-size:12px; font-weight:bold; margin-bottom:5px;">❗ الديون المعلقة (غير المحصلة):</div>`; for (let curr in debtsByCurrency) { debtsHtml += `<div style="color:#ef4444; font-size:16px; font-weight:900;">${debtsByCurrency[curr].toLocaleString()} ${curr}</div>`; } debtsHtml += `</div>`; }
-  let servicesHtml = `<div style="margin-top:15px; display:flex; flex-wrap:wrap; gap:5px; justify-content:center; padding-top:15px; border-top:1px solid rgba(255,255,255,0.1);">`; for(let s in serviceCounts) { servicesHtml += `<span class="statChip" style="font-size:11px; background:rgba(124,92,255,0.1); border-color:rgba(124,92,255,0.3); color:#eaf0ff;">${s}: ${serviceCounts[s]}</span>`; } servicesHtml += `</div>`;
-  $("totalsBody").innerHTML = `${totalsHtml}<div style="font-size:13px; color:var(--muted);">المداخيل الصافية المحصلة من الاشتراكات الفعّالة.</div>${debtsHtml}${servicesHtml}`; openModal("totalsModal"); 
-};
-
-window.exportCSV = () => { 
-  if(data.length === 0) return showToast("لا توجد بيانات لتصديرها", "warn"); 
-  let csv = "\uFEFFالاسم,الإيميل,الهاتف,الخدمة,المدة,السعر,المبلغ المدفوع,حالة الدفع,تاريخ البداية,تاريخ الانتهاء\n"; 
-  data.forEach(r => { let phone = r.phone ? `${r.countryCode||''}${r.phone}` : ''; let payStat = r.paymentStatus === 'unpaid' ? 'غير مدفوع' : (r.paymentStatus === 'partial' ? 'جزئي' : 'خالص'); let paidAmt = r.paymentStatus === 'unpaid' ? 0 : (r.paymentStatus === 'partial' ? (r.paidAmount||0) : (r.price||0)); csv += `${r.name||''},${r.email||''},${phone},${r.serviceType||''},${r.months||''} شهر,${r.price||0} ${r.currency||'DZD'},${paidAmt},${payStat},${r.start||''},${r.end||''}\n`; }); 
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Subscriptions_Excel_${todayISO()}.csv`; a.click(); closeModal('toolsModal'); showToast("تم التصدير بنجاح 📥"); 
-};
-
-window.undoDelete = async () => { 
-  if(!lastDeletedData || lastDeletedData.length === 0) { closeModal('toolsModal'); return showToast("لا يوجد أي حذف أخير لاسترجاعه", "warn"); } 
-  logAction("تراجع عن الحذف", `استرجاع ${lastDeletedData.length} اشتراكات`); data = [...lastDeletedData, ...data]; 
-  
-  try {
-      setSyncState("saving"); const updates = {}; lastDeletedData.forEach(r => updates[r.id] = r);
-      await db.ref("subscriptions").update(updates); // ⚡ استرجاع المحددين فقط عبر التحديث النقطي
-      saveLocalBackup(); setSyncState("ok");
-  } catch(e) { setSyncState("fail"); }
-
-  lastDeletedData = null; window.render(); closeModal('toolsModal'); showToast("تم استرجاع البيانات المحذوفة ↩️"); 
-};
-
-window.exportJson = () => { if(data.length === 0) return showToast("لا توجد بيانات", "warn"); const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data)); const a = document.createElement("a"); a.href = dataStr; a.download = `Backup_${todayISO()}.json`; a.click(); closeModal("toolsModal"); showToast("تم التنزيل 📥"); };
-window.importFile = () => $("fileInput").click();
-window.handleFileSelect = (e) => { 
-  const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); 
-  reader.onload = async (event) => { 
-    try { 
-      const imported = JSON.parse(event.target.result); 
-      if(Array.isArray(imported)) { 
-        data = imported; 
-        try { setSyncState("saving"); const importDict = {}; imported.forEach(r => importDict[r.id] = r); await db.ref("subscriptions").set(importDict); saveLocalBackup(); setSyncState("ok"); } catch(e) { setSyncState("fail"); }
-        window.render(); closeModal("backupModal"); closeModal("toolsModal"); showToast("تم الاستيراد ✅"); 
-      } 
-    } catch(err) { showToast("ملف غير صالح", "err"); } 
-  }; 
-  reader.readAsText(file); 
-};
-window.confirmPaste = async () => { 
-  try { 
-    const imported = JSON.parse($("pasteArea").value); 
-    if(Array.isArray(imported)) { 
-      data = imported; 
-      try { setSyncState("saving"); const importDict = {}; imported.forEach(r => importDict[r.id] = r); await db.ref("subscriptions").set(importDict); saveLocalBackup(); setSyncState("ok"); } catch(e) { setSyncState("fail"); }
-      window.render(); closeModal("pasteModal"); closeModal("backupModal"); closeModal("toolsModal"); $("pasteArea").value=""; showToast("تم الاستيراد ✅"); 
-    } 
-  } catch(e) { showToast("كود غير صالح", "err"); } 
-};
-window.clearAllData = async () => { 
-  if(confirm("⚠️ تحذير خطير: سيتم مسح كل البيانات!")) { 
-    logAction("تصفير اللوحة", "حذف كافة البيانات ⚠️"); lastDeletedData = [...data]; data = []; 
-    try { setSyncState("saving"); await db.ref("subscriptions").remove(); saveLocalBackup(); setSyncState("ok"); } catch(e) { setSyncState("fail"); }
-    window.render(); closeModal("toolsModal"); showToast("تم مسح البيانات 🗑️ (يمكنك التراجع من الأدوات)"); 
-  } 
-};
-window.shareApp = () => { closeModal("toolsModal"); if (navigator.share) { navigator.share({ title: 'لوحة الاشتراكات', url: window.location.href }); } else { showToast("المشاركة غير مدعومة", "warn"); } };
-
-window.loginUser = () => { auth.signInWithEmailAndPassword($("authEmail").value, $("authPass").value).catch(e => showToast("بيانات الدخول خاطئة", "err")); };
-window.logoutUser = () => { auth.signOut(); };
-window.clearSearch = () => { $("search").value = ""; window.render(); };
-window.pasteSearch = async () => { try { const text = await navigator.clipboard.readText(); $("search").value = text; window.render(); } catch(e) { showToast("فشل اللصق، يرجى منح صلاحية الحافظة", "warn"); } };
-window.setFilter = (btn, filterType) => { document.querySelectorAll(".filterBtn").forEach(x=>x.classList.remove("active")); btn.classList.add("active"); currentFilter = filterType; window.render(); };
+window.calcDebt = () => { $("debtAmount").value = Math.max(0, (parseFloat($("price").value)||0) - (parseFloat($("paidAmount").value)||0)); };
+window.openAddSub = () => openModal("formModal");
+window.setFilter = (btn, f) => { document.querySelectorAll(".filterBtn").forEach(x=>x.classList.remove("active")); btn.classList.add("active"); currentFilter=f; window.render(); };
 
 </script>
 </body>
