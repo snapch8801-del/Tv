@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>لوحة تسيير الاشتراكات 2.0</title>
+<title>لوحة تسيير الاشتراكات 2.0 (النسخة المنظفة)</title>
 
 <style>
 :root{
@@ -99,7 +99,7 @@ body{
   box-shadow: 0 0 0 4px rgba(124,92,255,.14);
 }
 
-/* ===== Filters Bar (الجديد) ===== */
+/* ===== Filters Bar ===== */
 .filtersBar{
   width: 100%;
   display: flex;
@@ -175,7 +175,7 @@ table{
   width:100%;
   border-collapse:separate;
   border-spacing:0;
-  min-width: 980px; /* تم زيادته ليناسب عمود الهاتف */
+  min-width: 980px;
 }
 thead th{
   position:sticky; top:0;
@@ -280,7 +280,7 @@ tr.expiring-row td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.85); 
   box-shadow: 0 0 0 4px rgba(124,92,255,.14);
 }
 
-/* ===== Actions Modal (للجدول فقط) ===== */
+/* ===== Actions Modal ===== */
 .actionPill{
   padding:10px 12px;
   border-radius:16px;
@@ -353,19 +353,6 @@ tr.expiring-row td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.85); 
 .toast .msg{ font-weight: 900; }
 .toast .sub{ color: var(--muted); font-weight: 800; }
 
-.toast .action{
-  margin-inline-start: auto;
-  border: 1px solid rgba(255,255,255,.14);
-  background: rgba(255,255,255,.06);
-  color: var(--text);
-  padding: 8px 10px;
-  border-radius: 12px;
-  font-weight: 900;
-  cursor: pointer;
-}
-.toast .action:hover{ background: rgba(255,255,255,.10); }
-
-/* إخفاء شريط الطباعة */
 @media print{
   .filtersBar, .topbar, .btn, .toast, .modal{ display:none !important; }
 }
@@ -373,6 +360,7 @@ tr.expiring-row td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.85); 
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 
 </head>
 
@@ -380,7 +368,7 @@ tr.expiring-row td:first-child{ box-shadow: inset 4px 0 0 rgba(245,158,11,.85); 
 <div class="container">
   <div class="header">
     <h1>🧾 لوحة تسيير الاشتراكات</h1>
-    <div class="sub">⚡ المرحلة 1: حماية + فلاتر + واتساب. <span style="opacity:.7;font-weight:800">(v2.0)</span></div>
+    <div class="sub">⚡ المرحلة 1: نسخة منظفة ومستقرة (Refactored v2.0)</div>
   </div>
 
   <div class="card">
@@ -602,23 +590,14 @@ function updateAuthUI(){
 }
 
 const $ = (id)=>document.getElementById(id);
-const FIREBASE_URL  = "https://dattta-6f497-default-rtdb.firebaseio.com";
 const FIREBASE_PATH = "subscriptions";
-
-async function requireIdToken(){
-  if(!currentUser) throw new Error("يجب تسجيل الدخول");
-  return await currentUser.getIdToken(false);
-}
-
 const LOCAL_BACKUP_KEY = "subs_local_backup_v4";
-const PENDING_SYNC_KEY = "subs_pending_sync_v1";
 
 let syncState = "idle"; 
 let data = [];
 let editingId = null;
 let currentFilter = "all"; 
 
-// ✅ تم تعديل هذه الدالة لتظهر الوقت والتحديث المباشر
 function setSyncState(state){
   syncState = state;
   const chip = document.getElementById("syncChip");
@@ -648,14 +627,6 @@ function setSyncState(state){
   }
 }
 
-async function fetchWithTimeout(url, options={}, timeoutMs=25000){
-  const controller = new AbortController();
-  const t = setTimeout(()=>controller.abort(), timeoutMs);
-  try{
-    return await fetch(url, { ...options, signal: controller.signal, cache: "no-store" });
-  } finally { clearTimeout(t); }
-}
-
 function saveLocalBackup(){ localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(data)); }
 function loadLocalBackup(){
   try{
@@ -664,24 +635,18 @@ function loadLocalBackup(){
   }catch{ return []; }
 }
 
+// ==========================================
+// 🚀 التنظيف الجذري الأول: الاعتماد على مكتبة Firebase مباشرة بدلاً من الروابط 
+// ==========================================
 async function firebasePull(){
-  const token = await requireIdToken();
-  const url = `${FIREBASE_URL}/${FIREBASE_PATH}.json?auth=${encodeURIComponent(token)}`;
-  const res = await fetchWithTimeout(url);
-  if(!res.ok) throw new Error("Pull failed");
-  const json = await res.json();
-  return Array.isArray(json) ? json : [];
+  const snapshot = await firebase.database().ref(FIREBASE_PATH).once('value');
+  const val = snapshot.val();
+  if(!val) return [];
+  return Array.isArray(val) ? val : Object.values(val);
 }
 
 async function firebasePushOnce(){
-  const token = await requireIdToken();
-  const url = `${FIREBASE_URL}/${FIREBASE_PATH}.json?auth=${encodeURIComponent(token)}`;
-  const res = await fetchWithTimeout(url, {
-    method: "PUT",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(data)
-  });
-  if(!res.ok) throw new Error("Push failed");
+  await firebase.database().ref(FIREBASE_PATH).set(data);
 }
 
 let syncTimer = null;
@@ -717,6 +682,7 @@ async function load(){
     data = loadLocalBackup();
   }
 }
+
 function save(){
   saveLocalBackup();
   scheduleSyncPush(0);
@@ -783,7 +749,10 @@ $("saveBtn").onclick = ()=>{
   const start = $("start").value;
   const currency = $("currency").value;
 
-  if(!name || !email || !start || !months || months<1) return alert("يرجى إكمال البيانات الأساسية");
+  // 🚀 التنظيف الثاني: استبدال alert برسالة Toast احترافية
+  if(!name || !email || !start || !months || months<1) {
+    return showToast("بيانات ناقصة", "يرجى ملء الاسم، الإيميل، والمدة", "err");
+  }
 
   const end = addMonths(start, months);
   const rec = {
@@ -829,7 +798,7 @@ $("actWhatsApp").onclick = ()=>{
   const rec = data.find(x => x.id === currentRowId);
   if(!rec) return;
   if(!rec.phone){
-    alert("❌ لا يوجد رقم هاتف محفوظ لهذا العميل. قم بتعديل العميل وإضافة الرقم أولاً.");
+    showToast("خطأ", "لا يوجد رقم هاتف محفوظ لهذا العميل", "err");
     return;
   }
   
@@ -859,7 +828,7 @@ function render(){
   const tb = $("tbody");
   tb.innerHTML="";
   
-  const alertDays = Number($("alertDays").value) || 7;
+  const alertDays = Number($("alertDays")?.value || 7);
 
   const rows = data.filter(r=>{
     const matchSearch = !q || (r.name||"").toLowerCase().includes(q) || (r.email||"").toLowerCase().includes(q) || (r.phone||"").includes(q);
@@ -940,7 +909,7 @@ $("openAuth").onclick = ()=> openModal("authModal");
 <script>
 $("authLogin").onclick = async ()=>{
   const e=$("authEmail").value.trim(), p=$("authPass").value;
-  if(!e||!p) return showToast("أكمل البيانات");
+  if(!e||!p) return showToast("أكمل البيانات", "", "warn");
   try{ await firebase.auth().signInWithEmailAndPassword(e, p); showToast("تم الدخول","","ok"); }
   catch(err){ showToast("فشل", err.message, "err"); }
 };
