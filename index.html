@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>لوحة تسيير الاشتراكات - النسخة 2.3</title>
+<title>لوحة تسيير الاشتراكات - النسخة 2.4 (المكتملة)</title>
 
 <style>
 :root{
@@ -73,7 +73,9 @@ input[type="checkbox"]:checked::after { content: "✔"; position: absolute; colo
 table{ width:100%; border-collapse:separate; border-spacing:0; min-width: 980px; }
 thead th{ position:sticky; top:0; z-index:5; background: rgba(0,0,0,.22); color: var(--muted); text-align:right; font-size:12px; font-weight:900; padding:12px; border-bottom:1px solid var(--line); }
 tbody td{ padding:12px; border-bottom:1px solid rgba(255,255,255,.07); white-space:nowrap; }
+
 tr.expired-row{ background: rgba(239,68,68,.10); }
+tr.expiring-row{ background: rgba(245,158,11,.08); }
 
 .badge{ display:inline-flex; align-items:center; padding:6px 10px; border-radius:999px; border:1px solid var(--line); font-size:12px; font-weight:900; }
 .badge.ok{ border-color: rgba(34,197,94,.45); color:#c8f7d9; }
@@ -108,7 +110,7 @@ tr.expired-row{ background: rgba(239,68,68,.10); }
 <div class="container">
   <div class="header">
     <h1>🧾 لوحة تسيير الاشتراكات</h1>
-    <div class="sub">⚡ النسخة 2.3: دعم مفاتيح الدول وإشعارات ذكية</div>
+    <div class="sub">⚡ النسخة 2.4: مكتملة مع كافة الفلاتر والإجراءات الجماعية</div>
   </div>
 
   <div class="card">
@@ -137,6 +139,7 @@ tr.expired-row{ background: rgba(239,68,68,.10); }
     <div class="filtersBar" id="filtersBar">
       <button class="filterBtn active" data-filter="all">الكل</button>
       <button class="filterBtn" data-filter="active">✅ فعّال</button>
+      <button class="filterBtn" data-filter="expiring">⏰ قريب ينتهي</button>
       <button class="filterBtn" data-filter="expired">❌ منتهي</button>
     </div>
 
@@ -213,8 +216,9 @@ tr.expired-row{ background: rgba(239,68,68,.10); }
       <div class="actGrid">
         <button class="actBtn" id="actExtend">🔁 تجديد</button>
         <button class="actBtn" id="actEdit">✏️ تعديل</button>
+        <button class="actBtn" id="actCopyEmail">📋 نسخ Email</button>
         <button class="actBtn" id="actWhatsApp" style="color:#22c55e">💬 واتساب</button>
-        <button class="actBtn danger" id="actDelete">🗑️ حذف</button>
+        <button class="actBtn danger" id="actDelete" style="grid-column: span 2;">🗑️ حذف الاشتراك</button>
       </div>
     </div>
   </div>
@@ -301,6 +305,14 @@ $("bulkExtend").onclick = () => {
   $("extendValue").value = 1; $("extendUnit").value = "months"; openModal("extendModal");
 };
 
+// الدالة المسؤولة عن تقييم حالة الاشتراك لتسهيل الفلترة
+function getStatus(endISO) {
+  const left = Math.round((new Date(endISO) - new Date().setHours(0,0,0,0))/(1000*60*60*24));
+  if(left < 0) return {key:"expired", label:"منتهي", cls:"err", left};
+  if(left <= 7) return {key:"expiring", label:"قريب ينتهي", cls:"warn", left};
+  return {key:"active", label:"فعّال", cls:"ok", left};
+}
+
 function render(){
   const q = ($("search").value||"").trim().toLowerCase();
   const tb = $("tbody"); tb.innerHTML="";
@@ -308,28 +320,28 @@ function render(){
 
   const rows = data.filter(r=>{
     const match = !q || r.name.toLowerCase().includes(q) || (r.phone||"").includes(q);
-    const left = Math.round((new Date(r.end) - new Date().setHours(0,0,0,0))/(1000*60*60*24));
-    const st = left < 0 ? "expired" : "active";
-    if(currentFilter !== "all" && currentFilter !== st) return false;
+    const st = getStatus(r.end);
+    if(currentFilter !== "all" && currentFilter !== st.key) return false;
     return match;
   });
 
   rows.forEach(r=>{
-    const left = Math.round((new Date(r.end) - new Date().setHours(0,0,0,0))/(1000*60*60*24));
-    const isExpired = left < 0;
+    const st = getStatus(r.end);
     const isChecked = selectedIds.has(r.id) ? "checked" : "";
     const tr = document.createElement("tr");
-    if(isExpired) tr.className = "expired-row";
     
-    // دمج رمز الدولة مع رقم الهاتف في العرض
+    // إضافة لون التمييز بناءً على الحالة
+    if(st.key === "expired") tr.className = "expired-row";
+    else if(st.key === "expiring") tr.className = "expiring-row";
+    
     const displayPhone = r.phone ? `${r.countryCode || ''} ${r.phone}`.trim() : '-';
     
     tr.innerHTML = `
       <td style="text-align: center;"><input type="checkbox" class="rowChk" value="${r.id}" ${isChecked}></td>
       <td>${r.name}</td><td>${r.email||'-'}</td><td dir="ltr">${displayPhone}</td>
       <td>${r.price} DZD</td><td>${r.end}</td>
-      <td>${isExpired ? 'منذ ' + Math.abs(left) : left} يوم</td>
-      <td><span class="badge ${isExpired ? 'err' : 'ok'}">${isExpired ? 'منتهي' : 'فعال'}</span></td>
+      <td>${st.left < 0 ? 'منذ ' + Math.abs(st.left) : st.left} يوم</td>
+      <td><span class="badge ${st.cls}">${st.label}</span></td>
       <td><button class="actionPill" onclick="openRowActions('${r.id}')">⚡ إجراء</button></td>
     `;
     tb.appendChild(tr);
@@ -356,7 +368,16 @@ $("actExtend").onclick = () => {
   closeModal("rowActionsModal"); openModal("extendModal");
 };
 
-// المنطق الجديد لزر الواتساب
+$("actCopyEmail").onclick = () => {
+  const rec = data.find(x => x.id === currentRowId);
+  if(!rec || !rec.email) {
+    closeModal("rowActionsModal");
+    return showToast("لا يوجد بريد إلكتروني مسجل لهذا العميل.", "err");
+  }
+  navigator.clipboard.writeText(rec.email);
+  closeModal("rowActionsModal"); showToast("تم نسخ الإيميل 📋");
+};
+
 $("actWhatsApp").onclick = () => {
   const rec = data.find(x => x.id === currentRowId);
   
@@ -367,7 +388,6 @@ $("actWhatsApp").onclick = () => {
   
   let fullPhone = (rec.countryCode || '') + rec.phone;
   let cleanPhone = fullPhone.replace(/[^0-9+]/g, '');
-  
   let message = `مرحباً ${rec.name}،\nنود تذكيرك بأن اشتراكك سينتهي بتاريخ ${rec.end}.\nيرجى التجديد لضمان استمرار الخدمة.`;
   window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
   closeModal("rowActionsModal");
