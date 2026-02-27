@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>لوحة تسيير الاشتراكات - النسخة الشاملة (تصميم فاخر)</title>
+<title>لوحة تسيير الاشتراكات - النسخة الشاملة (واجهة نظيفة)</title>
 
 <style>
 :root{
@@ -38,7 +38,7 @@ body{
 .searchWrap input, .searchWrap select { width:100%; padding:10px 12px; border-radius:14px; border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); outline:none; transition: all 0.2s; }
 .searchWrap input:focus, .searchWrap select:focus { border-color: rgba(124,92,255,.6); box-shadow: 0 0 0 4px rgba(124,92,255,.14); }
 
-/* ==== إصلاح مشكلة الإكمال التلقائي للمتصفحات ==== */
+/* إصلاح الإكمال التلقائي */
 input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active{
     -webkit-box-shadow: 0 0 0 30px #161b2a inset !important;
     -webkit-text-fill-color: var(--text) !important;
@@ -75,7 +75,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 .badge.warn{ border-color: rgba(245,158,11,.45); color:#ffe2b3; }
 .badge.err{ border-color: rgba(239,68,68,.45); color:#ffd0d0; }
 
-.modal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,.62); z-index:9999; padding: 18px; }
+.modal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,.75); z-index:9999; padding: 18px; }
 .modal[aria-hidden="false"]{ display:flex; }
 .modal .box{ width:min(860px, 100%); background: rgba(10,14,26,.96); border: 1px solid rgba(255,255,255,.10); border-radius: 22px; box-shadow: 0 30px 90px rgba(0,0,0,.65); overflow:hidden; }
 .modalHeader{ padding:16px 20px; border-bottom:1px solid rgba(255,255,255,.10); display:flex; align-items:center; justify-content:space-between; gap:10px; }
@@ -99,7 +99,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 .toast{ position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%) translateY(20px); padding: 12px 14px; border-radius: 16px; background: rgba(10,14,26,.92); border: 1px solid rgba(255,255,255,.12); color: var(--text); display: flex; align-items: center; gap: 10px; opacity: 0; pointer-events: none; transition: all .2s ease; z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-weight:bold; }
 .toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto;}
 
-/* ==== تنسيقات صفحة الدخول الجديدة الفاخرة ==== */
+/* تصميم صفحة الدخول */
 .auth-wrap { text-align: center; padding: 10px 15px; }
 .auth-icon-wrap { display:inline-flex; align-items:center; justify-content:center; width:75px; height:75px; background:linear-gradient(135deg, rgba(124,92,255,0.2), rgba(124,92,255,0.05)); border:1px solid rgba(124,92,255,0.3); border-radius:50%; font-size:32px; margin-bottom:15px; box-shadow: 0 10px 25px rgba(124,92,255,0.15); }
 .auth-title { margin:0 0 5px 0; font-size:24px; color:var(--text); font-weight:900; }
@@ -107,6 +107,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 .auth-input { width:100%; padding:15px 18px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:16px; color:#fff; font-size:15px; outline:none; transition:all 0.2s; text-align: left; direction: ltr; }
 .auth-input:focus { border-color: rgba(124,92,255,.6); box-shadow: 0 0 0 4px rgba(124,92,255,.14); background:rgba(0,0,0,0.6); }
 .auth-label { font-size:13px; color:var(--muted); margin-bottom:8px; display:block; text-align: right; font-weight: bold; }
+
 @media print{ .filtersBar, .topbar, .btn, .toast, .modal, .bulkBar{ display:none !important; } }
 </style>
 
@@ -119,22 +120,17 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 <div class="container">
   <div class="header">
     <h1>🧾 لوحة تسيير الاشتراكات</h1>
-    <div class="sub">⚡ النسخة الشاملة (مع تصميم فاخر لنافذة الحساب)</div>
+    <div class="sub">⚡ النسخة 2.7: واجهة علوية نظيفة واحترافية</div>
   </div>
 
   <div class="card">
     <div class="topbar">
       <button class="btn primary" id="openAdd" type="button">➕ إضافة</button>
-      <button class="btn soft" id="openBackup" type="button">📦 النسخ الاحتياطي</button>
-      <button class="btn soft" id="openSync" type="button">☁️ المزامنة</button>
       <button class="btn soft" id="openTotals" type="button">💰 المجموع</button>
-      <button class="btn soft" id="openAuth" type="button" style="border-color:var(--accent); color:var(--accent); box-shadow: 0 0 15px rgba(124,92,255,0.2);">👤 الحساب والإدارة</button>
+      <button class="btn soft" id="openAuth" type="button" style="border-color:var(--accent); color:var(--accent); box-shadow: 0 0 15px rgba(124,92,255,0.2);">👤 الإدارة</button>
+      <button class="btn soft" id="openToolsModal" type="button">⚙️ أدوات</button>
 
       <div class="searchWrap"><input id="search" placeholder="بحث بالاسم أو الإيميل أو الرقم..." /></div>
-
-      <button class="btn soft" id="shareBtn" type="button">📤 مشاركة</button>
-      <button class="btn soft" id="printBtn" type="button">🖨️ طباعة</button>
-      <button class="btn danger" id="clearBtn" type="button">حذف الكل</button>
 
       <div class="pills" id="statsBar">
         <div class="statChip sync" id="syncChip"><span class="ico">☁️</span> <span class="v" id="syncVal">—</span></div>
@@ -170,56 +166,104 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
   </div>
 </div>
 
-<div class="modal" id="authModal" aria-hidden="true">
-  <div class="box" style="width: 400px; padding:0;">
-    
-    <div class="modalHeader" style="border-bottom:none; padding-bottom:0;">
-      <button class="btn" id="closeAuthBtn" onclick="closeModal('authModal')" style="display:none; margin-inline-start:auto; background:transparent; border:none; font-size:18px;">✕</button>
-    </div>
-
-    <div class="modalBody" style="padding-top:0;">
-      
-      <div id="authLoginSection" class="auth-wrap">
-        <div class="auth-icon-wrap">🔒</div>
-        <h2 class="auth-title">مرحباً بعودتك</h2>
-        <div class="auth-sub">يرجى تسجيل الدخول للوصول إلى لوحة التحكم</div>
-        
-        <div style="margin-bottom:20px;">
-           <label class="auth-label">البريد الإلكتروني</label>
-           <input id="authEmail" type="email" class="auth-input" placeholder="admin@example.com">
-        </div>
-        <div style="margin-bottom:30px;">
-           <label class="auth-label">كلمة المرور</label>
-           <input id="authPass" type="password" class="auth-input" placeholder="••••••••">
-        </div>
-        <button class="btn primary" id="authLogin" style="width:100%; padding:16px; font-size:16px; font-weight:900; border-radius:16px; box-shadow: 0 8px 25px rgba(124,92,255,0.3);">تسجيل الدخول 🚀</button>
+<div class="modal" id="toolsModal" aria-hidden="true">
+  <div class="box" style="width: 450px">
+    <div class="modalHeader"><h2>⚙️ أدوات إضافية</h2><button class="btn" onclick="closeModal('toolsModal')">✕</button></div>
+    <div class="modalBody">
+      <div class="actGrid">
+        <button class="actBtn" id="openBackup">📦 النسخ الاحتياطي</button>
+        <button class="actBtn" id="openSync">☁️ حالة المزامنة</button>
+        <button class="actBtn" id="shareBtn">📤 مشاركة اللوحة</button>
+        <button class="actBtn" id="printBtn">🖨️ طباعة الجدول</button>
+        <button class="actBtn danger" id="clearBtn" style="grid-column: span 2;">🗑️ حذف جميع البيانات نهائياً</button>
       </div>
-
-      <div id="authLoggedInSection" style="display:none; padding:10px;">
-        
-        <div style="text-align:center; margin-bottom:25px;">
-           <div class="auth-icon-wrap" style="background:linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.05)); border-color:rgba(34,197,94,0.3); box-shadow: 0 10px 25px rgba(34,197,94,0.15);">✅</div>
-           <div id="authStateText" style="font-weight:900; font-size:15px; line-height:1.6;"></div>
-        </div>
-        
-        <div id="ownerDashboard" style="display:none; padding:20px; background:rgba(124,92,255,0.08); border-radius:18px; border:1px solid rgba(124,92,255,0.2); margin-bottom:25px;">
-          <h3 style="margin-top:0; color:#fff; font-size:15px; display:flex; align-items:center; gap:8px;">👑 أدوات المالك (Owner)</h3>
-          <button class="btn primary" onclick="openModal('addAdminModal')" style="width:100%; margin-bottom:12px; padding:12px; border-radius:12px;">➕ إنشاء حساب مستخدم جديد</button>
-          <button class="btn soft" onclick="loadAdminsList()" style="width:100%; padding:12px; border-radius:12px; border-color:rgba(255,255,255,0.1);">👥 إدارة الصلاحيات للمستخدمين</button>
-        </div>
-
-        <button class="btn danger" id="authLogout" style="width:100%; padding:14px; border-radius:14px; font-size:15px;">تسجيل الخروج المآمن</button>
-      </div>
-
     </div>
   </div>
 </div>
 
-<div class="modal" id="formModal" aria-hidden="true"><div class="box" role="dialog" aria-modal="true"><div class="modalHeader"><div><h2 id="formTitle">إضافة اشتراك</h2><div class="hint">املأ البيانات ثم اضغط حفظ</div></div><button class="btn" id="closeForm" type="button">✕</button></div><div class="modalBody"><div class="formGrid"><div class="field"><label>الاسم</label><input id="name" placeholder="مثال: Ahmed"></div><div class="field"><label>الإيميل</label><input id="email" placeholder="name@example.com" inputmode="email"></div><div class="field"><label>الهاتف (مع الرمز)</label><div style="display: flex; gap: 5px;"><select id="countryCode" style="width: 90px; direction: ltr;"><option value="+213">🇩🇿 +213</option><option value="+212">🇲🇦 +212</option><option value="+216">🇹🇳 +216</option><option value="">بدون رمز</option></select><input id="phone" type="tel" dir="ltr" placeholder="555000000" style="flex:1;"></div></div><div class="field"><label>اختيار سريع</label><select id="quickPlan"><option value="">— اختر —</option><option value="1">1 شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="12">12 شهر</option></select></div><div class="field"><label>عدد الأشهر</label><input id="months" type="number" min="1" step="1"></div><div class="field"><label>السعر</label><input id="price" type="number" min="0" step="0.01"></div><div class="field"><label>العملة</label><select id="currency"><option value="DZD">DZD</option><option value="EUR">EUR</option><option value="USD">USD</option><option value="MAD">MAD</option><option value="TND">TND</option></select></div><div class="field"><label>تاريخ البداية</label><input id="start" type="date"></div><div class="field"><label>تنبيه قبل (أيام)</label><input id="alertDays" type="number" min="1" step="1" value="7"></div></div></div><div class="modalFooter"><button class="btn primary" id="saveBtn" type="button">💾 حفظ</button><button class="btn" id="cancelBtn" type="button">إلغاء</button></div></div></div>
-<div class="modal" id="extendModal" aria-hidden="true"><div class="box" style="width: 350px"><div class="modalHeader"><h2 id="extendTitle">تجديد الاشتراك</h2><button class="btn" onclick="closeModal('extendModal')">✕</button></div><div class="modalBody"><div class="field" style="margin-bottom:15px"><label>المدة</label><input id="extendValue" type="number" min="1" value="1"></div><div class="field" style="margin-bottom:20px"><label>الوحدة</label><select id="extendUnit"><option value="months">أشهر</option><option value="days">أيام</option></select></div><button class="btn primary" id="confirmExtendBtn" style="width:100%">تأكيد التجديد</button></div></div></div>
-<div class="modal" id="rowActionsModal" aria-hidden="true"><div class="box" role="dialog" aria-modal="true" style="width:min(740px, 100%)"><div class="modalHeader"><div><h2>إجراءات</h2><div class="hint" id="rowActionsHint">—</div></div><button class="btn" id="closeRowActionsX" type="button">✕</button></div><div class="modalBody"><div class="actGrid"><button class="actBtn" id="actExtend" type="button">🔁 تجديد</button><button class="actBtn" id="actEdit" type="button">✏️ تعديل</button><button class="actBtn" id="actCopyEmail" type="button">📋 نسخ Email</button><button class="actBtn" id="actWhatsApp" type="button" style="border-color: rgba(37,211,102,.5); background: rgba(37,211,102,.15); color: #4ade80;">💬 مراسلة واتساب</button><button class="actBtn danger" id="actDelete" type="button" style="grid-column: span 2;">🗑️ حذف</button></div></div></div></div>
-<div class="modal" id="addAdminModal" aria-hidden="true"><div class="box" style="width: 380px"><div class="modalHeader"><h2>➕ إضافة مستخدم جديد</h2><button class="btn" onclick="closeModal('addAdminModal')">✕</button></div><div class="modalBody"><div class="field" style="margin-bottom:15px"><label>البريد الإلكتروني</label><input id="newAdminEmail" type="email"></div><div class="field" style="margin-bottom:15px"><label>كلمة المرور (6 أحرف أو أكثر)</label><input id="newAdminPass" type="password"></div><div class="field" style="margin-bottom:25px"><label>نوع الصلاحية</label><select id="newAdminRole"><option value="admin">أدمن</option><option value="owner">مالك 👑</option></select></div><button class="btn primary" id="confirmAddAdminBtn" style="width:100%; padding:14px; border-radius:14px;">تأكيد وإنشاء الحساب</button></div></div></div>
+<div class="modal" id="formModal" aria-hidden="true">
+  <div class="box" role="dialog" aria-modal="true">
+    <div class="modalHeader"><div><h2 id="formTitle">إضافة اشتراك</h2><div class="hint">املأ البيانات ثم اضغط حفظ</div></div><button class="btn" id="closeForm" type="button">✕ إغلاق</button></div>
+    <div class="modalBody">
+      <div class="formGrid">
+        <div class="field"><label>الاسم</label><input id="name" placeholder="مثال: Ahmed"></div>
+        <div class="field"><label>الإيميل</label><input id="email" placeholder="name@example.com" inputmode="email"></div>
+        <div class="field">
+          <label>الهاتف (مع الرمز)</label>
+          <div style="display: flex; gap: 5px;">
+            <select id="countryCode" style="width: 90px; direction: ltr;">
+              <option value="+213">🇩🇿 +213</option><option value="+212">🇲🇦 +212</option><option value="+216">🇹🇳 +216</option><option value="">بدون رمز</option>
+            </select>
+            <input id="phone" type="tel" dir="ltr" placeholder="555000000" style="flex:1;">
+          </div>
+        </div>
+        <div class="field">
+          <label>اختيار سريع</label>
+          <select id="quickPlan"><option value="">— اختر —</option><option value="1">1 شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="12">12 شهر</option></select>
+        </div>
+        <div class="field"><label>عدد الأشهر</label><input id="months" type="number" min="1" step="1"></div>
+        <div class="field"><label>السعر</label><input id="price" type="number" min="0" step="0.01"></div>
+        <div class="field">
+          <label>العملة</label>
+          <select id="currency"><option value="DZD">DZD</option><option value="EUR">EUR</option><option value="USD">USD</option><option value="MAD">MAD</option><option value="TND">TND</option></select>
+        </div>
+        <div class="field"><label>تاريخ البداية</label><input id="start" type="date"></div>
+        <div class="field"><label>تنبيه قبل (أيام)</label><input id="alertDays" type="number" min="1" step="1" value="7"></div>
+      </div>
+    </div>
+    <div class="modalFooter"><button class="btn primary" id="saveBtn" type="button">💾 حفظ</button><button class="btn" id="cancelBtn" type="button">إلغاء</button></div>
+  </div>
+</div>
+
+<div class="modal" id="extendModal" aria-hidden="true">
+  <div class="box" style="width: 350px">
+    <div class="modalHeader"><h2 id="extendTitle">تجديد الاشتراك</h2><button class="btn" onclick="closeModal('extendModal')">✕</button></div>
+    <div class="modalBody">
+      <div class="field" style="margin-bottom:15px"><label>المدة</label><input id="extendValue" type="number" min="1" value="1"></div>
+      <div class="field" style="margin-bottom:20px"><label>الوحدة</label><select id="extendUnit"><option value="months">أشهر</option><option value="days">أيام</option></select></div>
+      <button class="btn primary" id="confirmExtendBtn" style="width:100%">تأكيد التجديد</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="rowActionsModal" aria-hidden="true">
+  <div class="box" role="dialog" aria-modal="true" style="width:min(740px, 100%)">
+    <div class="modalHeader"><div><h2>إجراءات</h2><div class="hint" id="rowActionsHint">—</div></div><button class="btn" id="closeRowActionsX" type="button">✕</button></div>
+    <div class="modalBody">
+      <div class="actGrid">
+        <button class="actBtn" id="actExtend" type="button">🔁 تجديد</button>
+        <button class="actBtn" id="actEdit" type="button">✏️ تعديل</button>
+        <button class="actBtn" id="actCopyEmail" type="button">📋 نسخ Email</button>
+        <button class="actBtn" id="actWhatsApp" type="button" style="border-color: rgba(37,211,102,.5); background: rgba(37,211,102,.15); color: #4ade80;">💬 مراسلة واتساب</button>
+        <button class="actBtn danger" id="actDelete" type="button" style="grid-column: span 2;">🗑️ حذف</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="authModal" aria-hidden="true">
+  <div class="box" style="width: 420px; padding:0;">
+    <div class="modalHeader" style="border-bottom:none; padding-bottom:0;"><button class="btn" id="closeAuthBtn" onclick="closeModal('authModal')" style="display:none; margin-inline-start:auto; background:transparent; border:none; font-size:18px;">✕</button></div>
+    <div class="modalBody" style="padding-top:0;">
+      <div id="authLoginSection" class="auth-wrap">
+        <div class="auth-icon-wrap">🔒</div><h2 class="auth-title">مرحباً بعودتك</h2><div class="auth-sub">يرجى تسجيل الدخول للوصول إلى لوحة التحكم</div>
+        <div style="margin-bottom:20px;"><label class="auth-label">البريد الإلكتروني</label><input id="authEmail" type="email" class="auth-input" placeholder="admin@example.com"></div>
+        <div style="margin-bottom:30px;"><label class="auth-label">كلمة المرور</label><input id="authPass" type="password" class="auth-input" placeholder="••••••••"></div>
+        <button class="btn primary" id="authLogin" style="width:100%; padding:16px; font-size:16px; font-weight:900; border-radius:16px; box-shadow: 0 8px 25px rgba(124,92,255,0.3);">تسجيل الدخول 🚀</button>
+      </div>
+      <div id="authLoggedInSection" style="display:none; padding:10px;">
+        <div style="text-align:center; margin-bottom:25px;"><div class="auth-icon-wrap" style="background:linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.05)); border-color:rgba(34,197,94,0.3); box-shadow: 0 10px 25px rgba(34,197,94,0.15);">✅</div><div id="authStateText" style="font-weight:900; font-size:15px; line-height:1.6;"></div></div>
+        <div id="ownerDashboard" style="display:none; padding:20px; background:rgba(124,92,255,0.08); border-radius:18px; border:1px solid rgba(124,92,255,0.2); margin-bottom:25px;"><h3 style="margin-top:0; color:#fff; font-size:15px; display:flex; align-items:center; gap:8px;">👑 أدوات المالك (Owner)</h3><button class="btn primary" onclick="openModal('addAdminModal')" style="width:100%; margin-bottom:12px; padding:12px; border-radius:12px;">➕ إنشاء حساب مستخدم جديد</button><button class="btn soft" onclick="loadAdminsList()" style="width:100%; padding:12px; border-radius:12px; border-color:rgba(255,255,255,0.1);">👥 إدارة الصلاحيات للمستخدمين</button></div>
+        <button class="btn danger" id="authLogout" style="width:100%; padding:14px; border-radius:14px; font-size:15px;">تسجيل الخروج المآمن</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="addAdminModal" aria-hidden="true"><div class="box" style="width: 380px"><div class="modalHeader"><h2>➕ إضافة مستخدم جديد</h2><button class="btn" onclick="closeModal('addAdminModal')">✕</button></div><div class="modalBody"><div class="field" style="margin-bottom:15px"><label>البريد الإلكتروني</label><input id="newAdminEmail" type="email"></div><div class="field" style="margin-bottom:15px"><label>كلمة المرور (6 أحرف أو أكثر)</label><input id="newAdminPass" type="password"></div><div class="field" style="margin-bottom:25px"><label>نوع الصلاحية</label><select id="newAdminRole"><option value="admin">أدمن</option><option value="owner">مالك 👑</option></select></div><button class="btn primary" id="confirmAddAdminBtn" style="width:100%; padding:12px;">تأكيد وإنشاء الحساب</button></div></div></div>
+
 <div class="modal" id="manageAdminsModal" aria-hidden="true"><div class="box" style="width: 500px"><div class="modalHeader"><h2>👥 قائمة المستخدمين</h2><button class="btn" onclick="closeModal('manageAdminsModal')">✕</button></div><div class="modalBody"><div style="font-size:12px; color:var(--warn); margin-bottom:15px; padding:10px; background:rgba(245,158,11,0.1); border-radius:10px; border:1px solid rgba(245,158,11,0.3);"><b>ملاحظة هامة:</b> سحب الصلاحية يمنع المستخدم من الدخول للوحة. لحذف الإيميل نهائياً لإعادة تسجيله لاحقاً، يجب حذفه من قسم (Authentication) في Firebase.</div><div style="max-height:300px; overflow:auto;"><table style="min-width:100%;"><thead><tr><th>الإيميل</th><th>الصلاحية</th><th>إجراء</th></tr></thead><tbody id="adminsTbody"></tbody></table></div></div></div></div>
+
 <div class="modal" id="backupModal" aria-hidden="true"><div class="box" style="width:400px"><div class="modalHeader"><h2>📦 النسخ الاحتياطي</h2><button class="btn" id="closeBackup" type="button">✕ إغلاق</button></div><div class="modalBody"><div style="display:grid; gap:10px;"><button class="btn soft" id="exportJsonBtn">⬇️ تصدير JSON</button><button class="btn soft" id="importFileBtn">⬆️ استيراد JSON</button><input id="fileInput" type="file" accept=".json" style="display:none"><button class="btn soft" onclick="openModal('pasteModal')">📋 استيراد باللصق</button></div></div></div></div>
 <div class="modal" id="pasteModal" aria-hidden="true"><div class="box"><div class="modalHeader"><h2>📋 استيراد باللصق</h2><button class="btn" onclick="closeModal('pasteModal')">✕</button></div><div class="modalBody"><textarea id="pasteArea" rows="10" style="width:100%; background:rgba(0,0,0,0.3); color:white; border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:10px; outline:none;"></textarea></div><div class="modalFooter"><button class="btn primary" id="confirmPasteBtn">استيراد البيانات</button></div></div></div>
 <div class="modal" id="syncModal" aria-hidden="true"><div class="box"><div class="modalHeader"><h2>☁️ المزامنة والنسخ الاحتياطي</h2><button class="btn" id="closeSyncX" type="button">✕</button></div><div class="modalBody">ميزة المزامنة تعمل في الخلفية لحظياً وبشكل تلقائي ✅</div></div></div>
@@ -267,7 +311,7 @@ function updateAuthUI() {
   }
 }
 
-// إنشاء مدراء (المالك)
+// إنشاء وإدارة المدراء
 $("confirmAddAdminBtn").onclick = async () => {
   const email = $("newAdminEmail").value.trim(); const pass = $("newAdminPass").value; const role = $("newAdminRole").value;
   if(!email || pass.length < 6) return showToast("بيانات غير صالحة", "err");
@@ -294,6 +338,7 @@ window.loadAdminsList = async () => {
 };
 window.revokeAdmin = async (uid) => { if(confirm("تأكيد سحب الصلاحية؟")) { await db.ref("admins/" + uid).remove(); showToast("تم سحب الصلاحية بنجاح ✅"); loadAdminsList(); } };
 
+// المزامنة والوقت
 function todayISO(){ const d=new Date(); d.setHours(0,0,0,0); return d.toISOString().slice(0,10); }
 function toDate(iso){ const d=new Date(iso+"T00:00:00"); d.setHours(0,0,0,0); return d; }
 function saveLocalBackup(){ localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(data)); }
@@ -302,6 +347,7 @@ function setSyncState(state){ const chip = $("syncChip"); const val = $("syncVal
 async function load() { if(!navigator.onLine) { data = loadLocalBackup(); render(); return; } try { setSyncState("saving"); const snap = await db.ref("subscriptions").once('value'); data = snap.val() ? Object.values(snap.val()) : []; saveLocalBackup(); setSyncState("ok"); render(); } catch(e) {} }
 async function firebasePush() { if(!navigator.onLine) return; try { setSyncState("saving"); await db.ref("subscriptions").set(data); saveLocalBackup(); setSyncState("ok"); } catch(e) { showToast("خطأ", "err"); } }
 
+// الإجراءات الجماعية
 function updateBulkUI() { const bar = $("bulkBar"); if(selectedIds.size > 0) { bar.style.display = "flex"; $("selCount").textContent = `${selectedIds.size} محدد`; } else { bar.style.display = "none"; $("selectAll").checked = false; } }
 $("tbody").addEventListener("change", (e) => { if(e.target.classList.contains("rowChk")) { if(e.target.checked) selectedIds.add(e.target.value); else selectedIds.delete(e.target.value); updateBulkUI(); } });
 $("selectAll").addEventListener("change", (e) => { const isChkd = e.target.checked; document.querySelectorAll(".rowChk").forEach(chk => { chk.checked = isChkd; if(isChkd) selectedIds.add(chk.value); else selectedIds.delete(chk.value); }); updateBulkUI(); });
@@ -323,6 +369,7 @@ function render(){
   });
 }
 
+// الإجراءات الفردية
 window.openRowActions = (id) => { currentRowId = id; const rec = data.find(x => x.id === id); $("rowActionsHint").textContent = rec.name; openModal("rowActionsModal"); };
 $("actEdit").onclick = () => { const rec = data.find(x => x.id === currentRowId); if(!rec) return; closeModal("rowActionsModal"); editingId = rec.id; $("formTitle").textContent = "تعديل اشتراك"; $("name").value = rec.name||""; $("email").value = rec.email||""; $("phone").value = rec.phone||""; $("countryCode").value = rec.countryCode||"+213"; $("months").value = rec.months||""; $("price").value = rec.price||""; $("currency").value = rec.currency||"DZD"; $("start").value = rec.start; $("alertDays").value = rec.alertDays||"7"; openModal("formModal"); };
 $("actDelete").onclick = async () => { if(confirm("حذف؟")) { data = data.filter(x => x.id !== currentRowId); await firebasePush(); render(); closeModal("rowActionsModal"); } };
@@ -345,17 +392,21 @@ $("saveBtn").onclick = async () => {
   await firebasePush(); render(); closeModal("formModal"); showToast("تم الحفظ ✨");
 };
 
-$("openTotals").onclick = () => { const alertD = parseInt($("alertDays")?.value || 7); const activeData = data.filter(r => getStatus(r.end, alertD).key !== "expired"); const total = activeData.reduce((sum, r) => sum + (parseFloat(r.price) || 0), 0); $("totalsBody").innerHTML = `<div style="color:var(--accent); font-size:32px; margin-bottom:10px;">${total.toLocaleString()}</div><div style="font-size:13px; color:var(--muted)">إجمالي المداخيل من الاشتراكات الفعّالة والقريبة من الانتهاء.</div>`; openModal("totalsModal"); };
-$("exportJsonBtn").onclick = () => { if(data.length === 0) return showToast("لا توجد بيانات", "warn"); const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data)); const a = document.createElement("a"); a.href = dataStr; a.download = `Backup_${todayISO()}.json`; a.click(); showToast("تم التنزيل 📥"); };
-$("importFileBtn").onclick = () => $("fileInput").click();
-$("fileInput").onchange = (e) => { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = async (event) => { try { const imported = JSON.parse(event.target.result); if(Array.isArray(imported)) { data = imported; await firebasePush(); render(); closeModal("backupModal"); showToast("تم الاستيراد ✅"); } } catch(err) { showToast("ملف غير صالح", "err"); } }; reader.readAsText(file); };
-$("confirmPasteBtn").onclick = async () => { try { const imported = JSON.parse($("pasteArea").value); if(Array.isArray(imported)) { data = imported; await firebasePush(); render(); closeModal("pasteModal"); closeModal("backupModal"); $("pasteArea").value=""; showToast("تم الاستيراد ✅"); } } catch(e) { showToast("كود غير صالح", "err"); } };
-$("printBtn").onclick = () => window.print();
-$("clearBtn").onclick = async () => { if(confirm("⚠️ تحذير خطير: سيتم مسح كل البيانات!")) { data = []; await firebasePush(); render(); showToast("تم مسح البيانات 🗑️"); } };
-$("shareBtn").onclick = () => { if (navigator.share) { navigator.share({ title: 'لوحة الاشتراكات', url: window.location.href }); } else { showToast("المشاركة غير مدعومة", "warn"); } };
+// ==== فتح نافذة الأدوات ====
+$("openToolsModal").onclick = () => { openModal("toolsModal"); };
 
-$("openBackup").onclick = ()=> openModal("backupModal"); $("closeBackup").onclick = ()=> closeModal("backupModal");
-$("openSync").onclick = ()=> openModal("syncModal"); $("closeSyncX").onclick = ()=> closeModal("syncModal");
+// وظائف الأدوات
+$("openTotals").onclick = () => { const alertD = parseInt($("alertDays")?.value || 7); const activeData = data.filter(r => getStatus(r.end, alertD).key !== "expired"); const total = activeData.reduce((sum, r) => sum + (parseFloat(r.price) || 0), 0); $("totalsBody").innerHTML = `<div style="color:var(--accent); font-size:32px; margin-bottom:10px;">${total.toLocaleString()}</div><div style="font-size:13px; color:var(--muted)">إجمالي المداخيل من الاشتراكات الفعّالة والقريبة من الانتهاء.</div>`; openModal("totalsModal"); };
+$("exportJsonBtn").onclick = () => { if(data.length === 0) return showToast("لا توجد بيانات", "warn"); const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data)); const a = document.createElement("a"); a.href = dataStr; a.download = `Backup_${todayISO()}.json`; a.click(); closeModal("toolsModal"); showToast("تم التنزيل 📥"); };
+$("importFileBtn").onclick = () => $("fileInput").click();
+$("fileInput").onchange = (e) => { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = async (event) => { try { const imported = JSON.parse(event.target.result); if(Array.isArray(imported)) { data = imported; await firebasePush(); render(); closeModal("backupModal"); closeModal("toolsModal"); showToast("تم الاستيراد ✅"); } } catch(err) { showToast("ملف غير صالح", "err"); } }; reader.readAsText(file); };
+$("confirmPasteBtn").onclick = async () => { try { const imported = JSON.parse($("pasteArea").value); if(Array.isArray(imported)) { data = imported; await firebasePush(); render(); closeModal("pasteModal"); closeModal("backupModal"); closeModal("toolsModal"); $("pasteArea").value=""; showToast("تم الاستيراد ✅"); } } catch(e) { showToast("كود غير صالح", "err"); } };
+$("printBtn").onclick = () => { closeModal("toolsModal"); window.print(); };
+$("clearBtn").onclick = async () => { if(confirm("⚠️ تحذير خطير: سيتم مسح كل البيانات!")) { data = []; await firebasePush(); render(); closeModal("toolsModal"); showToast("تم مسح البيانات 🗑️"); } };
+$("shareBtn").onclick = () => { closeModal("toolsModal"); if (navigator.share) { navigator.share({ title: 'لوحة الاشتراكات', url: window.location.href }); } else { showToast("المشاركة غير مدعومة", "warn"); } };
+
+$("openBackup").onclick = ()=> { closeModal("toolsModal"); openModal("backupModal"); }; $("closeBackup").onclick = ()=> closeModal("backupModal");
+$("openSync").onclick = ()=> { closeModal("toolsModal"); openModal("syncModal"); }; $("closeSyncX").onclick = ()=> closeModal("syncModal");
 $("closeTotalsX").onclick = ()=> closeModal("totalsModal");
 $("closeForm").onclick = ()=> closeModal("formModal"); $("cancelBtn").onclick = ()=> closeModal("formModal");
 $("closeRowActionsX").onclick = ()=> closeModal("rowActionsModal");
