@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>لوحة تسيير الاشتراكات - v11.3</title>
+<title>لوحة تسيير الاشتراكات - v11.4</title>
 
 <style>
 :root{
@@ -26,21 +26,21 @@ body{
 .version-badge { background: linear-gradient(135deg, var(--accent), #5a3bc2); color: white; padding: 4px 8px; border-radius: 8px; font-weight: 900; font-size: 12px; box-shadow: 0 4px 15px rgba(124,92,255,0.3);}
 
 .card{ background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); backdrop-filter: blur(10px); overflow:hidden; }
-.topbar{ padding:14px; border-bottom:1px solid var(--line); display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
 
-.btn{ border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); padding:10px 12px; border-radius:14px; font-weight:900; cursor:pointer; transition: all .15s ease; }
+/* 🛠️ تعديل الشريط العلوي لمنع التداخل على الهواتف */
+.topbar{ padding:14px; border-bottom:1px solid var(--line); display:flex; flex-direction:column; gap:12px; }
+.topbar-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; width: 100%; }
+.searchWrap{ display: flex; gap: 6px; align-items: center; width: 100%; }
+.searchWrap input { flex:1; width:100%; padding:10px 12px; border-radius:14px; border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); outline:none; transition: all 0.2s; font-size: 14px;}
+.searchWrap input:focus { border-color: rgba(124,92,255,.6); box-shadow: 0 0 0 4px rgba(124,92,255,.14); }
+
+.btn{ border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); padding:10px 12px; border-radius:14px; font-weight:900; cursor:pointer; transition: all .15s ease; font-size:13px; }
 .btn:hover{ background: rgba(255,255,255,.06); }
 .btn:active{ transform: scale(.98); }
 .btn.primary{ border-color: rgba(124,92,255,.55); background: linear-gradient(135deg, rgba(124,92,255,.55), rgba(124,92,255,.15)); }
 .btn.danger{ border-color: rgba(239,68,68,.45); background: linear-gradient(135deg, rgba(239,68,68,.35), rgba(239,68,68,.12)); color: #ff8a8a; }
 .btn.soft{ border-color: rgba(255,255,255,.14); background: rgba(255,255,255,.04); }
-
 .btn-close { padding: 8px 14px; font-size: 13px; border-radius: 12px; }
-
-.searchWrap{ flex:1; min-width:240px; display: flex; gap: 6px; align-items: center; }
-.searchWrap input { flex:1; width:100%; padding:10px 12px; border-radius:14px; border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); outline:none; transition: all 0.2s; }
-.searchWrap input:focus { border-color: rgba(124,92,255,.6); box-shadow: 0 0 0 4px rgba(124,92,255,.14); }
-.searchWrap select { width:100%; padding:10px 12px; border-radius:14px; border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); outline:none; transition: all 0.2s; }
 
 input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active{
     -webkit-box-shadow: 0 0 0 30px #161b2a inset !important;
@@ -48,15 +48,14 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
     transition: background-color 5000s ease-in-out 0s;
 }
 
-.filtersBar{ width: 100%; display: flex; gap: 8px; padding: 0 14px 14px 14px; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+.filtersBar{ width: 100%; display: flex; gap: 8px; padding: 14px; flex-wrap: wrap; border-bottom: 1px solid var(--line); background: rgba(0,0,0,0.1); }
 .filterBtn{ padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: rgba(0,0,0,.18); color: var(--muted); font-size: 13px; font-weight: 800; cursor: pointer; }
 .filterBtn.active{ background: var(--text); color: var(--bg0); border-color: var(--text); }
 
 .bulkBar{ display: none; align-items: center; gap: 10px; padding: 12px 14px; background: rgba(124,92,255,.15); border-bottom: 1px solid rgba(124,92,255,.3); }
 .bulkBar .selCount{ font-weight: 900; color: #fff; background: var(--accent); padding: 4px 10px; border-radius: 99px; font-size: 12px; }
 
-.pills{margin-inline-start:auto;display:flex;gap:8px;flex-wrap:wrap; align-items:center;}
-.statChip{ display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:999px; border:1px solid var(--line); background: rgba(0,0,0,.18); font-size:12px; font-weight:900; color: var(--text); }
+.statChip{ display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:999px; border:1px solid var(--line); background: rgba(0,0,0,.18); font-size:12px; font-weight:900; color: var(--text); margin-inline-start: auto; }
 .statChip.sync{ border-color: rgba(124,92,255,.45); background: rgba(124,92,255,.10); }
 
 input[type="checkbox"] { appearance: none; width: 18px; height: 18px; border: 2px solid var(--muted); border-radius: 4px; background: rgba(0,0,0,.2); cursor: pointer; position: relative; display: inline-block; vertical-align: middle; }
@@ -111,17 +110,16 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 .auth-sub { color:var(--muted); font-size:13px; margin-bottom: 30px; }
 .auth-input { width:100%; padding:15px 18px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:16px; color:#fff; font-size:15px; outline:none; transition:all 0.2s; text-align: left; direction: ltr; }
 .auth-input:focus { border-color: rgba(124,92,255,.6); box-shadow: 0 0 0 4px rgba(124,92,255,.14); background:rgba(0,0,0,0.6); }
-.auth-label { font-size:13px; color:var(--muted); margin-bottom:8px; display:block; text-align: right; font-weight: bold; }
 
-.receipt-table { min-width: 0 !important; width: 100% !important; } 
-
+/* ======== 🛠️ إصلاح طباعة الوصل جذرياً ======== */
 @media print {
-    body * { visibility: hidden; }
+    body > *:not(#receiptModal) { display: none !important; }
     body { background: white !important; padding: 0 !important; margin: 0 !important; }
-    #receiptModal, #receiptModal * { visibility: visible; }
-    #receiptModal { position: absolute; left: 0; top: 0; width: 100%; height: 100%; background: white !important; align-items: flex-start; padding: 15px; }
+    
+    #receiptModal { display: block !important; position: static !important; background: white !important; }
     #receiptModal .box { width: 100% !important; max-width: none !important; box-shadow: none !important; border: none !important; border-radius: 0 !important; padding: 0 !important; }
-    .no-print, .modalHeader, .modalFooter, #toast { display: none !important; }
+    
+    .no-print { display: none !important; }
 }
 </style>
 
@@ -133,32 +131,32 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v11.3</span></h1>
-    <div class="sub">⚡ النسخة المدمجة (إصلاح النوافذ وتثبيت أزرار الإغلاق)</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v11.4</span></h1>
+    <div class="sub">⚡ ترتيب ذكي للهاتف + إصلاح الأعطال والطباعة</div>
   </div>
 
   <div class="card">
     <div class="topbar">
-      <button class="btn primary" id="openAdd" type="button">➕ إضافة</button>
-      <button class="btn soft" id="openTotals" type="button">💰 المجموع</button>
-      <button class="btn soft" id="openAuth" type="button" style="border-color:var(--accent); color:var(--accent); box-shadow: 0 0 15px rgba(124,92,255,0.2);">👤 الإدارة</button>
-      <button class="btn soft" id="openToolsModal" type="button">⚙️ أدوات</button>
+      <div class="topbar-actions">
+        <button class="btn primary" id="openAdd" type="button">➕ إضافة</button>
+        <button class="btn soft" id="openTotals" type="button">💰 المجموع</button>
+        <button class="btn soft" id="openAuth" type="button" style="border-color:var(--accent); color:var(--accent);">👤 الإدارة</button>
+        <button class="btn soft" id="openToolsModal" type="button">⚙️ أدوات</button>
+        
+        <div class="statChip sync" id="syncChip"><span class="ico">☁️</span> <span class="v" id="syncVal">—</span></div>
+      </div>
 
       <div class="searchWrap">
         <input id="search" placeholder="بحث بالاسم أو الإيميل، الهاتف، أو الخدمة..." />
-        <button class="btn soft" id="pasteSearchBtn" title="لصق البحث" style="padding: 8px 12px; border-radius: 12px; font-size: 15px;">📋</button>
-        <button class="btn soft" id="clearSearchBtn" title="مسح البحث" style="padding: 8px 12px; border-radius: 12px; font-size: 15px; color: var(--err);">✕</button>
-      </div>
-
-      <div class="pills" id="statsBar">
-        <div class="statChip sync" id="syncChip"><span class="ico">☁️</span> <span class="v" id="syncVal">—</span></div>
+        <button class="btn soft" id="pasteSearchBtn" title="لصق البحث" style="padding: 10px 12px; border-radius: 12px; font-size: 15px;">📋</button>
+        <button class="btn soft" id="clearSearchBtn" title="مسح البحث" style="padding: 10px 12px; border-radius: 12px; font-size: 15px; color: var(--err);">✕</button>
       </div>
     </div>
 
     <div class="bulkBar" id="bulkBar">
       <div class="selCount" id="selCount">0 محدد</div>
-      <button class="btn" id="bulkExtend" style="border-color:var(--accent); color:var(--accent);">🔁 تجديد المحدد</button>
-      <button class="btn danger" id="bulkDelete">🗑️ حذف المحدد</button>
+      <button class="btn" id="bulkExtend" style="border-color:var(--accent); color:var(--accent);">🔁 تجديد</button>
+      <button class="btn danger" id="bulkDelete">🗑️ حذف</button>
       <button class="btn soft" id="clearSelection" style="margin-inline-start:auto;">إلغاء التحديد</button>
     </div>
 
@@ -197,8 +195,8 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
     </div>
     <div class="modalBody">
       <div class="actGrid">
-        <button class="actBtn" id="exportCsvBtn" style="color:#10b981; border-color:rgba(16,185,129,0.4); background:rgba(16,185,129,0.1);">📥 تصدير Excel (CSV)</button>
-        <button class="actBtn" id="undoDeleteBtn" style="color:#f59e0b; border-color:rgba(245,158,11,0.4); background:rgba(245,158,11,0.1);">↩️ التراجع عن آخر حذف</button>
+        <button class="actBtn" id="exportCsvBtn" style="color:#10b981; border-color:rgba(16,185,129,0.4); background:rgba(16,185,129,0.1);">📥 تصدير Excel</button>
+        <button class="actBtn" id="undoDeleteBtn" style="color:#f59e0b; border-color:rgba(245,158,11,0.4); background:rgba(245,158,11,0.1);">↩️ التراجع عن الحذف</button>
         <button class="actBtn" id="openBackup">📦 النسخ الاحتياطي</button>
         <button class="actBtn" id="openSync">☁️ حالة المزامنة</button>
         <button class="actBtn" id="shareBtn">📤 مشاركة اللوحة</button>
@@ -241,9 +239,9 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
         
         <div class="field"><label>حالة الدفع</label>
           <select id="paymentStatus">
-            <option value="paid">🟢 خالص (مدفوع بالكامل)</option>
-            <option value="partial">🟡 دفع جزئي (تسجيل الباقي كدين)</option>
-            <option value="unpaid">🔴 غير مدفوع (دين كامل)</option>
+            <option value="paid">🟢 خالص (مدفوع)</option>
+            <option value="partial">🟡 دفع جزئي (دين)</option>
+            <option value="unpaid">🔴 غير مدفوع (دين)</option>
           </select>
         </div>
         <div class="field" id="paidAmountWrap" style="display:none;"><label>المبلغ المدفوع الآن</label><input id="paidAmount" type="number" min="0" step="0.01"></div>
@@ -282,7 +280,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
         <h1 id="receiptStoreName" style="margin: 0; font-size: 24px; color: #4f46e5; font-weight: 900;">متجر الاشتراكات</h1>
         <div style="color: #64748b; font-size: 13px; margin-top: 5px;">فاتورة اشتراك إلكترونية</div>
       </div>
-      <table class="receipt-table" style="width: 100%; border-collapse: collapse; font-size: 15px;">
+      <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
         <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b; width:40%;">اسم العميل:</td><td style="padding: 12px 0; text-align: left; font-weight: bold; color: #0f172a;" id="recName"></td></tr>
         <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">رقم الهاتف:</td><td style="padding: 12px 0; text-align: left; direction: ltr; color: #0f172a;" id="recPhone"></td></tr>
         <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">نوع الخدمة:</td><td style="padding: 12px 0; text-align: left; font-weight: bold; color: #8b5cf6;" id="recService"></td></tr>
@@ -324,9 +322,9 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 
 <div class="modal" id="authModal" aria-hidden="true">
   <div class="box" style="width: 420px; padding:0;">
-    <div class="modalHeader" style="border-bottom:none; padding-bottom:0;"><button class="btn danger btn-close" type="button" onclick="closeModal('authModal')" style="display:none; margin-inline-start:auto;">✕ إغلاق</button></div>
+    <div class="modalHeader" style="border-bottom:none; padding-bottom:0;"><button class="btn danger btn-close" type="button" id="closeAuthBtn" onclick="closeModal('authModal')" style="display:none; margin-inline-start:auto;">✕ إغلاق</button></div>
     <div class="modalBody" style="padding-top:0;">
-      <div id="authLoginSection" class="auth-wrap"><div class="auth-icon-wrap">🔒</div><h2 class="auth-title">مرحباً بعودتك</h2><div class="auth-sub">يرجى تسجيل الدخول للوصول إلى لوحة التحكم</div><div style="margin-bottom:20px;"><label class="auth-label">البريد الإلكتروني</label><input id="authEmail" type="email" class="auth-input" placeholder="admin@example.com"></div><div style="margin-bottom:30px;"><label class="auth-label">كلمة المرور</label><input id="authPass" type="password" class="auth-input" placeholder="••••••••"></div><button class="btn primary" id="authLogin" style="width:100%; padding:16px; font-size:16px; font-weight:900; border-radius:16px; box-shadow: 0 8px 25px rgba(124,92,255,0.3);">تسجيل الدخول 🚀</button></div>
+      <div id="authLoginSection" class="auth-wrap"><div class="auth-icon-wrap">🔒</div><h2 class="auth-title">تسجيل الدخول</h2><div class="auth-sub">يرجى تسجيل الدخول للوصول إلى لوحة التحكم</div><div style="margin-bottom:20px;"><label class="auth-label">البريد الإلكتروني</label><input id="authEmail" type="email" class="auth-input" placeholder="admin@example.com"></div><div style="margin-bottom:30px;"><label class="auth-label">كلمة المرور</label><input id="authPass" type="password" class="auth-input" placeholder="••••••••"></div><button class="btn primary" id="authLogin" style="width:100%; padding:16px; font-size:16px; font-weight:900; border-radius:16px; box-shadow: 0 8px 25px rgba(124,92,255,0.3);">دخول 🚀</button></div>
       <div id="authLoggedInSection" style="display:none; padding:10px;">
         <div style="text-align:center; margin-bottom:25px;"><div id="authStatusIcon" class="auth-icon-wrap" style="background:linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.05)); border-color:rgba(34,197,94,0.3); box-shadow: 0 10px 25px rgba(34,197,94,0.15);">✅</div><div id="authStateText" style="font-weight:900; font-size:15px; line-height:1.6;"></div></div>
         <div id="ownerDashboard" style="display:none; padding:20px; background:rgba(124,92,255,0.08); border-radius:18px; border:1px solid rgba(124,92,255,0.2); margin-bottom:25px;"><h3 style="margin-top:0; color:#fff; font-size:15px; display:flex; align-items:center; gap:8px;">👑 أدوات المالك (Owner)</h3><button class="btn soft" onclick="closeModal('authModal'); openModal('storeSettingsModal')" style="width:100%; margin-bottom:12px; padding:12px; border-radius:12px; border-color:rgba(16,185,129,0.3); color:#10b981;">⚙️ إعدادات المتجر (الاسم واللوجو)</button><button class="btn primary" onclick="closeModal('authModal'); openModal('addAdminModal')" style="width:100%; margin-bottom:12px; padding:12px; border-radius:12px;">➕ إنشاء حساب مستخدم جديد</button><button class="btn soft" onclick="closeModal('authModal'); loadAdminsList()" style="width:100%; padding:12px; border-radius:12px; border-color:rgba(255,255,255,0.1);">👥 إدارة الصلاحيات للمستخدمين</button><button class="btn soft" onclick="closeModal('authModal'); openAuditLog()" style="width:100%; padding:12px; border-radius:12px; border-color:rgba(245,158,11,0.3); color:#f59e0b; margin-top:12px;">🕵️‍♂️ سجل نشاطات المدراء</button></div>
@@ -401,15 +399,20 @@ function todayISO(){ const d=new Date(); d.setHours(0,0,0,0); return d.toISOStri
 function toDate(iso){ const d=new Date(iso+"T00:00:00"); d.setHours(0,0,0,0); return d; }
 function saveLocalBackup(){ localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(data)); }
 function loadLocalBackup(){ try { const j = JSON.parse(localStorage.getItem(LOCAL_BACKUP_KEY)); return Array.isArray(j) ? j : []; } catch { return []; } }
-function setSyncState(state){ const chip = $("syncChip"); const val = $("syncVal"); chip.className = "statChip sync " + state; if(!navigator.onLine) val.textContent = "أوفلاين 📴"; else if(state==="saving") val.textContent = "جاري الحفظ..."; else if(state==="ok") { const d = new Date(); val.textContent = d.getHours()+":"+String(d.getMinutes()).padStart(2,"0") + " ✅"; } }
+function setSyncState(state){ const chip = $("syncChip"); const val = $("syncVal"); chip.className = "statChip sync " + state; if(!navigator.onLine) val.textContent = "أوفلاين 📴"; else if(state==="saving") val.textContent = "جاري الحفظ..."; else if(state==="ok") { const d = new Date(); val.textContent = d.getHours()+":"+String(d.getMinutes()).padStart(2,"0") + " ✅"; } else if(state==="fail") { val.textContent = "خطأ اتصال ❌"; chip.style.borderColor="var(--err)"; chip.style.background="rgba(239,68,68,0.1)"; } }
 
 async function load() { 
   if(!navigator.onLine) { data = loadLocalBackup(); render(); return; } 
   try { 
     setSyncState("saving"); 
-    try { const settingsSnap = await db.ref("settings/storeInfo").once('value'); if(settingsSnap.exists()) { storeSettings = settingsSnap.val(); $("setStoreName").value = storeSettings.name || ""; if(storeSettings.logo) { $("logoPreview").src = storeSettings.logo; $("logoPreview").style.display = "block"; $("logoEmojiFallback").style.display = "none"; } } } catch(errSettings) {} 
+    try { const settingsSnap = await db.ref("settings/storeInfo").once('value'); if(settingsSnap.exists()) { storeSettings = settingsSnap.val(); $("setStoreName").value = storeSettings.name || ""; if(storeSettings.logo) { $("logoPreview").src = storeSettings.logo; $("logoPreview").style.display = "block"; $("logoEmojiFallback").style.display = "none"; } } } catch(errSettings) { console.log("تم تخطي الإعدادات"); } 
     const snap = await db.ref("subscriptions").once('value'); data = snap.val() ? Object.values(snap.val()) : []; saveLocalBackup(); setSyncState("ok"); render(); 
-  } catch(e) { showToast("ليس لديك صلاحية للقراءة", "err"); setSyncState("fail"); } 
+  } catch(e) { 
+    setSyncState("fail"); 
+    showToast("حدث خطأ في جلب البيانات من السيرفر. تم عرض النسخة المحفوظة.", "warn"); 
+    data = loadLocalBackup(); // 🛠️ عرض النسخة المحلية حتى لو فشل السيرفر لتجنب الجدول الفارغ
+    render(); 
+  } 
 }
 
 async function firebasePush() { if(!navigator.onLine) return; try { setSyncState("saving"); await db.ref("subscriptions").set(data); saveLocalBackup(); setSyncState("ok"); } catch(e) { showToast("خطأ", "err"); } }
@@ -429,6 +432,11 @@ function render(){
     if(currentFilter !== "all" && currentFilter !== st.key) return false; return match; 
   });
   
+  if(rows.length === 0) {
+    tb.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:40px; color:var(--muted); font-size:15px;">لا توجد بيانات مطابقة لعرضها 📭</td></tr>`;
+    return;
+  }
+
   rows.forEach(r => {
     const st = getStatus(r.end, alertD); const isChecked = selectedIds.has(r.id) ? "checked" : ""; const tr = document.createElement("tr");
     if(st.key === "expired") tr.className = "expired-row"; else if(st.key === "expiring") tr.className = "expiring-row";
@@ -506,15 +514,8 @@ $("sendReceiptWaBtn").onclick = () => {
   
   let msg = `🧾 *فاتورة اشتراك إلكترونية* 🧾\n\n🏢 المتجر: *${sName}*\n👤 العميل: ${rec.name||'-'}\n📦 الخدمة: ${rec.serviceType||'غير محدد'}\n⏳ المدة: ${rec.months||0} شهر\n📅 البداية: ${rec.start||'-'}\n🏁 الانتهاء: ${rec.end||'-'}\n\n💰 *السعر الإجمالي:* ${parseFloat(rec.price||0).toLocaleString()} ${rec.currency||'DZD'}\n💳 *حالة الدفع:* ${pText}\n`;
   
-  if(rec.paymentStatus === 'partial') {
-      msg += `💸 *المبلغ المدفوع:* ${parseFloat(rec.paidAmount||0).toLocaleString()} ${rec.currency||'DZD'}\n`;
-  }
-
-  if(rec.paymentStatus === 'partial' || rec.paymentStatus === 'unpaid'){ 
-      let total = parseFloat(rec.price)||0; 
-      let paid = rec.paymentStatus === 'unpaid' ? 0 : parseFloat(rec.paidAmount)||0; 
-      msg += `❗ *المتبقي (دين):* ${(total - paid).toLocaleString()} ${rec.currency||'DZD'}\n`; 
-  }
+  if(rec.paymentStatus === 'partial') { msg += `💸 *المبلغ المدفوع:* ${parseFloat(rec.paidAmount||0).toLocaleString()} ${rec.currency||'DZD'}\n`; }
+  if(rec.paymentStatus === 'partial' || rec.paymentStatus === 'unpaid'){ let total = parseFloat(rec.price)||0; let paid = rec.paymentStatus === 'unpaid' ? 0 : parseFloat(rec.paidAmount)||0; msg += `❗ *المتبقي (دين):* ${(total - paid).toLocaleString()} ${rec.currency||'DZD'}\n`; }
   msg += `\n🤍 نشكركم على ثقتكم بنا!`; window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
 };
 
@@ -559,12 +560,7 @@ $("openToolsModal").onclick = () => { openModal("toolsModal"); };
 $("exportCsvBtn").onclick = () => { 
   if(data.length === 0) return showToast("لا توجد بيانات لتصديرها", "warn"); 
   let csv = "\uFEFFالاسم,الإيميل,الهاتف,الخدمة,المدة,السعر,المبلغ المدفوع,حالة الدفع,تاريخ البداية,تاريخ الانتهاء\n"; 
-  data.forEach(r => { 
-    let phone = r.phone ? `${r.countryCode||''}${r.phone}` : ''; 
-    let payStat = r.paymentStatus === 'unpaid' ? 'غير مدفوع' : (r.paymentStatus === 'partial' ? 'جزئي' : 'خالص'); 
-    let paidAmt = r.paymentStatus === 'unpaid' ? 0 : (r.paymentStatus === 'partial' ? (r.paidAmount||0) : (r.price||0));
-    csv += `${r.name||''},${r.email||''},${phone},${r.serviceType||''},${r.months||''} شهر,${r.price||0} ${r.currency||'DZD'},${paidAmt},${payStat},${r.start||''},${r.end||''}\n`; 
-  }); 
+  data.forEach(r => { let phone = r.phone ? `${r.countryCode||''}${r.phone}` : ''; let payStat = r.paymentStatus === 'unpaid' ? 'غير مدفوع' : (r.paymentStatus === 'partial' ? 'جزئي' : 'خالص'); let paidAmt = r.paymentStatus === 'unpaid' ? 0 : (r.paymentStatus === 'partial' ? (r.paidAmount||0) : (r.price||0)); csv += `${r.name||''},${r.email||''},${phone},${r.serviceType||''},${r.months||''} شهر,${r.price||0} ${r.currency||'DZD'},${paidAmt},${payStat},${r.start||''},${r.end||''}\n`; }); 
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Subscriptions_Excel_${todayISO()}.csv`; a.click(); closeModal('toolsModal'); showToast("تم التصدير بنجاح 📥"); 
 };
 $("undoDeleteBtn").onclick = async () => { if(!lastDeletedData || lastDeletedData.length === 0) { closeModal('toolsModal'); return showToast("لا يوجد أي حذف أخير لاسترجاعه", "warn"); } logAction("تراجع عن الحذف", `استرجاع ${lastDeletedData.length} اشتراكات`); data = [...lastDeletedData, ...data]; lastDeletedData = null; await firebasePush(); render(); closeModal('toolsModal'); showToast("تم استرجاع البيانات المحذوفة ↩️"); };
