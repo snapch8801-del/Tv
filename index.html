@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>لوحة تسيير الاشتراكات - v11.4</title>
+<title>لوحة تسيير الاشتراكات - v11.5</title>
 
 <style>
 :root{
@@ -27,7 +27,6 @@ body{
 
 .card{ background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); backdrop-filter: blur(10px); overflow:hidden; }
 
-/* 🛠️ تعديل الشريط العلوي لمنع التداخل على الهواتف */
 .topbar{ padding:14px; border-bottom:1px solid var(--line); display:flex; flex-direction:column; gap:12px; }
 .topbar-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; width: 100%; }
 .searchWrap{ display: flex; gap: 6px; align-items: center; width: 100%; }
@@ -110,8 +109,10 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 .auth-sub { color:var(--muted); font-size:13px; margin-bottom: 30px; }
 .auth-input { width:100%; padding:15px 18px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:16px; color:#fff; font-size:15px; outline:none; transition:all 0.2s; text-align: left; direction: ltr; }
 .auth-input:focus { border-color: rgba(124,92,255,.6); box-shadow: 0 0 0 4px rgba(124,92,255,.14); background:rgba(0,0,0,0.6); }
+.auth-label { font-size:13px; color:var(--muted); margin-bottom:8px; display:block; text-align: right; font-weight: bold; }
 
-/* ======== 🛠️ إصلاح طباعة الوصل جذرياً ======== */
+.receipt-table { min-width: 0 !important; width: 100% !important; } 
+
 @media print {
     body > *:not(#receiptModal) { display: none !important; }
     body { background: white !important; padding: 0 !important; margin: 0 !important; }
@@ -131,8 +132,8 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v11.4</span></h1>
-    <div class="sub">⚡ ترتيب ذكي للهاتف + إصلاح الأعطال والطباعة</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v11.5</span></h1>
+    <div class="sub">⚡ النسخة الصافية (إصلاح النوافذ المكررة والفاتورة)</div>
   </div>
 
   <div class="card">
@@ -280,7 +281,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
         <h1 id="receiptStoreName" style="margin: 0; font-size: 24px; color: #4f46e5; font-weight: 900;">متجر الاشتراكات</h1>
         <div style="color: #64748b; font-size: 13px; margin-top: 5px;">فاتورة اشتراك إلكترونية</div>
       </div>
-      <table style="width: 100%; border-collapse: collapse; font-size: 15px;">
+      <table class="receipt-table" style="width: 100%; border-collapse: collapse; font-size: 15px;">
         <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b; width:40%;">اسم العميل:</td><td style="padding: 12px 0; text-align: left; font-weight: bold; color: #0f172a;" id="recName"></td></tr>
         <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">رقم الهاتف:</td><td style="padding: 12px 0; text-align: left; direction: ltr; color: #0f172a;" id="recPhone"></td></tr>
         <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">نوع الخدمة:</td><td style="padding: 12px 0; text-align: left; font-weight: bold; color: #8b5cf6;" id="recService"></td></tr>
@@ -410,7 +411,7 @@ async function load() {
   } catch(e) { 
     setSyncState("fail"); 
     showToast("حدث خطأ في جلب البيانات من السيرفر. تم عرض النسخة المحفوظة.", "warn"); 
-    data = loadLocalBackup(); // 🛠️ عرض النسخة المحلية حتى لو فشل السيرفر لتجنب الجدول الفارغ
+    data = loadLocalBackup();
     render(); 
   } 
 }
