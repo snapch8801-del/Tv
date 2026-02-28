@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>لوحة تسيير الاشتراكات - v12.9.23</title>
+<title>لوحة تسيير الاشتراكات - v12.9.18</title>
 
 <meta name="theme-color" content="#070a12" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -12,50 +12,6 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
-
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-<script>
-const _urlParams = new URLSearchParams(window.location.search);
-const _portalData = _urlParams.get('p');
-
-if (_portalData) {
-    window.onload = () => {
-        try {
-            const jsonStr = decodeURIComponent(atob(_portalData));
-            const d = JSON.parse(jsonStr);
-            document.body.innerHTML = `
-            <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: radial-gradient(circle at 50% -20%, #7c5cff30, transparent 60%), #070a12; font-family: system-ui, -apple-system, sans-serif; direction: rtl;">
-                <div style="width: 100%; max-width: 400px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 35px 25px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); backdrop-filter: blur(20px);">
-                    <div style="font-size: 50px; margin-bottom: 10px; filter: drop-shadow(0 10px 15px rgba(124,92,255,0.3));">👤</div>
-                    <h2 style="color: #eaf0ff; margin: 0 0 5px 0; font-size: 22px; font-weight: 900;">${d.sn}</h2>
-                    <div style="color: rgba(234,240,255,0.5); font-size: 13px; margin-bottom: 30px; letter-spacing: 1px;">بوابة المشترك الرقمية</div>
-                    <h1 style="color: white; font-size: 28px; margin: 0 0 10px 0; font-weight: 900;">${d.n}</h1>
-                    <div style="display: inline-block; background: rgba(124,92,255,0.15); color: #c4b5fd; padding: 6px 16px; border-radius: 99px; font-weight: bold; font-size: 14px; border: 1px solid rgba(124,92,255,0.3); margin-bottom: 30px;">${d.srv}</div>
-                    <div style="background: rgba(0,0,0,0.3); border-radius: 18px; padding: 20px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.03); text-align: right;">
-                        <div style="color: rgba(234,240,255,0.5); font-size: 13px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;"><span>📊</span> تفاصيل الاشتراك:</div>
-                        ${d.ty === 'sessions'
-                            ? `<div style="font-size: 16px; color: white; font-weight: bold;">متبقي <span style="color: #10b981; font-size: 26px; font-weight: 900; margin: 0 4px;">${d.sl}</span> من ${d.st} حصة</div>`
-                            : `<div style="font-size: 15px; color: white; font-weight: bold; line-height: 1.8;">البداية: <span style="color:#eaf0ff;">${d.sd}</span><br>الانتهاء: <span style="color:#ef4444; font-size:18px;">${d.ed}</span></div>`
-                        }
-                    </div>
-                    <div style="background: ${d.db > 0 ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)'}; border-radius: 18px; padding: 20px; border: 1px solid ${d.db > 0 ? 'rgba(239,68,68,0.2)' : 'rgba(16,185,129,0.2)'}; text-align: right;">
-                        <div style="color: ${d.db > 0 ? '#fca5a5' : '#6ee7b7'}; font-size: 13px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;"><span>💳</span> الوضعية المالية:</div>
-                        <div style="font-size: 18px; color: ${d.db > 0 ? '#ef4444' : '#10b981'}; font-weight: bold;">
-                            ${d.db > 0 ? `متبقي للدفع: <span style="font-size: 24px; font-weight: 900;">${d.db}</span> ${d.cr}` : 'خالص بالكامل 🟢'}
-                        </div>
-                    </div>
-                    <div style="margin-top: 35px; font-size: 11px; color: rgba(234,240,255,0.2);">Powered by Subscription Manager v12</div>
-                </div>
-            </div>`;
-        } catch(e) {
-            document.body.innerHTML = `<div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #070a12;"><div style="text-align:center; padding:50px; color:#ef4444; background: rgba(239,68,68,0.1); border-radius:20px; border: 1px solid rgba(239,68,68,0.3);">❌<br><br>عذراً، الرابط تالف أو غير صالح.</div></div>`;
-        }
-    };
-}
-</script>
 
 <style>
 :root{
@@ -111,12 +67,13 @@ input[type="checkbox"] { appearance: none; width: 18px; height: 18px; border: 2p
 input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
 input[type="checkbox"]:checked::after { content: "✔"; position: absolute; color: white; font-size: 12px; left: 3px; top: -1px; font-weight: bold; }
 
-.tableWrap { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; border-top: 1px solid var(--line); }
-table { width: 100%; border-collapse: collapse; min-width: 900px; text-align: right; }
-thead th { position: sticky; top: 0; z-index: 5; background: rgba(0,0,0,0.4); color: var(--muted); padding: 14px 12px; border-bottom: 1px solid var(--line); font-size: 12px; font-weight: 900; white-space: nowrap; }
-tbody tr { transition: background 0.2s; border-bottom: 1px solid rgba(255,255,255,0.05); }
-tbody tr:hover { background: rgba(255,255,255,0.03); }
-tbody td { padding: 12px; vertical-align: middle; white-space: nowrap; }
+/* 🌟 الجدول الكلاسيكي القوي والمستقر - خالي من الأخطاء 🌟 */
+.tableWrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; min-width: 850px; }
+thead th { position: sticky; top: 0; z-index: 5; background: rgba(0,0,0,0.3); color: var(--muted); text-align: right; font-size: 12px; font-weight: 900; padding: 12px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+tbody tr { transition: background 0.2s; }
+tbody tr:hover { background: rgba(255,255,255,0.02); }
+tbody td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; white-space: nowrap; }
 
 tr.expired-row{ background: rgba(239,68,68,.08); }
 tr.expiring-row{ background: rgba(245,158,11,.06); }
@@ -199,17 +156,22 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 .menu-section-title { font-size: 12px; color: var(--accent); font-weight: bold; margin: 25px 0 10px; padding-inline-start: 5px; }
 .side-menu .actBtn { margin-bottom: 8px; font-size: 13px; padding: 12px 14px; }
 
+/* الفاتورة المرنة - مستقرة تماماً */
 .flex-row-receipt { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #cbd5e1; flex-wrap: wrap; gap: 5px;}
 .flex-row-receipt span.label { color: #64748b; }
 .flex-row-receipt strong.val, .flex-row-receipt span.val { color: #0f172a; text-align: left; }
 </style>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 
 <body>
-<div class="container" id="adminAppContainer" style="display: none;">
+<div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.23 PWA</span></h1>
-    <div class="sub">⚡ النسخة الكاملة والمستقرة: جدول كلاسيكي قوي، تشفير آمن، وبوابة للعميل.</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.18 PWA</span></h1>
+    <div class="sub">⚡ النسخة النقية والمضمونة 100%: جداول كلاسيكية سريعة ومستقرة بدون أي انهيار.</div>
   </div>
 
   <div class="card">
@@ -267,23 +229,23 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
     <button class="btn danger btn-close" onclick="closeSideMenu()" style="padding: 6px 12px;">✕</button>
   </div>
   <div style="flex:1; overflow-y:auto; padding-right: 5px;">
-   
+    
     <div class="menu-section-title">إصلاح وحل المشاكل</div>
     <button class="actBtn" style="color:#60a5fa; border-color:rgba(96,165,250,0.4); background:rgba(96,165,250,0.1);" onclick="window.location.reload(true)">🔄 تفريغ الذاكرة وتحديث الصفحة</button>
 
     <div class="menu-section-title">إدارة النظام</div>
     <button class="actBtn" onclick="closeSideMenu(); openModal('authModal')" style="border-color:var(--accent); color:var(--accent); background: rgba(124,92,255,0.1);">👤 إدارة الحسابات والصلاحيات</button>
-   
+    
     <div class="menu-section-title">البيانات والحماية</div>
     <button class="actBtn" style="color:#10b981; border-color:rgba(16,185,129,0.4); background:rgba(16,185,129,0.1);" onclick="closeSideMenu(); window.exportCSV()">📥 تحميل كملف Excel</button>
     <button class="actBtn" onclick="closeSideMenu(); openModal('backupModal')">📦 حفظ واسترجاع البيانات</button>
     <button class="actBtn" onclick="closeSideMenu(); openModal('syncModal')">☁️ المزامنة السحابية</button>
-   
+    
     <div class="menu-section-title">أدوات إضافية</div>
     <button class="actBtn" style="color:#f59e0b; border-color:rgba(245,158,11,0.4); background:rgba(245,158,11,0.1);" onclick="closeSideMenu(); window.undoDelete()">↩️ التراجع عن آخر حذف</button>
     <button class="actBtn" onclick="closeSideMenu(); window.shareApp()">📤 مشاركة رابط اللوحة</button>
     <button class="actBtn" onclick="closeSideMenu(); window.print()">🖨️ طباعة الجدول</button>
-   
+    
     <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(239,68,68,0.2);">
       <button class="actBtn danger" onclick="closeSideMenu(); window.clearAllData()" style="text-align: center;">⚠️ تصفير اللوحة بالكامل</button>
     </div>
@@ -345,7 +307,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
         <div id="advancedFields" class="full-width" style="display: none; background: rgba(0,0,0,0.2); padding: 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05); margin-top: 10px;">
           <div class="formGrid">
             <div class="field full-width"><label>🔗 رابط المحادثة (ميسنجر / انستغرام / ويب)</label><input id="messengerLink" type="url" dir="ltr" placeholder="https://..." title="انسخ رابط حساب الزبون أو رابط المحادثة والصقه هنا"></div>
-           
+            
             <div class="field full-width"><label>الإيميل (اختياري)</label><input id="email" placeholder="مثال: name@example.com" inputmode="email"></div>
             <div class="field full-width"><label>الأوسمة / التصنيفات (مفصولة بفاصلة)</label><input id="tags" placeholder="مثال: سنة 4 متوسط, فوج الأحد, VIP..."></div>
             <div class="field"><label>تنبيه قبل (أيام)</label><input id="alertDays" type="number" min="1" step="1" value="7"></div>
@@ -439,12 +401,12 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
         <h1 id="receiptStoreName" style="margin: 0; font-size: 24px; color: #4f46e5; font-weight: 900;">المؤسسة</h1>
         <div style="color: #64748b; font-size: 13px; margin-top: 5px;">فاتورة اشتراك إلكترونية</div>
       </div>
-     
+      
       <div style="font-size: 15px;">
         <div class="flex-row-receipt"><span class="label">اسم العميل:</span><strong class="val" id="recName"></strong></div>
         <div class="flex-row-receipt"><span class="label">رقم الهاتف:</span><span class="val" style="direction: ltr;" id="recPhone"></span></div>
         <div class="flex-row-receipt"><span class="label">نوع الخدمة:</span><strong class="val" style="color: #8b5cf6;" id="recService"></strong></div>
-       
+        
         <div id="recRowMonths" class="flex-row-receipt" style="display:none;"><span class="label">مدة الاشتراك:</span><span class="val" id="recMonths"></span></div>
         <div id="recRowSessions" class="flex-row-receipt" style="display:none;"><span class="label">رصيد الحصص:</span><strong class="val" id="recSessions"></strong></div>
         <div id="recRowStart" class="flex-row-receipt" style="display:none;"><span class="label">تاريخ البداية:</span><span class="val" id="recStart"></span></div>
@@ -461,7 +423,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
           <span style="color: #ef4444; font-weight:bold;">❗ المبلغ المتبقي (دين):</span><strong style="color: #ef4444; font-size: 16px;" id="recRemaining"></strong>
         </div>
       </div>
-     
+      
       <div id="receiptPaymentLogSection" style="display:none; margin-top: 15px; border-top: 1px dashed #cbd5e1; padding-top: 15px;">
          <div style="font-size: 12px; color: #64748b; margin-bottom: 8px; font-weight: bold;">سجل الدفعات بالتفصيل:</div>
          <div id="receiptPaymentLogList"></div>
@@ -516,7 +478,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
     <div class="modalHeader"><h2>💸 إدارة الدفعات</h2><button class="btn danger btn-close" type="button" onclick="closeModal('paymentModal'); openModal('rowActionsModal')">العودة ↩</button></div>
     <div class="modalBody">
       <div style="margin-bottom: 15px; font-weight: bold; color: var(--text); font-size: 16px;" id="paymentClientName"></div>
-     
+      
       <div style="display: flex; justify-content: space-between; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05);">
         <div style="text-align: center;"><span style="font-size:11px; color:var(--muted); display:block;">السعر الإجمالي</span><strong id="payTotal" style="color:var(--text); font-size:15px;"></strong></div>
         <div style="text-align: center;"><span style="font-size:11px; color:var(--muted); display:block;">إجمالي المدفوع</span><strong id="payPaid" style="color:#10b981; font-size:15px;"></strong></div>
@@ -533,7 +495,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
       <div style="font-size:12px; color:var(--accent); margin-bottom:8px; font-weight:bold;">سجل الدفعات السابقة:</div>
       <div style="max-height: 200px; overflow: auto; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
         <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
-          <thead style="background: rgba(255,255,255,0.05);"><tr><th style="padding: 10px; text-align: right; color: var(--muted);">التاريخ والوقت</th><th style="padding: 10px; text-align: left; color: var(--muted);">المبلغ الذي تم دفعه</th></tr></thead>
+          <thead style="background: rgba(255,255,255,0.05);"><tr><th style="padding: 10px; text-align: right; color: var(--muted);">التاريخ والوقت</th><th style="padding: 10px; text-align: left; color: var(--muted);">الدفعة المالية</th></tr></thead>
           <tbody id="paymentTbody"></tbody>
         </table>
       </div>
@@ -562,9 +524,9 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
       <div><h2 style="font-size: 16px;">⚡ إجراءات المشترك</h2><div class="hint" id="rowActionsHint" style="color: var(--accent); font-weight: bold; font-size: 14px;">—</div></div>
       <button class="btn danger btn-close" type="button" onclick="closeModal('rowActionsModal')" style="padding: 6px 12px;">✕</button>
     </div>
-   
+    
     <div class="modalBody" style="padding: 20px;">
-     
+      
       <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
         <button class="btn primary" style="padding: 14px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(124,92,255,0.2);" onclick="window.actExtendAction()">
           🔁 تجديد الاشتراك (رصيد / مدة)
@@ -582,7 +544,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
           💬 ميسنجر / انستا
         </button>
       </div>
-     
+      
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
         <button class="btn soft" style="color: #f43f5e; border-color: rgba(244,63,94,.3); background: rgba(244,63,94,.1);" onclick="window.actSMSAction()">
           📱 رسالة SMS
@@ -598,7 +560,6 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
         <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px;" onclick="window.actCopyEmailAction()">📋 نسخ Email</button>
         <button class="btn soft" id="btnViewAttendance" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #10b981; border-color: rgba(16,185,129,.3);" onclick="window.openAttendanceLog()">📅 سجل الحضور</button>
         <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #fbbf24; border-color: rgba(251,191,36,.3);" onclick="window.openPaymentModal()">💸 الدفعات والديون</button>
-        <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #c084fc; border-color: rgba(192,132,252,.3); width: 100%; font-weight:bold; background: rgba(192,132,252,0.1);" onclick="window.copyPortalLink()">🌐 نسخ رابط بوابة العميل الذكية</button>
       </div>
 
       <div style="padding-top: 15px; border-top: 1px solid rgba(239,68,68,0.2);">
@@ -690,72 +651,36 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 <div id="toast" class="toast"></div>
 
 <script>
-// --- بداية التعديلات (إضافة الثوابت والدالة المفقودة ليعمل الكود بدون أخطاء) ---
-const $ = (id) => document.getElementById(id);
-const LOCAL_BACKUP_KEY = "subscription_data_v12";
-const LOCAL_PACKAGES_KEY = "subscription_packages_v12";
-const BASE_APP_TITLE = document.title;
-const FIREBASE_CONFIG = {
-    // قم بلصق إعدادات مشروع Firebase الخاص بك هنا لتعمل المزامنة السحابية
-};
-// --- نهاية التعديلات ---
-
-window.copyPortalLink = () => {
-    const rec = data.find(x => x.id === currentRowId);
-    if(!rec) return;
-
-    let debt = (parseFloat(rec.price)||0) - (parseFloat(rec.paidAmount)||0);
-    if(debt < 0) debt = 0;
-
-    const payload = {
-        n: rec.name || "عميل",
-        srv: rec.serviceType || "غير محدد",
-        ty: rec.subType || "time",
-        sl: rec.sessionsLeft || 0,
-        st: rec.sessionsTotal || 0,
-        sd: rec.start || "-",
-        ed: rec.end || "-",
-        db: debt,
-        cr: rec.currency || "DZD",
-        sn: storeSettings.name || "المؤسسة"
-    };
-
-    try {
-        const jsonStr = JSON.stringify(payload);
-        const base64 = btoa(encodeURIComponent(jsonStr));
-        const link = window.location.origin + window.location.pathname + "?p=" + base64;
-
-        const textArea = document.createElement("textarea");
-        textArea.value = link;
-        textArea.style.position = "fixed"; 
-        textArea.style.left = "-9999px"; 
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
-
-        showToast("تم نسخ رابط بوابة العميل بنجاح 🔗");
-        closeModal("rowActionsModal");
-    } catch(err) {
-        showToast("حدث خطأ أثناء توليد الرابط", "err");
-    }
-};
+'use strict';
 
 window.openSideMenu = () => { $("sideMenu").classList.add("open"); $("menuBackdrop").classList.add("open"); };
 window.closeSideMenu = () => { $("sideMenu").classList.remove("open"); $("menuBackdrop").classList.remove("open"); };
 
 window.addEventListener('DOMContentLoaded', () => {
-    if(!_portalData) {
-        document.getElementById('adminAppContainer').style.display = 'block';
-        data = loadLocalBackup();
-        window.render();
-        setTimeout(() => {
-            if(data.length === 0 && !currentUser) {
-                $("syncVal").textContent = "أوفلاين 📴";
-            }
-        }, 3000);
-    }
+    data = loadLocalBackup();
+    window.render();
+    setTimeout(() => {
+        if(data.length === 0 && !currentUser) {
+            $("syncVal").textContent = "أوفلاين 📴";
+        }
+    }, 3000);
 });
+
+(function initPWA() {
+  try {
+    const pwaManifest = { name: "لوحة تسيير الاشتراكات", short_name: "الاشتراكات", start_url: window.location.pathname || "/", display: "standalone", background_color: "#070a12", theme_color: "#070a12", icons: [ { src: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%237c5cff'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='60'>🧾</text></svg>", sizes: "192x192", type: "image/svg+xml" }, { src: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%237c5cff'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='60'>🧾</text></svg>", sizes: "512x512", type: "image/svg+xml" } ] };
+    const manifestBlob = new Blob([JSON.stringify(pwaManifest)], {type: 'application/json'}); document.getElementById('manifest-link')?.setAttribute('href', URL.createObjectURL(manifestBlob));
+    const swCode = `self.addEventListener('install', (e) => self.skipWaiting()); self.addEventListener('activate', (e) => self.clients.claim());`;
+    const swBlob = new Blob([swCode], {type: 'text/javascript'});
+    if ('serviceWorker' in navigator) navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
+  } catch (e) {}
+})();
+
+const FIREBASE_CONFIG = { apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ", authDomain: "dattta-6f497.firebaseapp.com", databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com", projectId: "dattta-6f497", storageBucket: "dattta-6f497.firebasestorage.app", messagingSenderId: "804914291938", appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb" };
+const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.18"; 
+const $ = (id)=>document.getElementById(id); 
+const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
+const LOCAL_PACKAGES_KEY = "subs_packages_backup_v12";
 
 let data = []; let packagesData = []; let editingId = null; let currentRowId = null; let currentFilter = "all"; 
 let selectedIds = new Set(); let extendMode = "single"; let currentUser = null; let currentRole = null;
@@ -850,6 +775,7 @@ window.handleLogoUpload = (e) => {
           canvas.height = img.height * scaleSize;
           const ctx = canvas.getContext("2d");
           ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          
           const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7); 
           $("logoPreview").src = compressedDataUrl; 
           $("logoPreview").style.display = "block"; 
@@ -954,17 +880,18 @@ window.render = () => {
             
             let dateOrSessionHtml = "";
             if(r.subType === 'sessions') {
-              dateOrSessionHtml = `<div style="font-weight:bold; font-size:14px; color:var(--text);">${r.sessionsLeft||0} / ${r.sessionsTotal||0} حصة</div>
+              dateOrSessionHtml = `<div style="font-weight:bold; font-size:13px; color:var(--text);">${r.sessionsLeft||0} / ${r.sessionsTotal||0} حصة</div>
               <button class="btn soft" style="padding:4px 8px; font-size:10px; margin-top:4px; border-color:#22c55e; color:#22c55e;" onclick="window.markAttendance('${r.id}')">✔️ حضور</button>`;
             } else {
               dateOrSessionHtml = `<span style="color:var(--text)">م:</span> ${r.start||"-"}<br><span style="color:var(--text)">إ:</span> ${r.end||"-"}
               <div style="margin-top:4px;"><button class="btn soft" style="padding:4px 8px; font-size:10px; border-color:#22c55e; color:#22c55e;" onclick="window.markAttendance('${r.id}')">✔️ تسجيل دخول</button></div>`;
             }
 
+            // الجدول الكلاسيكي القوي والخالي من أخطاء الموبايل
             tr.innerHTML = `
               <td style="text-align: center;"><input type="checkbox" class="rowChk" value="${r.id}" ${isChecked}></td>
               <td>
-                 <div style="font-weight:bold; color:var(--text); font-size:14px;">${r.name||"-"}${notesIcon}</div>
+                 <div style="font-weight:bold; color:var(--text); font-size:14px;">${r.name ? r.name : "بدون اسم"}${notesIcon}</div>
                  ${r.email ? `<div style="font-size:11px; color:var(--muted); margin-bottom:4px; direction: ltr; text-align: right;">${r.email}</div>` : ''}
                  <div>${tagsHtml}</div>
               </td>
@@ -976,7 +903,7 @@ window.render = () => {
               <td><button class="actionPill" onclick="window.openRowActions('${r.id}')">⚡ إجراء</button></td>
             `;
             tb.appendChild(tr);
-        } catch(rowErr) {}
+        } catch(rowErr) { console.error(rowErr); }
       });
 
       $("paginationControls").innerHTML = `
@@ -984,7 +911,7 @@ window.render = () => {
         <span class="page-info">صفحة ${window.currentPage} من ${totalPages} <span style="margin: 0 8px; color:var(--line);">|</span> الإجمالي: ${filteredRows.length} مشترك</span>
         <button class="page-btn" onclick="window.changePage(-1)" ${window.currentPage === 1 ? 'disabled' : ''}>▶ السابق</button>
       `;
-  } catch(e) {}
+  } catch(e) { console.error(e); }
 };
 
 window.markAttendance = async (id) => {
