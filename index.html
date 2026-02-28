@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>لوحة تسيير الاشتراكات - v12.8</title>
+<title>لوحة تسيير الاشتراكات - v12.9</title>
 
 <meta name="theme-color" content="#070a12" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -13,6 +13,7 @@
 <link id="manifest-link" rel="manifest" href="" />
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
 <style>
 :root{
@@ -139,38 +140,31 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 .page-info { font-size: 13px; color: var(--muted); font-weight: bold; background: rgba(0,0,0,0.2); padding: 8px 14px; border-radius: 10px; }
 
 /* تصميم بطاقة الانخراط */
-.id-card-wrap {
-  border: 2px solid #e2e8f0; border-radius: 16px; padding: 25px; 
-  background: linear-gradient(135deg, #ffffff, #f1f5f9); 
-  position: relative; overflow: hidden; color: #0f172a; text-align: center;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.1);
-}
-.id-card-wrap::before {
-  content: ""; position: absolute; top: 0; left: 0; right: 0; height: 6px;
-  background: linear-gradient(90deg, var(--accent), #4ade80);
-}
-</style>
+.id-card-wrap { border: 2px solid #e2e8f0; border-radius: 16px; padding: 25px; background: linear-gradient(135deg, #ffffff, #f1f5f9); position: relative; overflow: hidden; color: #0f172a; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+.id-card-wrap::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, var(--accent), #4ade80); }
 
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+/* إخفاء شعار مكتبة QR Code الكاميرا ليصبح المظهر أنظف */
+#qr-reader__dashboard_section_csr span { color: var(--text) !important; }
+#qr-reader__dashboard_section_swaplink { display: none !important; }
+</style>
 </head>
 
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.8 PWA</span></h1>
-    <div class="sub">⚡ النسخة المستقرة (بدون أخطاء): الحصص، بطاقات QR، والرسائل الجماعية</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9 PWA</span></h1>
+    <div class="sub">⚡ الميزات: كاميرا قارئ الباركود (QR Scanner) 📷 مدمجة بالكامل</div>
   </div>
 
   <div class="card">
     <div class="topbar">
       <div class="topbar-actions">
-        <button class="btn" id="installPwaBtn" type="button" onclick="window.installApp()" style="display:none; border-color:rgba(16,185,129,0.5); background:linear-gradient(135deg, rgba(16,185,129,0.2), rgba(16,185,129,0.05)); color:#10b981;">📱 تثبيت التطبيق</button>
+        <button class="btn primary" type="button" onclick="openScannerModal()" style="background: linear-gradient(135deg, #10b981, #059669); border-color: #059669; box-shadow: 0 4px 15px rgba(16,185,129,0.3);">📷 مسح بطاقة (QR)</button>
         <button class="btn primary" type="button" onclick="openAddSub()">➕ إضافة</button>
         <button class="btn soft" type="button" onclick="openTotalsReport()">💰 المجموع</button>
         <button class="btn soft" type="button" onclick="openModal('authModal')" style="border-color:var(--accent); color:var(--accent);">👤 الإدارة</button>
         <button class="btn soft" type="button" onclick="openModal('toolsModal')">⚙️ أدوات</button>
+        <button class="btn" id="installPwaBtn" type="button" onclick="window.installApp()" style="display:none; border-color:rgba(16,185,129,0.5); color:#10b981;">📱 تثبيت التطبيق</button>
         <div class="statChip sync" id="syncChip"><span class="ico">☁️</span> <span class="v" id="syncVal">—</span></div>
       </div>
       <div class="searchWrap">
@@ -208,6 +202,40 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
     </div>
     
     <div id="paginationControls" class="pagination"></div>
+  </div>
+</div>
+
+<div class="modal" id="scannerModal" aria-hidden="true">
+  <div class="box" style="width: 400px">
+    <div class="modalHeader">
+      <h2>📷 مسح بطاقة الانخراط</h2>
+      <button class="btn danger btn-close" type="button" onclick="closeScannerModal()">✕ إغلاق</button>
+    </div>
+    <div class="modalBody" style="text-align: center;">
+      <div id="qr-reader" style="width:100%; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: #fff;"></div>
+      <div id="qr-reader-results" style="margin-top: 15px; font-weight: bold; color: var(--warn);">وجّه الكاميرا نحو الـ QR Code...</div>
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="checkInModal" aria-hidden="true">
+  <div class="box" style="width: 400px; text-align:center;">
+    <div class="modalHeader" style="justify-content:center;"><h2>🛂 نقطة الدخول (Check-in)</h2></div>
+    <div class="modalBody" style="padding: 30px 20px;">
+      <h3 id="chkInName" style="font-size:26px; margin:0 0 10px 0; color:var(--text);">الاسم</h3>
+      <div id="chkInService" style="color:var(--muted); font-size: 15px; margin-bottom:20px;">الخدمة</div>
+      
+      <div style="margin-bottom:25px;"><span id="chkInStatus" class="badge" style="font-size: 14px; padding: 8px 16px;">الحالة</span></div>
+      
+      <div id="chkInAlert" style="font-weight:bold; font-size:18px; margin-bottom:25px; padding: 15px; border-radius: 12px; background: rgba(255,255,255,0.05);"></div>
+      
+      <button class="btn primary" id="btnChkInAction" style="width:100%; padding:16px; font-size:16px; font-weight:bold; margin-bottom:15px; border-radius:14px;"></button>
+      
+      <div style="display:flex; gap:10px;">
+        <button class="btn soft" style="flex:1; padding: 12px;" onclick="closeModal('checkInModal'); openRowActions(currentRowId)">⚙️ إدارة المشترك</button>
+        <button class="btn danger" style="flex:1; padding: 12px;" onclick="closeModal('checkInModal')">إغلاق النافذة</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -259,6 +287,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
     <div class="modalHeader"><div><h2 id="formTitle">إضافة اشتراك</h2><div class="hint">املأ البيانات ثم اضغط حفظ</div></div><button class="btn danger btn-close" type="button" onclick="closeModal('formModal')">✕ إغلاق</button></div>
     <div class="modalBody">
       <div class="formGrid">
+        
         <div class="field full-width" style="background:rgba(124,92,255,0.1); padding:12px 14px; border-radius:14px; border:1px solid rgba(124,92,255,0.3); margin-bottom:5px;">
           <label style="color:#c4b5fd; margin-bottom:8px;">📦 التعبئة السريعة من الباقات الجاهزة</label>
           <select id="packageSelector" onchange="window.applyPackage()" style="background:rgba(0,0,0,0.5); border-color:rgba(124,92,255,0.4); cursor:pointer;">
@@ -508,7 +537,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 })();
 
 const FIREBASE_CONFIG = { apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ", authDomain: "dattta-6f497.firebaseapp.com", databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com", projectId: "dattta-6f497", storageBucket: "dattta-6f497.firebasestorage.app", messagingSenderId: "804914291938", appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb" };
-const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.8"; const $ = (id)=>document.getElementById(id); const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
+const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9"; const $ = (id)=>document.getElementById(id); const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
 
 let data = []; let packagesData = []; let editingId = null; let currentRowId = null; let currentFilter = "all"; 
 let selectedIds = new Set(); let extendMode = "single"; let currentUser = null; let currentRole = null;
@@ -528,6 +557,78 @@ function loadLocalBackup(){ try { const j = JSON.parse(localStorage.getItem(LOCA
 function setSyncState(state){ const chip = $("syncChip"); const val = $("syncVal"); chip.className = "statChip sync " + state; if(!navigator.onLine) val.textContent = "أوفلاين 📴"; else if(state==="saving") val.textContent = "جاري الحفظ..."; else if(state==="ok") { const d = new Date(); val.textContent = d.getHours()+":"+String(d.getMinutes()).padStart(2,"0") + " ✅"; } else if(state==="fail") { val.textContent = "خطأ ❌"; chip.style.borderColor="var(--err)"; chip.style.background="rgba(239,68,68,0.1)"; } }
 
 async function logAction(actionName, detailsStr) { if (!currentUser) return; try { await db.ref("logs").push({ email: currentUser.email, action: actionName, details: detailsStr || "-", time: new Date().toISOString() }); } catch(e) {} }
+
+// ================== نظام قراءة الـ QR بالكاميرا ==================
+let html5QrcodeScanner;
+
+window.openScannerModal = () => {
+  openModal('scannerModal');
+  if (!html5QrcodeScanner) {
+    html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
+  }
+  html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+};
+
+window.closeScannerModal = () => {
+  closeModal('scannerModal');
+  if (html5QrcodeScanner) {
+    html5QrcodeScanner.clear().catch(error => console.error("Failed to clear scanner", error));
+  }
+};
+
+function onScanSuccess(decodedText, decodedResult) {
+  if(decodedText.startsWith("ID:")) {
+     window.closeScannerModal();
+     const scId = decodedText.split("ID:")[1];
+     window.processScannedId(scId);
+  } else {
+     $("qr-reader-results").textContent = "رمز غير صالح! يرجى مسح بطاقة انخراط نظامية.";
+  }
+}
+function onScanFailure(error) { /* يتم تجاهل الأخطاء المستمرة حتى يعثر على كود */ }
+
+window.processScannedId = (id) => {
+  const rec = data.find(x => x.id === id);
+  if(!rec) {
+    showToast("هذا المشترك غير مسجل في النظام!", "err");
+    return;
+  }
+  
+  currentRowId = rec.id;
+  const alertD = parseInt($("alertDays").value) || 7;
+  const st = getStatus(rec, alertD);
+  
+  $("chkInName").textContent = rec.name;
+  $("chkInService").textContent = rec.serviceType;
+  $("chkInStatus").textContent = st.label;
+  $("chkInStatus").className = "badge " + st.cls;
+  
+  const btnAct = $("btnChkInAction");
+  
+  if(st.key === 'expired') {
+     $("chkInAlert").innerHTML = "❌ الاشتراك منتهي! لا يمكن الدخول.";
+     $("chkInAlert").style.color = "#ef4444";
+     btnAct.style.display = "none";
+  } else {
+     $("chkInAlert").innerHTML = "✅ الاشتراك صالح، يمكن الدخول.";
+     $("chkInAlert").style.color = "#10b981";
+     
+     if(rec.subType === 'sessions') {
+         btnAct.style.display = "block";
+         btnAct.style.background = "#10b981";
+         btnAct.style.borderColor = "#059669";
+         btnAct.textContent = `✔️ خصم حصة حضور (الرصيد المتبقي: ${rec.sessionsLeft})`;
+         btnAct.onclick = () => { 
+           window.markAttendance(rec.id); 
+           closeModal('checkInModal'); 
+         };
+     } else {
+         btnAct.style.display = "none"; 
+     }
+  }
+  openModal('checkInModal');
+};
+// =================================================================
 
 let selectedLogIds = new Set();
 window.updateLogBulkUI = () => { if(selectedLogIds.size > 0) { $("deleteSelectedLogsBtn").style.display = "block"; $("deleteSelectedLogsBtn").textContent = `🗑️ حذف (${selectedLogIds.size})`; } else { $("deleteSelectedLogsBtn").style.display = "none"; $("selectAllLogs").checked = false; } };
