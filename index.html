@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>لوحة تسيير الاشتراكات - v12.9.1</title>
+<title>لوحة تسيير الاشتراكات - v12.9.2</title>
 
 <meta name="theme-color" content="#070a12" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -141,8 +141,8 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.1 PWA</span></h1>
-    <div class="sub">⚡ النسخة الصافية: تم حل مشكلة متصفح Brave لتعمل بسلاسة تامة</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.2 PWA</span></h1>
+    <div class="sub">⚡ النسخة المبسطة: واجهة إضافة أسرع وأنظف، مع إخفاء ذكي للخيارات المتقدمة.</div>
   </div>
 
   <div class="card">
@@ -193,15 +193,15 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 </div>
 
 <div class="modal" id="formModal" aria-hidden="true">
-  <div class="box" role="dialog" aria-modal="true">
-    <div class="modalHeader"><div><h2 id="formTitle">إضافة اشتراك</h2><div class="hint">املأ البيانات ثم اضغط حفظ</div></div><button class="btn danger btn-close" type="button" onclick="closeModal('formModal')">✕ إغلاق</button></div>
+  <div class="box" role="dialog" aria-modal="true" style="width:min(600px, 100%)">
+    <div class="modalHeader"><div><h2 id="formTitle">إضافة اشتراك</h2><div class="hint">املأ البيانات الأساسية ثم اضغط حفظ</div></div><button class="btn danger btn-close" type="button" onclick="closeModal('formModal')">✕ إغلاق</button></div>
     <div class="modalBody">
       <div class="formGrid">
         
-        <div class="field full-width" style="background:rgba(124,92,255,0.1); padding:12px 14px; border-radius:14px; border:1px solid rgba(124,92,255,0.3); margin-bottom:5px;">
+        <div class="field full-width" style="background:rgba(124,92,255,0.08); padding:12px 14px; border-radius:14px; border:1px dashed rgba(124,92,255,0.3); margin-bottom:5px;">
           <label style="color:#c4b5fd; margin-bottom:8px;">📦 اختصار: اختر باقة جاهزة (اختياري)</label>
           <select id="packageSelector" onchange="window.applyPackage()" style="background:rgba(0,0,0,0.5); border-color:rgba(124,92,255,0.4); cursor:pointer;">
-            <option value="">✍️ لا أريد باقة، سأكتب البيانات بنفسي في الأسفل</option>
+            <option value="">✍️ لا أريد باقة، سأكتب البيانات بنفسي</option>
           </select>
         </div>
 
@@ -213,12 +213,8 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
           </select>
         </div>
 
-        <div class="field full-width"><label>الاسم <span style="color:var(--err)">*</span></label><input id="name" placeholder="مثال: Ahmed"></div>
+        <div class="field full-width"><label>الاسم <span style="color:var(--err)">*</span></label><input id="name" placeholder="مثال: أحمد محمد"></div>
         <div class="field full-width"><label>الهاتف (مع الرمز)</label><div style="display: flex; gap: 8px;"><select id="countryCode" style="width: 110px; direction: ltr;"><option value="+213">🇩🇿 +213</option><option value="+212">🇲🇦 +212</option><option value="+216">🇹🇳 +216</option><option value="">بدون رمز</option></select><input id="phone" type="tel" dir="ltr" placeholder="555000000" style="flex:1;"></div></div>
-        
-        <div class="field full-width"><label>الإيميل (اختياري)</label><input id="email" placeholder="مثال: name@example.com" inputmode="email"></div>
-
-        <div class="field full-width"><label>الأوسمة / التصنيفات (مفصولة بفاصلة)</label><input id="tags" placeholder="مثال: سنة 4 متوسط, فوج الأحد, VIP..."></div>
         
         <div class="field full-width">
           <label>الخدمة / البرنامج <span style="color:var(--err)">*</span></label>
@@ -227,9 +223,11 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
         </div>
         
         <div id="timeFieldsGrp" style="display:contents;">
-          <div class="field"><label>المدة (أشهر)</label><input id="months" type="number" min="1" step="1"></div>
-          <div class="field"><label>تاريخ البداية</label><input id="start" type="date"></div>
-          <div class="field"><label>اختيار سريع للمدة</label><select id="quickPlan" onchange="window.handleQuickPlan()"><option value="">— اختر —</option><option value="1">1 شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="12">12 شهر</option></select></div>
+          <div class="field full-width" style="display: flex; gap:10px;">
+            <div style="flex:1;"><label>المدة (أشهر)</label><input id="months" type="number" min="1" step="1"></div>
+            <div style="flex:1;"><label>تاريخ البداية</label><input id="start" type="date"></div>
+            <div style="flex:1;"><label>اختيار سريع</label><select id="quickPlan" onchange="window.handleQuickPlan()"><option value="">— اختر —</option><option value="1">1 شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="12">12 شهر</option></select></div>
+          </div>
         </div>
 
         <div id="sessionsFieldsGrp" style="display:none;">
@@ -237,19 +235,33 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
           <div class="field full-width"><label>الرصيد المتبقي (للتعديل اليدوي فقط)</label><input id="sessionsLeft" type="number" min="0" step="1" style="color:var(--warn); font-weight:bold;"></div>
         </div>
 
-        <div class="field"><label>تنبيه قبل (أيام)</label><input id="alertDays" type="number" min="1" step="1" value="7"></div>
-        <div class="field"><label>العملة</label><select id="currency"><option value="DZD">DZD</option><option value="EUR">EUR</option><option value="USD">USD</option><option value="MAD">MAD</option><option value="TND">TND</option></select></div>
-        <div class="field full-width"><label>السعر الإجمالي</label><input id="price" type="number" min="0" step="0.01" placeholder="5000" oninput="window.calcDebt()"></div>
-        <div class="field"><label>المبلغ المدفوع</label><input id="paidAmount" type="number" min="0" step="0.01" placeholder="فارغ = دفع الكل" oninput="window.calcDebt()"></div>
+        <div class="field full-width" style="display:flex; gap:10px; margin-top:5px;">
+           <div style="flex:1;"><label>السعر الإجمالي</label><input id="price" type="number" min="0" step="0.01" placeholder="5000" oninput="window.calcDebt()"></div>
+           <div style="flex:1;"><label>المدفوع <span style="font-size:10px; font-weight:normal;">(فارغ = دفع الكل)</span></label><input id="paidAmount" type="number" min="0" step="0.01" oninput="window.calcDebt()"></div>
+        </div>
         <div class="field full-width"><label>الدين المتبقي (آلي)</label><input id="debtAmount" type="text" readonly style="background: rgba(239,68,68,0.1); color: #ff8a8a; font-weight: bold; border-color: rgba(239,68,68,0.3); pointer-events: none;"></div>
         
-        <div class="field full-width"><label>ملاحظات خاصة (لا تظهر للعميل)</label><textarea id="notes" rows="2" placeholder="أرقام سرية..."></textarea></div>
+        <div class="full-width" style="margin-top: 10px;">
+          <button type="button" id="btnToggleAdvanced" class="btn soft" style="width: 100%; border-style: dashed; color: var(--muted); padding: 12px;" onclick="window.toggleAdvancedFields()">
+            🔽 إظهار الخيارات الإضافية (الإيميل، الملاحظات، الأوسمة...)
+          </button>
+        </div>
+
+        <div id="advancedFields" class="full-width" style="display: none; background: rgba(0,0,0,0.2); padding: 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05); margin-top: 10px;">
+          <div class="formGrid">
+            <div class="field full-width"><label>الإيميل (اختياري)</label><input id="email" placeholder="مثال: name@example.com" inputmode="email"></div>
+            <div class="field full-width"><label>الأوسمة / التصنيفات (مفصولة بفاصلة)</label><input id="tags" placeholder="مثال: سنة 4 متوسط, فوج الأحد, VIP..."></div>
+            <div class="field"><label>تنبيه قبل (أيام)</label><input id="alertDays" type="number" min="1" step="1" value="7"></div>
+            <div class="field full-width"><label>العملة</label><select id="currency"><option value="DZD">DZD</option><option value="EUR">EUR</option><option value="USD">USD</option><option value="MAD">MAD</option><option value="TND">TND</option></select></div>
+            <div class="field full-width"><label>ملاحظات خاصة (لا تظهر للعميل)</label><textarea id="notes" rows="2" placeholder="أرقام سرية، ملاحظات خاصة..."></textarea></div>
+          </div>
+        </div>
+
       </div>
     </div>
-    <div class="modalFooter"><button class="btn primary" type="button" style="padding: 12px 24px; font-size: 14px;" onclick="window.saveSubscription()">💾 حفظ البيانات</button></div>
+    <div class="modalFooter"><button class="btn primary" type="button" style="width:100%; padding: 16px; font-size: 16px; font-weight:bold; border-radius:14px; box-shadow: 0 8px 25px rgba(124,92,255,0.2);" onclick="window.saveSubscription()">💾 حفظ بيانات المشترك</button></div>
   </div>
 </div>
-
 <div class="modal" id="scannerModal" aria-hidden="true">
   <div class="box" style="width: 400px">
     <div class="modalHeader">
@@ -464,7 +476,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
   <div class="box" style="width: 420px; padding:0;">
     <div class="modalHeader" style="border-bottom:none; padding-bottom:0;"><button class="btn danger btn-close" type="button" id="closeAuthBtn" onclick="closeModal('authModal')" style="display:none; margin-inline-start:auto;">✕ إغلاق</button></div>
     <div class="modalBody" style="padding-top:0;">
-      <div id="authLoginSection" class="auth-wrap"><div class="auth-icon-wrap">🔒</div><h2 class="auth-title">تسجيل الدخول</h2><div class="auth-sub">يرجى تسجيل الدخول للوصول إلى لوحة التحكم</div><div style="margin-bottom:20px;"><label class="auth-label">البريد الإلكتروني</label><input id="authEmail" type="email" class="auth-input" placeholder="admin@example.com"></div><div style="margin-bottom:30px;"><label class="auth-label">كلمة المرور</label><input id="authPass" type="password" class="auth-input" placeholder="••••••••"></div><button class="btn primary" style="width:100%; padding:16px; font-size:16px; font-weight:900; border-radius:16px; box-shadow: 0 8px 25px rgba(124,92,255,0.3);" onclick="window.loginUser()">دخول 🚀</button></div>
+      <div id="authLoginSection" class="auth-wrap"><div class="auth-icon-wrap">🔒</div><h2 class="auth-title">تسجيل الدخول</h2><div class="auth-sub">يرجى تسجيل الدخول للوصول إلى لوحة التحكم</div><div style="margin-bottom:20px;"><label class="auth-label">البريد الإلكتروني</label><input id="authEmailAuth" type="email" class="auth-input" placeholder="admin@example.com"></div><div style="margin-bottom:30px;"><label class="auth-label">كلمة المرور</label><input id="authPass" type="password" class="auth-input" placeholder="••••••••"></div><button class="btn primary" style="width:100%; padding:16px; font-size:16px; font-weight:900; border-radius:16px; box-shadow: 0 8px 25px rgba(124,92,255,0.3);" onclick="window.loginUser()">دخول 🚀</button></div>
       <div id="authLoggedInSection" style="display:none; padding:10px;">
         <div style="text-align:center; margin-bottom:25px;"><div id="authStatusIcon" class="auth-icon-wrap" style="background:linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.05)); border-color:rgba(34,197,94,0.3); box-shadow: 0 10px 25px rgba(34,197,94,0.15);">✅</div><div id="authStateText" style="font-weight:900; font-size:15px; line-height:1.6;"></div></div>
         <div id="ownerDashboard" style="display:none; padding:20px; background:rgba(124,92,255,0.08); border-radius:18px; border:1px solid rgba(124,92,255,0.2); margin-bottom:25px;"><h3 style="margin-top:0; color:#fff; font-size:15px; display:flex; align-items:center; gap:8px;">👑 أدوات المالك (Owner)</h3><button class="btn soft" onclick="closeModal('authModal'); openModal('storeSettingsModal')" style="width:100%; margin-bottom:12px; padding:12px; border-radius:12px; border-color:rgba(16,185,129,0.3); color:#10b981;">⚙️ إعدادات المتجر (الاسم واللوجو)</button><button class="btn primary" onclick="closeModal('authModal'); openModal('addAdminModal')" style="width:100%; margin-bottom:12px; padding:12px; border-radius:12px;">➕ إنشاء حساب مستخدم جديد</button><button class="btn soft" onclick="closeModal('authModal'); window.loadAdminsList()" style="width:100%; padding:12px; border-radius:12px; border-color:rgba(255,255,255,0.1);">👥 إدارة الصلاحيات للمستخدمين</button><button class="btn soft" onclick="closeModal('authModal'); window.openAuditLog()" style="width:100%; padding:12px; border-radius:12px; border-color:rgba(245,158,11,0.3); color:#f59e0b; margin-top:12px;">🕵️‍♂️ سجل نشاطات المدراء</button></div>
@@ -506,10 +518,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 
 // 1. نظام حماية المتصفح (Brave Anti-Freeze)
 window.addEventListener('DOMContentLoaded', () => {
-    // إجبار اللوحة على الرسم الأول فارغة حتى لو تأخر Firebase
     window.render();
-    
-    // مهلة 3 ثواني للتحقق من اتصال Firebase، إذا فشل نعرض البيانات المحلية
     setTimeout(() => {
         if(data.length === 0 && !currentUser) {
             console.warn("Firebase Auth Timeout - Browser might be blocking the script.");
@@ -525,18 +534,16 @@ window.addEventListener('DOMContentLoaded', () => {
 (function initPWA() {
   try {
     const pwaManifest = { name: "لوحة تسيير الاشتراكات", short_name: "الاشتراكات", start_url: window.location.pathname || "/", display: "standalone", background_color: "#070a12", theme_color: "#070a12", icons: [ { src: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%237c5cff'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='60'>🧾</text></svg>", sizes: "192x192", type: "image/svg+xml" }, { src: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%237c5cff'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='60'>🧾</text></svg>", sizes: "512x512", type: "image/svg+xml" } ] };
-    const manifestBlob = new Blob([JSON.stringify(pwaManifest)], {type: 'application/json'}); document.getElementById('manifest-link').href = URL.createObjectURL(manifestBlob);
+    const manifestBlob = new Blob([JSON.stringify(pwaManifest)], {type: 'application/json'}); document.getElementById('manifest-link')?.setAttribute('href', URL.createObjectURL(manifestBlob));
     const swCode = `self.addEventListener('install', (e) => self.skipWaiting()); self.addEventListener('activate', (e) => self.clients.claim());`;
     const swBlob = new Blob([swCode], {type: 'text/javascript'});
     if ('serviceWorker' in navigator) navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>{});
-    let deferredPrompt; window.addEventListener('beforeinstallprompt', (e) => { e.preventDefault(); deferredPrompt = e; const btn = document.getElementById('installPwaBtn'); if(btn) btn.style.display = 'inline-flex'; });
-    window.installApp = async () => { if (!deferredPrompt) return; deferredPrompt.prompt(); const { outcome } = await deferredPrompt.userChoice; if (outcome === 'accepted') document.getElementById('installPwaBtn').style.display = 'none'; deferredPrompt = null; };
   } catch (e) {}
 })();
 
 // 3. إعداد Firebase
 const FIREBASE_CONFIG = { apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ", authDomain: "dattta-6f497.firebaseapp.com", databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com", projectId: "dattta-6f497", storageBucket: "dattta-6f497.firebasestorage.app", messagingSenderId: "804914291938", appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb" };
-const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.1"; 
+const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.2"; 
 const $ = (id)=>document.getElementById(id); 
 const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
 
@@ -560,12 +567,11 @@ window.closeModal = (id) => { const el = $(id); if(el) el.setAttribute("aria-hid
 window.showToast = (m, type="ok") => { const t=$("toast"); t.textContent=m; t.style.borderColor = type==="err"?"#ef4444":"#22c55e"; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"), 3000); };
 function todayISO(){ const d=new Date(); d.setHours(0,0,0,0); return d.toISOString().slice(0,10); }
 
-// دالة تحويل التاريخ محمية ضد الأخطاء
 function toDate(iso){ 
-    if(!iso) return new Date(); // حماية
+    if(!iso) return new Date();
     const d = new Date(iso+"T00:00:00"); 
     d.setHours(0,0,0,0); 
-    return isNaN(d) ? new Date() : d; // حماية ضد التواريخ الخاطئة
+    return isNaN(d) ? new Date() : d;
 }
 
 function saveLocalBackup(){ localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(data)); }
@@ -574,9 +580,7 @@ function setSyncState(state){ const chip = $("syncChip"); const val = $("syncVal
 
 async function logAction(actionName, detailsStr) { if (!currentUser || typeof db === 'undefined') return; try { await db.ref("logs").push({ email: currentUser.email, action: actionName, details: detailsStr || "-", time: new Date().toISOString() }); } catch(e) {} }
 
-// ================== نظام قراءة الـ QR بالكاميرا ==================
 let html5QrcodeScanner;
-
 window.openScannerModal = () => {
   openModal('scannerModal');
   if (typeof Html5QrcodeScanner !== "undefined") {
@@ -615,7 +619,7 @@ window.processScannedId = (id) => {
   }
   
   currentRowId = rec.id;
-  const alertD = parseInt($("alertDays").value) || 7;
+  const alertD = parseInt($("alertDays")?.value) || 7;
   const st = getStatus(rec, alertD);
   
   $("chkInName").textContent = rec.name;
@@ -648,7 +652,6 @@ window.processScannedId = (id) => {
   }
   openModal('checkInModal');
 };
-// =================================================================
 
 let selectedLogIds = new Set();
 window.updateLogBulkUI = () => { if(selectedLogIds.size > 0) { $("deleteSelectedLogsBtn").style.display = "block"; $("deleteSelectedLogsBtn").textContent = `🗑️ حذف (${selectedLogIds.size})`; } else { $("deleteSelectedLogsBtn").style.display = "none"; $("selectAllLogs").checked = false; } };
@@ -903,7 +906,7 @@ window.openMembershipCard = () => {
   $("idCardClientName").textContent = rec.name || "-";
   $("idCardService").textContent = rec.serviceType || "غير محدد";
   
-  let alertD = parseInt($("alertDays").value) || 7;
+  let alertD = parseInt($("alertDays")?.value) || 7;
   let st = getStatus(rec, alertD);
   $("idCardStatus").textContent = st.label;
   $("idCardStatus").style.color = st.cls === 'ok' ? '#10b981' : (st.cls === 'warn' ? '#f59e0b' : '#ef4444');
@@ -946,7 +949,7 @@ async function firebasePushPackages() { if(!navigator.onLine) return; try { awai
 window.renderPackages = () => {
   const tb = $("packagesTbody"); if(tb) tb.innerHTML = "";
   const sel = $("packageSelector"); 
-  if(sel) sel.innerHTML = '<option value="">✍️ لا أريد باقة، سأكتب البيانات بنفسي في الأسفل</option>';
+  if(sel) sel.innerHTML = '<option value="">✍️ لا أريد باقة، سأكتب البيانات بنفسي</option>';
   if(packagesData.length === 0) { if(tb) tb.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--muted);">لا توجد باقات جاهزة.</td></tr>`; return; }
   packagesData.forEach(p => {
     let typeTxt = p.type === 'sessions' ? `${p.value} حصص` : `${p.value} شهر`;
@@ -975,6 +978,27 @@ window.applyPackage = () => {
   }
 };
 
+// دالة التبديل السحرية للخيارات المتقدمة
+window.toggleAdvancedFields = (forceShow = false) => {
+  const adv = $("advancedFields");
+  const btn = $("btnToggleAdvanced");
+  if(!adv || !btn) return;
+  
+  if (adv.style.display === "none" || forceShow === true) {
+    adv.style.display = "block";
+    btn.innerHTML = "🔼 إخفاء الخيارات الإضافية";
+    btn.style.background = "rgba(124,92,255,0.1)";
+    btn.style.borderColor = "rgba(124,92,255,0.3)";
+    btn.style.color = "var(--text)";
+  } else {
+    adv.style.display = "none";
+    btn.innerHTML = "🔽 إظهار الخيارات الإضافية (الإيميل، الملاحظات، الأوسمة...)";
+    btn.style.background = "rgba(255,255,255,0.04)";
+    btn.style.borderColor = "rgba(255,255,255,0.14)";
+    btn.style.color = "var(--muted)";
+  }
+};
+
 window.openAddSub = () => { 
   editingId=null; $("formTitle").textContent="إضافة اشتراك"; 
   $("name").value=""; $("email").value=""; $("phone").value=""; $("tags").value="";
@@ -983,6 +1007,11 @@ window.openAddSub = () => {
   $("price").value=""; $("start").value=todayISO(); 
   $("paidAmount").value = ""; $("notes").value = ""; 
   $("packageSelector").value = ""; $("subType").value = "time"; window.toggleSubType();
+  
+  // إخفاء الحقول المتقدمة افتراضياً
+  $("advancedFields").style.display = "block"; // خدعة بسيطة لضمان عمل الدالة
+  window.toggleAdvancedFields(false); 
+
   window.calcDebt(); openModal("formModal"); 
 };
 
@@ -999,12 +1028,17 @@ window.actEditAction = () => {
   $("start").value = rec.start; $("alertDays").value = rec.alertDays||"7"; 
   $("notes").value = rec.notes || ""; $("packageSelector").value = ""; $("quickPlan").value = "";
   if(rec.paymentStatus === 'unpaid') $("paidAmount").value = 0; else if(rec.paymentStatus === 'partial') $("paidAmount").value = rec.paidAmount || 0; else $("paidAmount").value = ""; 
+  
+  // إذا كان العميل لديه بيانات متقدمة، اعرض الحقول المتقدمة تلقائياً
+  const hasAdvancedData = (rec.email && rec.email !== "") || (rec.tags && rec.tags !== "") || (rec.notes && rec.notes.trim() !== "") || (rec.currency && rec.currency !== "DZD");
+  window.toggleAdvancedFields(hasAdvancedData);
+
   window.calcDebt(); openModal("formModal"); 
 };
 
 window.saveSubscription = async () => {
   const subType = $("subType").value;
-  const start = $("start").value; const emailVal = $("email").value.trim(); const serviceVal = $("serviceType").value.trim(); const nameVal = $("name").value.trim();
+  const start = $("start").value; const emailVal = $("email") ? $("email").value.trim() : ""; const serviceVal = $("serviceType").value.trim(); const nameVal = $("name").value.trim();
   let months = parseInt($("months").value); let sessionsTot = parseInt($("sessionsTotal").value); let sessionsLft = parseInt($("sessionsLeft").value);
   
   if(!nameVal || !serviceVal) return showToast("أدخل الاسم والخدمة", "err");
@@ -1126,7 +1160,7 @@ window.confirmPaste = async () => { try { const imported = JSON.parse($("pasteAr
 window.clearAllData = async () => { if(confirm("⚠️ تحذير خطير: سيتم مسح كل البيانات!")) { logAction("تصفير اللوحة", "حذف كافة البيانات ⚠️"); lastDeletedData = [...data]; data = []; await firebasePush(); window.render(); closeModal("toolsModal"); showToast("تم المسح 🗑️ (يمكنك التراجع من الأدوات)"); } };
 window.shareApp = () => { closeModal("toolsModal"); if (navigator.share) { navigator.share({ title: 'لوحة الاشتراكات', url: window.location.href }); } else { showToast("المشاركة غير مدعومة", "warn"); } };
 
-window.loginUser = () => { auth.signInWithEmailAndPassword($("authEmail").value, $("authPass").value).catch(e => showToast("بيانات الدخول خاطئة", "err")); };
+window.loginUser = () => { auth.signInWithEmailAndPassword($("authEmailAuth").value, $("authPass").value).catch(e => showToast("بيانات الدخول خاطئة", "err")); };
 window.logoutUser = () => { auth.signOut(); };
 window.clearSearch = () => { $("search").value = ""; window.currentPage = 1; window.render(); };
 window.pasteSearch = async () => { try { const text = await navigator.clipboard.readText(); $("search").value = text; window.currentPage = 1; window.render(); } catch(e) { showToast("فشل اللصق، يرجى منح صلاحية الحافظة", "warn"); } };
