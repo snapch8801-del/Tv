@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>لوحة تسيير الاشتراكات - v12.9.2</title>
+<title>لوحة تسيير الاشتراكات - v12.9.3</title>
 
 <meta name="theme-color" content="#070a12" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -141,8 +141,8 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.2 PWA</span></h1>
-    <div class="sub">⚡ النسخة المبسطة: واجهة إضافة أسرع وأنظف، مع إخفاء ذكي للخيارات المتقدمة.</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.3 PWA</span></h1>
+    <div class="sub">⚡ النسخة المبسطة: تسلسل منطقي واحترافي لنموذج إضافة عميل جديد.</div>
   </div>
 
   <div class="card">
@@ -205,34 +205,36 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
           </select>
         </div>
 
-        <div class="field full-width">
-          <label>طبيعة الاشتراك <span style="color:var(--err)">*</span></label>
+        <div class="field full-width"><label>الاسم <span style="color:var(--err)">*</span></label><input id="name" placeholder="مثال: أحمد محمد"></div>
+        <div class="field full-width"><label>الهاتف (مع الرمز)</label><div style="display: flex; gap: 8px;"><select id="countryCode" style="width: 110px; direction: ltr;"><option value="+213">🇩🇿 +213</option><option value="+212">🇲🇦 +212</option><option value="+216">🇹🇳 +216</option><option value="">بدون رمز</option></select><input id="phone" type="tel" dir="ltr" placeholder="555000000" style="flex:1;"></div></div>
+        
+        <div class="field full-width" style="margin-top: 5px;">
+          <label>الخدمة / البرنامج <span style="color:var(--err)">*</span></label>
+          <input id="serviceType" list="serviceList" placeholder="اكتب الخدمة (مثال: رياضيات)">
+          <datalist id="serviceList"><option value="دروس دعم"><option value="نادي رياضي"><option value="نقل مدرسي"></datalist>
+        </div>
+        
+        <div class="field full-width" style="margin-top: 5px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.1);">
+          <label>طبيعة الاشتراك وكيفية الحساب <span style="color:var(--err)">*</span></label>
           <select id="subType" onchange="window.toggleSubType()" style="background:rgba(0,0,0,0.5); border:1px solid #10b981; color:#10b981; font-weight:bold;">
             <option value="time">⏳ اشتراك زمني (أشهر / تاريخ)</option>
             <option value="sessions">🎟️ اشتراك بالحصص (رصيد دخول)</option>
           </select>
         </div>
 
-        <div class="field full-width"><label>الاسم <span style="color:var(--err)">*</span></label><input id="name" placeholder="مثال: أحمد محمد"></div>
-        <div class="field full-width"><label>الهاتف (مع الرمز)</label><div style="display: flex; gap: 8px;"><select id="countryCode" style="width: 110px; direction: ltr;"><option value="+213">🇩🇿 +213</option><option value="+212">🇲🇦 +212</option><option value="+216">🇹🇳 +216</option><option value="">بدون رمز</option></select><input id="phone" type="tel" dir="ltr" placeholder="555000000" style="flex:1;"></div></div>
-        
-        <div class="field full-width">
-          <label>الخدمة / البرنامج <span style="color:var(--err)">*</span></label>
-          <input id="serviceType" list="serviceList" placeholder="اكتب الخدمة (مثال: رياضيات)">
-          <datalist id="serviceList"><option value="دروس دعم"><option value="نادي رياضي"><option value="نقل مدرسي"></datalist>
-        </div>
-        
         <div id="timeFieldsGrp" style="display:contents;">
-          <div class="field full-width" style="display: flex; gap:10px;">
-            <div style="flex:1;"><label>المدة (أشهر)</label><input id="months" type="number" min="1" step="1"></div>
-            <div style="flex:1;"><label>تاريخ البداية</label><input id="start" type="date"></div>
-            <div style="flex:1;"><label>اختيار سريع</label><select id="quickPlan" onchange="window.handleQuickPlan()"><option value="">— اختر —</option><option value="1">1 شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="12">12 شهر</option></select></div>
+          <div class="field full-width" style="display: flex; gap:10px; background: rgba(16,185,129,0.05); padding: 12px; border-radius: 12px; border: 1px solid rgba(16,185,129,0.2);">
+            <div style="flex:1;"><label>المدة (أشهر)</label><input id="months" type="number" min="1" step="1" style="background: rgba(0,0,0,0.6);"></div>
+            <div style="flex:1;"><label>تاريخ البداية</label><input id="start" type="date" style="background: rgba(0,0,0,0.6);"></div>
+            <div style="flex:1;"><label>اختيار سريع</label><select id="quickPlan" onchange="window.handleQuickPlan()" style="background: rgba(0,0,0,0.6);"><option value="">— اختر —</option><option value="1">1 شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="12">12 شهر</option></select></div>
           </div>
         </div>
 
         <div id="sessionsFieldsGrp" style="display:none;">
-          <div class="field"><label>إجمالي عدد الحصص</label><input id="sessionsTotal" type="number" min="1" step="1" placeholder="مثال: 12"></div>
-          <div class="field full-width"><label>الرصيد المتبقي (للتعديل اليدوي فقط)</label><input id="sessionsLeft" type="number" min="0" step="1" style="color:var(--warn); font-weight:bold;"></div>
+          <div class="field full-width" style="display: flex; gap:10px; background: rgba(16,185,129,0.05); padding: 12px; border-radius: 12px; border: 1px solid rgba(16,185,129,0.2);">
+            <div style="flex:1;"><label>إجمالي عدد الحصص</label><input id="sessionsTotal" type="number" min="1" step="1" placeholder="مثال: 12" style="background: rgba(0,0,0,0.6);"></div>
+            <div style="flex:1;"><label>الرصيد المتبقي (للتعديل فقط)</label><input id="sessionsLeft" type="number" min="0" step="1" style="color:var(--warn); font-weight:bold; background: rgba(0,0,0,0.6);"></div>
+          </div>
         </div>
 
         <div class="field full-width" style="display:flex; gap:10px; margin-top:5px;">
@@ -543,7 +545,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // 3. إعداد Firebase
 const FIREBASE_CONFIG = { apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ", authDomain: "dattta-6f497.firebaseapp.com", databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com", projectId: "dattta-6f497", storageBucket: "dattta-6f497.firebasestorage.app", messagingSenderId: "804914291938", appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb" };
-const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.2"; 
+const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.3"; 
 const $ = (id)=>document.getElementById(id); 
 const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
 
