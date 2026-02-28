@@ -13,6 +13,10 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
 <script>
 const _urlParams = new URLSearchParams(window.location.search);
 const _portalData = _urlParams.get('p');
@@ -107,7 +111,6 @@ input[type="checkbox"] { appearance: none; width: 18px; height: 18px; border: 2p
 input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
 input[type="checkbox"]:checked::after { content: "✔"; position: absolute; color: white; font-size: 12px; left: 3px; top: -1px; font-weight: bold; }
 
-/* 🌟 الجدول الكلاسيكي القوي 🌟 */
 .tableWrap { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; border-top: 1px solid var(--line); }
 table { width: 100%; border-collapse: collapse; min-width: 900px; text-align: right; }
 thead th { position: sticky; top: 0; z-index: 5; background: rgba(0,0,0,0.4); color: var(--muted); padding: 14px 12px; border-bottom: 1px solid var(--line); font-size: 12px; font-weight: 900; white-space: nowrap; }
@@ -196,7 +199,6 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 .menu-section-title { font-size: 12px; color: var(--accent); font-weight: bold; margin: 25px 0 10px; padding-inline-start: 5px; }
 .side-menu .actBtn { margin-bottom: 8px; font-size: 13px; padding: 12px 14px; }
 
-/* الفاتورة المرنة - مستقرة تماماً */
 .flex-row-receipt { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #cbd5e1; flex-wrap: wrap; gap: 5px;}
 .flex-row-receipt span.label { color: #64748b; }
 .flex-row-receipt strong.val, .flex-row-receipt span.val { color: #0f172a; text-align: left; }
@@ -265,23 +267,23 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
     <button class="btn danger btn-close" onclick="closeSideMenu()" style="padding: 6px 12px;">✕</button>
   </div>
   <div style="flex:1; overflow-y:auto; padding-right: 5px;">
-    
+   
     <div class="menu-section-title">إصلاح وحل المشاكل</div>
     <button class="actBtn" style="color:#60a5fa; border-color:rgba(96,165,250,0.4); background:rgba(96,165,250,0.1);" onclick="window.location.reload(true)">🔄 تفريغ الذاكرة وتحديث الصفحة</button>
 
     <div class="menu-section-title">إدارة النظام</div>
     <button class="actBtn" onclick="closeSideMenu(); openModal('authModal')" style="border-color:var(--accent); color:var(--accent); background: rgba(124,92,255,0.1);">👤 إدارة الحسابات والصلاحيات</button>
-    
+   
     <div class="menu-section-title">البيانات والحماية</div>
     <button class="actBtn" style="color:#10b981; border-color:rgba(16,185,129,0.4); background:rgba(16,185,129,0.1);" onclick="closeSideMenu(); window.exportCSV()">📥 تحميل كملف Excel</button>
     <button class="actBtn" onclick="closeSideMenu(); openModal('backupModal')">📦 حفظ واسترجاع البيانات</button>
     <button class="actBtn" onclick="closeSideMenu(); openModal('syncModal')">☁️ المزامنة السحابية</button>
-    
+   
     <div class="menu-section-title">أدوات إضافية</div>
     <button class="actBtn" style="color:#f59e0b; border-color:rgba(245,158,11,0.4); background:rgba(245,158,11,0.1);" onclick="closeSideMenu(); window.undoDelete()">↩️ التراجع عن آخر حذف</button>
     <button class="actBtn" onclick="closeSideMenu(); window.shareApp()">📤 مشاركة رابط اللوحة</button>
     <button class="actBtn" onclick="closeSideMenu(); window.print()">🖨️ طباعة الجدول</button>
-    
+   
     <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(239,68,68,0.2);">
       <button class="actBtn danger" onclick="closeSideMenu(); window.clearAllData()" style="text-align: center;">⚠️ تصفير اللوحة بالكامل</button>
     </div>
@@ -343,7 +345,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
         <div id="advancedFields" class="full-width" style="display: none; background: rgba(0,0,0,0.2); padding: 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05); margin-top: 10px;">
           <div class="formGrid">
             <div class="field full-width"><label>🔗 رابط المحادثة (ميسنجر / انستغرام / ويب)</label><input id="messengerLink" type="url" dir="ltr" placeholder="https://..." title="انسخ رابط حساب الزبون أو رابط المحادثة والصقه هنا"></div>
-            
+           
             <div class="field full-width"><label>الإيميل (اختياري)</label><input id="email" placeholder="مثال: name@example.com" inputmode="email"></div>
             <div class="field full-width"><label>الأوسمة / التصنيفات (مفصولة بفاصلة)</label><input id="tags" placeholder="مثال: سنة 4 متوسط, فوج الأحد, VIP..."></div>
             <div class="field"><label>تنبيه قبل (أيام)</label><input id="alertDays" type="number" min="1" step="1" value="7"></div>
@@ -437,12 +439,12 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
         <h1 id="receiptStoreName" style="margin: 0; font-size: 24px; color: #4f46e5; font-weight: 900;">المؤسسة</h1>
         <div style="color: #64748b; font-size: 13px; margin-top: 5px;">فاتورة اشتراك إلكترونية</div>
       </div>
-      
+     
       <div style="font-size: 15px;">
         <div class="flex-row-receipt"><span class="label">اسم العميل:</span><strong class="val" id="recName"></strong></div>
         <div class="flex-row-receipt"><span class="label">رقم الهاتف:</span><span class="val" style="direction: ltr;" id="recPhone"></span></div>
         <div class="flex-row-receipt"><span class="label">نوع الخدمة:</span><strong class="val" style="color: #8b5cf6;" id="recService"></strong></div>
-        
+       
         <div id="recRowMonths" class="flex-row-receipt" style="display:none;"><span class="label">مدة الاشتراك:</span><span class="val" id="recMonths"></span></div>
         <div id="recRowSessions" class="flex-row-receipt" style="display:none;"><span class="label">رصيد الحصص:</span><strong class="val" id="recSessions"></strong></div>
         <div id="recRowStart" class="flex-row-receipt" style="display:none;"><span class="label">تاريخ البداية:</span><span class="val" id="recStart"></span></div>
@@ -459,7 +461,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
           <span style="color: #ef4444; font-weight:bold;">❗ المبلغ المتبقي (دين):</span><strong style="color: #ef4444; font-size: 16px;" id="recRemaining"></strong>
         </div>
       </div>
-      
+     
       <div id="receiptPaymentLogSection" style="display:none; margin-top: 15px; border-top: 1px dashed #cbd5e1; padding-top: 15px;">
          <div style="font-size: 12px; color: #64748b; margin-bottom: 8px; font-weight: bold;">سجل الدفعات بالتفصيل:</div>
          <div id="receiptPaymentLogList"></div>
@@ -514,7 +516,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
     <div class="modalHeader"><h2>💸 إدارة الدفعات</h2><button class="btn danger btn-close" type="button" onclick="closeModal('paymentModal'); openModal('rowActionsModal')">العودة ↩</button></div>
     <div class="modalBody">
       <div style="margin-bottom: 15px; font-weight: bold; color: var(--text); font-size: 16px;" id="paymentClientName"></div>
-      
+     
       <div style="display: flex; justify-content: space-between; background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.05);">
         <div style="text-align: center;"><span style="font-size:11px; color:var(--muted); display:block;">السعر الإجمالي</span><strong id="payTotal" style="color:var(--text); font-size:15px;"></strong></div>
         <div style="text-align: center;"><span style="font-size:11px; color:var(--muted); display:block;">إجمالي المدفوع</span><strong id="payPaid" style="color:#10b981; font-size:15px;"></strong></div>
@@ -560,9 +562,9 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
       <div><h2 style="font-size: 16px;">⚡ إجراءات المشترك</h2><div class="hint" id="rowActionsHint" style="color: var(--accent); font-weight: bold; font-size: 14px;">—</div></div>
       <button class="btn danger btn-close" type="button" onclick="closeModal('rowActionsModal')" style="padding: 6px 12px;">✕</button>
     </div>
-    
+   
     <div class="modalBody" style="padding: 20px;">
-      
+     
       <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
         <button class="btn primary" style="padding: 14px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(124,92,255,0.2);" onclick="window.actExtendAction()">
           🔁 تجديد الاشتراك (رصيد / مدة)
@@ -580,7 +582,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
           💬 ميسنجر / انستا
         </button>
       </div>
-      
+     
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
         <button class="btn soft" style="color: #f43f5e; border-color: rgba(244,63,94,.3); background: rgba(244,63,94,.1);" onclick="window.actSMSAction()">
           📱 رسالة SMS
@@ -688,6 +690,16 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 <div id="toast" class="toast"></div>
 
 <script>
+// --- بداية التعديلات (إضافة الثوابت والدالة المفقودة ليعمل الكود بدون أخطاء) ---
+const $ = (id) => document.getElementById(id);
+const LOCAL_BACKUP_KEY = "subscription_data_v12";
+const LOCAL_PACKAGES_KEY = "subscription_packages_v12";
+const BASE_APP_TITLE = document.title;
+const FIREBASE_CONFIG = {
+    // قم بلصق إعدادات مشروع Firebase الخاص بك هنا لتعمل المزامنة السحابية
+};
+// --- نهاية التعديلات ---
+
 window.copyPortalLink = () => {
     const rec = data.find(x => x.id === currentRowId);
     if(!rec) return;
