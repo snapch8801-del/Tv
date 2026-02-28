@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>لوحة تسيير الاشتراكات - v12.9.5</title>
+<title>لوحة تسيير الاشتراكات - v12.9.6</title>
 
 <meta name="theme-color" content="#070a12" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -161,25 +161,20 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.5 PWA</span></h1>
-    <div class="sub">⚡ ترتيب ذكي للعمليات وعرض متكامل للإيميلات.</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.6 PWA</span></h1>
+    <div class="sub">⚡ النسخة المتقدمة: نظام سجل الدخول والحضور الدقيق مع الوقت والتاريخ.</div>
   </div>
 
   <div class="card">
     <div class="topbar">
       <div class="topbar-actions">
         <button class="btn soft" type="button" onclick="openSideMenu()" title="الإعدادات والأدوات" style="padding: 10px 14px; font-size: 18px; border-color: rgba(255,255,255,0.2);">☰</button>
-        
         <button class="btn primary" type="button" onclick="openAddSub()">➕ إضافة عميل</button>
         <button class="btn primary" type="button" onclick="openScannerModal()" style="background: linear-gradient(135deg, #10b981, #059669); border-color: #059669;">📷 مسح بطاقة</button>
-        
         <button class="btn soft" type="button" onclick="openModal('packagesModal')" style="border-color:#a855f7; color:#c084fc; background: rgba(168,85,247,0.15); font-weight: 900;">📦 الباقات</button>
-        
         <button class="btn soft" type="button" onclick="openTotalsReport()">💰 الإحصائيات</button>
-        
         <div class="statChip sync" id="syncChip"><span class="ico">☁️</span> <span class="v" id="syncVal">—</span></div>
       </div>
-      
       <div class="searchWrap">
         <input id="search" oninput="window.currentPage=1; window.render()" placeholder="بحث بالاسم، الإيميل، الوسام، الهاتف..." />
         <button class="btn soft" title="مسح البحث" style="padding: 10px 12px; border-radius: 12px; color: var(--err);" onclick="clearSearch()">✕</button>
@@ -224,47 +219,40 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
     <button class="btn danger btn-close" onclick="closeSideMenu()" style="padding: 6px 12px;">✕</button>
   </div>
   <div style="flex:1; overflow-y:auto; padding-right: 5px;">
-    
     <div class="menu-section-title">إدارة النظام</div>
     <button class="actBtn" onclick="closeSideMenu(); openModal('authModal')" style="border-color:var(--accent); color:var(--accent); background: rgba(124,92,255,0.1);">👤 إدارة الحسابات والصلاحيات</button>
-    
     <div class="menu-section-title">البيانات والحماية</div>
     <button class="actBtn" style="color:#10b981; border-color:rgba(16,185,129,0.4); background:rgba(16,185,129,0.1);" onclick="closeSideMenu(); window.exportCSV()">📥 تحميل كملف Excel</button>
     <button class="actBtn" onclick="closeSideMenu(); openModal('backupModal')">📦 حفظ واسترجاع البيانات</button>
     <button class="actBtn" onclick="closeSideMenu(); openModal('syncModal')">☁️ المزامنة السحابية</button>
-    
     <div class="menu-section-title">أدوات إضافية</div>
     <button class="actBtn" style="color:#f59e0b; border-color:rgba(245,158,11,0.4); background:rgba(245,158,11,0.1);" onclick="closeSideMenu(); window.undoDelete()">↩️ التراجع عن آخر حذف</button>
     <button class="actBtn" onclick="closeSideMenu(); window.shareApp()">📤 مشاركة رابط اللوحة</button>
     <button class="actBtn" onclick="closeSideMenu(); window.print()">🖨️ طباعة الجدول</button>
-    
     <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(239,68,68,0.2);">
       <button class="actBtn danger" onclick="closeSideMenu(); window.clearAllData()" style="text-align: center;">⚠️ تصفير اللوحة بالكامل</button>
     </div>
   </div>
 </div>
+
 <div class="modal" id="formModal" aria-hidden="true">
   <div class="box" role="dialog" aria-modal="true" style="width:min(600px, 100%)">
     <div class="modalHeader"><div><h2 id="formTitle">إضافة اشتراك</h2><div class="hint">املأ البيانات الأساسية ثم اضغط حفظ</div></div><button class="btn danger btn-close" type="button" onclick="closeModal('formModal')">✕ إغلاق</button></div>
     <div class="modalBody">
       <div class="formGrid">
-        
         <div class="field full-width" style="background:rgba(124,92,255,0.08); padding:12px 14px; border-radius:14px; border:1px dashed rgba(124,92,255,0.3); margin-bottom:5px;">
           <label style="color:#c4b5fd; margin-bottom:8px;">📦 اختصار: اختر باقة جاهزة (اختياري)</label>
           <select id="packageSelector" onchange="window.applyPackage()" style="background:rgba(0,0,0,0.5); border-color:rgba(124,92,255,0.4); cursor:pointer;">
             <option value="">✍️ لا أريد باقة، سأكتب البيانات بنفسي</option>
           </select>
         </div>
-
         <div class="field full-width"><label>الاسم <span style="color:var(--err)">*</span></label><input id="name" placeholder="مثال: أحمد محمد"></div>
         <div class="field full-width"><label>الهاتف (مع الرمز)</label><div style="display: flex; gap: 8px;"><select id="countryCode" style="width: 110px; direction: ltr;"><option value="+213">🇩🇿 +213</option><option value="+212">🇲🇦 +212</option><option value="+216">🇹🇳 +216</option><option value="">بدون رمز</option></select><input id="phone" type="tel" dir="ltr" placeholder="555000000" style="flex:1;"></div></div>
-        
         <div class="field full-width" style="margin-top: 5px;">
           <label>الخدمة / البرنامج <span style="color:var(--err)">*</span></label>
           <input id="serviceType" list="serviceList" placeholder="اكتب الخدمة (مثال: رياضيات)">
           <datalist id="serviceList"><option value="دروس دعم"><option value="نادي رياضي"><option value="نقل مدرسي"></datalist>
         </div>
-        
         <div class="field full-width" style="margin-top: 5px; padding-top: 10px; border-top: 1px dashed rgba(255,255,255,0.1);">
           <label>طبيعة الاشتراك وكيفية الحساب <span style="color:var(--err)">*</span></label>
           <select id="subType" onchange="window.toggleSubType()" style="background:rgba(0,0,0,0.5); border:1px solid #10b981; color:#10b981; font-weight:bold;">
@@ -272,7 +260,6 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
             <option value="sessions">🎟️ اشتراك بالحصص (رصيد دخول)</option>
           </select>
         </div>
-
         <div id="timeFieldsGrp" style="display:contents;">
           <div class="field full-width" style="display: flex; gap:10px; background: rgba(16,185,129,0.05); padding: 12px; border-radius: 12px; border: 1px solid rgba(16,185,129,0.2);">
             <div style="flex:1;"><label>المدة (أشهر)</label><input id="months" type="number" min="1" step="1" style="background: rgba(0,0,0,0.6);"></div>
@@ -280,26 +267,22 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
             <div style="flex:1;"><label>اختيار سريع</label><select id="quickPlan" onchange="window.handleQuickPlan()" style="background: rgba(0,0,0,0.6);"><option value="">— اختر —</option><option value="1">1 شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="12">12 شهر</option></select></div>
           </div>
         </div>
-
         <div id="sessionsFieldsGrp" style="display:none;">
           <div class="field full-width" style="display: flex; gap:10px; background: rgba(16,185,129,0.05); padding: 12px; border-radius: 12px; border: 1px solid rgba(16,185,129,0.2);">
             <div style="flex:1;"><label>إجمالي عدد الحصص</label><input id="sessionsTotal" type="number" min="1" step="1" placeholder="مثال: 12" style="background: rgba(0,0,0,0.6);"></div>
             <div style="flex:1;"><label>الرصيد المتبقي (للتعديل فقط)</label><input id="sessionsLeft" type="number" min="0" step="1" style="color:var(--warn); font-weight:bold; background: rgba(0,0,0,0.6);"></div>
           </div>
         </div>
-
         <div class="field full-width" style="display:flex; gap:10px; margin-top:5px;">
            <div style="flex:1;"><label>السعر الإجمالي</label><input id="price" type="number" min="0" step="0.01" placeholder="5000" oninput="window.calcDebt()"></div>
            <div style="flex:1;"><label>المدفوع <span style="font-size:10px; font-weight:normal;">(فارغ = دفع الكل)</span></label><input id="paidAmount" type="number" min="0" step="0.01" oninput="window.calcDebt()"></div>
         </div>
         <div class="field full-width"><label>الدين المتبقي (آلي)</label><input id="debtAmount" type="text" readonly style="background: rgba(239,68,68,0.1); color: #ff8a8a; font-weight: bold; border-color: rgba(239,68,68,0.3); pointer-events: none;"></div>
-        
         <div class="full-width" style="margin-top: 10px;">
           <button type="button" id="btnToggleAdvanced" class="btn soft" style="width: 100%; border-style: dashed; color: var(--muted); padding: 12px;" onclick="window.toggleAdvancedFields()">
             🔽 إظهار الخيارات الإضافية (الإيميل، الملاحظات، الأوسمة...)
           </button>
         </div>
-
         <div id="advancedFields" class="full-width" style="display: none; background: rgba(0,0,0,0.2); padding: 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05); margin-top: 10px;">
           <div class="formGrid">
             <div class="field full-width"><label>الإيميل (اختياري)</label><input id="email" placeholder="مثال: name@example.com" inputmode="email"></div>
@@ -309,12 +292,12 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
             <div class="field full-width"><label>ملاحظات خاصة (لا تظهر للعميل)</label><textarea id="notes" rows="2" placeholder="أرقام سرية، ملاحظات خاصة..."></textarea></div>
           </div>
         </div>
-
       </div>
     </div>
     <div class="modalFooter"><button class="btn primary" type="button" style="width:100%; padding: 16px; font-size: 16px; font-weight:bold; border-radius:14px; box-shadow: 0 8px 25px rgba(124,92,255,0.2);" onclick="window.saveSubscription()">💾 حفظ بيانات المشترك</button></div>
   </div>
 </div>
+
 <div class="modal" id="scannerModal" aria-hidden="true">
   <div class="box" style="width: 400px">
     <div class="modalHeader">
@@ -347,10 +330,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 
 <div class="modal" id="packagesModal" aria-hidden="true">
   <div class="box" style="width: 600px">
-    <div class="modalHeader">
-      <h2>📦 الباقات الجاهزة</h2>
-      <button class="btn danger btn-close" type="button" onclick="closeModal('packagesModal')">✕ إغلاق</button>
-    </div>
+    <div class="modalHeader"><h2>📦 الباقات الجاهزة</h2><button class="btn danger btn-close" type="button" onclick="closeModal('packagesModal')">✕ إغلاق</button></div>
     <div class="modalBody">
       <div class="formGrid" style="margin-bottom: 20px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
         <div class="field full-width"><label>اسم الباقة الدلالي</label><input id="pkgName" placeholder="مثال: باقة فيزياء - 4 متوسط"></div>
@@ -452,6 +432,21 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 
 <div class="modal" id="extendModal" aria-hidden="true"><div class="box" style="width: 350px"><div class="modalHeader"><h2 id="extendTitle">تجديد الاشتراك</h2><button class="btn danger btn-close" type="button" onclick="closeModal('extendModal')">✕ إغلاق</button></div><div class="modalBody"><div class="field" style="margin-bottom:15px"><label id="lblExtendValue">المدة المضافة</label><input id="extendValue" type="number" min="1" value="1"></div><div class="field" style="margin-bottom:20px" id="grpExtendUnit"><label>الوحدة</label><select id="extendUnit"><option value="months">أشهر</option><option value="days">أيام</option></select></div><button class="btn primary" style="width:100%; text-align: center;" onclick="window.confirmExtend()">تأكيد التجديد</button></div></div></div>
 
+<div class="modal" id="attendanceModal" aria-hidden="true">
+  <div class="box" style="width: 450px">
+    <div class="modalHeader"><h2>📅 سجل الحضور والدخول</h2><button class="btn danger btn-close" type="button" onclick="closeModal('attendanceModal'); openModal('rowActionsModal')">العودة ↩</button></div>
+    <div class="modalBody">
+      <div style="margin-bottom: 15px; font-weight: bold; color: var(--accent); font-size: 18px;" id="attendanceClientName"></div>
+      <div style="max-height: 300px; overflow: auto; background: rgba(0,0,0,0.3); border-radius: 14px; border: 1px solid rgba(255,255,255,0.1);">
+        <table style="width: 100%; font-size: 13px;">
+          <thead style="background: rgba(255,255,255,0.05);"><tr><th style="padding: 10px;">#</th><th style="padding: 10px; text-align: right;">التاريخ</th><th style="padding: 10px; text-align: left;">الوقت</th></tr></thead>
+          <tbody id="attendanceTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal" id="rowActionsModal" aria-hidden="true">
   <div class="box" role="dialog" aria-modal="true" style="width: 400px;">
     <div class="modalHeader">
@@ -484,6 +479,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
         <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px;" onclick="window.actEditAction()">✏️ تعديل البيانات</button>
         <button class="btn soft" id="btnViewNotes" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #a855f7; border-color: rgba(168,85,247,.3);" onclick="window.openNotesAction()">📝 الملاحظات</button>
         <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px;" onclick="window.actCopyEmailAction()">📋 نسخ Email</button>
+        <button class="btn soft" id="btnViewAttendance" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #10b981; border-color: rgba(16,185,129,.3);" onclick="window.openAttendanceLog()">📅 سجل الحضور</button>
       </div>
 
       <div style="padding-top: 15px; border-top: 1px solid rgba(239,68,68,0.2);">
@@ -614,7 +610,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // 3. إعداد Firebase
 const FIREBASE_CONFIG = { apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ", authDomain: "dattta-6f497.firebaseapp.com", databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com", projectId: "dattta-6f497", storageBucket: "dattta-6f497.firebasestorage.app", messagingSenderId: "804914291938", appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb" };
-const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.5"; 
+const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.6"; 
 const $ = (id)=>document.getElementById(id); 
 const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
 
@@ -708,18 +704,18 @@ window.processScannedId = (id) => {
      $("chkInAlert").innerHTML = "✅ الاشتراك صالح، يمكن الدخول.";
      $("chkInAlert").style.color = "#10b981";
      
+     btnAct.style.display = "block";
+     btnAct.style.background = "#10b981";
+     btnAct.style.borderColor = "#059669";
      if(rec.subType === 'sessions') {
-         btnAct.style.display = "block";
-         btnAct.style.background = "#10b981";
-         btnAct.style.borderColor = "#059669";
-         btnAct.textContent = `✔️ خصم حصة حضور (الرصيد المتبقي: ${rec.sessionsLeft})`;
-         btnAct.onclick = () => { 
-           window.markAttendance(rec.id); 
-           closeModal('checkInModal'); 
-         };
+         btnAct.textContent = `✔️ خصم حصة وتسجيل الدخول (باقي: ${rec.sessionsLeft})`;
      } else {
-         btnAct.style.display = "none"; 
+         btnAct.textContent = `✔️ تسجيل الدخول (زمني)`;
      }
+     btnAct.onclick = () => { 
+       window.markAttendance(rec.id); 
+       closeModal('checkInModal'); 
+     };
   }
   openModal('checkInModal');
 };
@@ -848,12 +844,14 @@ window.render = () => {
 
         const serviceHtml = `<span class="service-badge">${r.serviceType || "غير محدد"}</span>`;
         
+        // زر الحضور في الجدول متاح الآن للنوعين!
         let dateOrSessionHtml = "";
         if(r.subType === 'sessions') {
           dateOrSessionHtml = `<div style="font-weight:bold; font-size:14px; color:var(--text);">${r.sessionsLeft||0} / ${r.sessionsTotal||0} حصة</div>
           <button class="btn soft" style="padding:4px 8px; font-size:10px; margin-top:4px; border-color:#22c55e; color:#22c55e;" onclick="window.markAttendance('${r.id}')">✔️ حضور</button>`;
         } else {
-          dateOrSessionHtml = `<span style="color:var(--text)">م:</span> ${r.start||"-"}<br><span style="color:var(--text)">إ:</span> ${r.end||"-"}`;
+          dateOrSessionHtml = `<span style="color:var(--text)">م:</span> ${r.start||"-"}<br><span style="color:var(--text)">إ:</span> ${r.end||"-"}
+          <div style="margin-top:4px;"><button class="btn soft" style="padding:4px 8px; font-size:10px; border-color:#22c55e; color:#22c55e;" onclick="window.markAttendance('${r.id}')">✔️ تسجيل دخول</button></div>`;
         }
 
         tr.innerHTML = `
@@ -877,17 +875,65 @@ window.render = () => {
   } catch(e) { console.error(e); }
 };
 
+// دالة تسجيل الحضور الجديدة المطورة
 window.markAttendance = async (id) => {
   let rec = data.find(x => x.id === id);
-  if(rec && rec.subType === 'sessions' && rec.sessionsLeft > 0) {
-    rec.sessionsLeft--;
-    logAction("تسجيل حضور ✔️", `العميل: ${rec.name}، الرصيد المتبقي: ${rec.sessionsLeft}`);
+  if(rec) {
+    // التحقق من صلاحية الاشتراك قبل الدخول
+    if (rec.subType === 'sessions' && rec.sessionsLeft <= 0) {
+      return showToast("الرصيد منتهي، لا يمكن الخصم!", "err");
+    }
+    if (rec.subType === 'time') {
+      const alertD = parseInt($("alertDays")?.value) || 7;
+      const st = getStatus(rec, alertD);
+      if(st.key === 'expired') return showToast("الاشتراك الزمني منتهي، لا يمكن الدخول!", "err");
+    }
+
+    // الخصم إذا كان نظام حصص
+    if(rec.subType === 'sessions') rec.sessionsLeft--;
+
+    // تسجيل الوقت والتاريخ الدقيق في السجل الجديد
+    if(!rec.attendanceLog) rec.attendanceLog = [];
+    rec.attendanceLog.push({ time: new Date().toISOString() });
+
+    let logDetails = rec.subType === 'sessions' ? `الرصيد المتبقي: ${rec.sessionsLeft}` : `اشتراك زمني`;
+    logAction("تسجيل حضور ✔️", `العميل: ${rec.name}، ${logDetails}`);
+    
+    setSyncState("saving");
     await firebasePush();
     window.render();
-    showToast("تم خصم حصة (تسجيل حضور) ✔️");
-  } else {
-    showToast("الرصيد منتهي، لا يمكن الخصم!", "err");
+    showToast("تم تسجيل الدخول بنجاح ✔️");
   }
+};
+
+window.openAttendanceLog = () => {
+  const rec = data.find(x => x.id === currentRowId);
+  if(!rec) return;
+  closeModal("rowActionsModal");
+  
+  $("attendanceClientName").textContent = `👤 ${rec.name}`;
+  const tb = $("attendanceTbody");
+  tb.innerHTML = "";
+  
+  if(!rec.attendanceLog || rec.attendanceLog.length === 0) {
+    tb.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:20px; color:var(--muted);">لا يوجد سجل حضور لهذا المشترك بعد.</td></tr>`;
+  } else {
+    // عكس المصفوفة لعرض الأحدث في الأعلى
+    const sortedLogs = [...rec.attendanceLog].reverse();
+    sortedLogs.forEach((log, index) => {
+      const d = new Date(log.time);
+      const dateStr = d.toLocaleDateString('en-GB'); // شكل: DD/MM/YYYY
+      const timeStr = d.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'}); // شكل: HH:MM
+      tb.innerHTML += `
+        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
+          <td style="padding: 10px; color: var(--muted);">${sortedLogs.length - index}</td>
+          <td style="padding: 10px; text-align: right; font-weight: bold; color: var(--text);">${dateStr}</td>
+          <td style="padding: 10px; text-align: left; color: var(--accent); direction: ltr; font-weight: bold;">${timeStr}</td>
+        </tr>
+      `;
+    });
+  }
+  openModal("attendanceModal");
 };
 
 window.updateBulkUI = () => { const bar = $("bulkBar"); if(selectedIds.size > 0) { bar.style.display = "flex"; $("selCount").textContent = `${selectedIds.size} محدد`; } else { bar.style.display = "none"; $("selectAll").checked = false; } };
@@ -962,10 +1008,17 @@ window.openRowActions = (id) => {
   currentRowId = id; 
   const rec = data.find(x => x.id === id); 
   $("rowActionsHint").textContent = rec.name; 
+  
+  // تفعيل/تعطيل زر الملاحظات
   const hasNotes = rec.notes && rec.notes.trim() !== "";
   const btnNotes = $("btnViewNotes");
   if(hasNotes) { btnNotes.disabled = false; btnNotes.style.opacity = "1"; btnNotes.onclick = window.openNotesAction; } 
   else { btnNotes.disabled = true; btnNotes.style.opacity = "0.4"; btnNotes.onclick = null; }
+  
+  // تحديث عداد سجل الحضور
+  const logCount = rec.attendanceLog ? rec.attendanceLog.length : 0;
+  $("btnViewAttendance").textContent = `📅 سجل الحضور (${logCount})`;
+
   openModal("rowActionsModal"); 
 };
 
@@ -1010,7 +1063,7 @@ window.actExtendAction = () => {
 };
 window.actCopyEmailAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.email) { closeModal("rowActionsModal"); return showToast("لا يوجد بريد.", "err"); } navigator.clipboard.writeText(rec.email); closeModal("rowActionsModal"); showToast("تم نسخ الإيميل 📋"); };
 window.actWhatsAppAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.phone) { closeModal("rowActionsModal"); return showToast("لا يوجد هاتف.", "err"); } let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, ''); let endTxt = rec.subType === 'sessions' ? `رصيدك المتبقي: ${rec.sessionsLeft} حصة` : `ينتهي بتاريخ: ${rec.end}`; window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`مرحباً ${rec.name}، نود تذكيرك بخصوص اشتراكك الذي ${endTxt}.`)}`, '_blank'); closeModal("rowActionsModal"); };
-window.actDeleteAction = async () => { if(confirm("حذف المشترك؟")) { const recToDelete = data.find(x => x.id === currentRowId); logAction("حذف اشتراك", `الاسم: ${recToDelete.name}`); lastDeletedData = data.filter(x => x.id === currentRowId); data = data.filter(x => x.id !== currentRowId); await firebasePush(); window.render(); closeModal("rowActionsModal"); showToast("تم الحذف 🗑️"); } };
+window.actDeleteAction = async () => { if(confirm("حذف المشترك نهائياً؟")) { const recToDelete = data.find(x => x.id === currentRowId); logAction("حذف اشتراك", `الاسم: ${recToDelete.name}`); lastDeletedData = data.filter(x => x.id === currentRowId); data = data.filter(x => x.id !== currentRowId); await firebasePush(); window.render(); closeModal("rowActionsModal"); showToast("تم الحذف 🗑️"); } };
 
 window.calcDebt = () => { const p = parseFloat($("price").value) || 0; let valRaw = $("paidAmount").value; let a = valRaw === "" ? p : (parseFloat(valRaw) || 0); let d = p - a; $("debtAmount").value = d > 0 ? d : 0; };
 window.handleQuickPlan = () => { if($("quickPlan").value) $("months").value = $("quickPlan").value; };
@@ -1131,6 +1184,12 @@ window.saveSubscription = async () => {
   };
   if(subType === 'time') { rec.start = start; rec.months = months; rec.end = endISO; }
   else { rec.sessionsTotal = sessionsTot; rec.sessionsLeft = sessionsLft; }
+  
+  // الحفاظ على سجل الحضور القديم إن وجد
+  if(editingId) {
+    const oldRec = data.find(x => x.id === editingId);
+    if(oldRec && oldRec.attendanceLog) rec.attendanceLog = oldRec.attendanceLog;
+  }
 
   if(editingId) data = data.map(x => x.id === editingId ? rec : x); else data.unshift(rec);
   await firebasePush(); window.render(); closeModal("formModal"); showToast("تم الحفظ ✨");
@@ -1208,14 +1267,15 @@ window.openTotalsReport = () => {
 
 window.exportCSV = () => { 
   if(data.length === 0) return showToast("لا توجد بيانات لتصديرها", "warn"); 
-  let csv = "\uFEFFالاسم,الأوسمة,الإيميل,الهاتف,النوع,الخدمة,المدة/الحصص,السعر,حالة الدفع,تاريخ البداية,تاريخ الانتهاء,الرصيد المتبقي\n"; 
+  let csv = "\uFEFFالاسم,الأوسمة,الإيميل,الهاتف,النوع,الخدمة,المدة/الحصص,السعر,حالة الدفع,تاريخ البداية,تاريخ الانتهاء,الرصيد المتبقي,عدد مرات الدخول\n"; 
   data.forEach(r => { 
     let phone = r.phone ? `${r.countryCode||''}${r.phone}` : ''; 
     let payStat = r.paymentStatus === 'unpaid' ? 'غير مدفوع' : (r.paymentStatus === 'partial' ? 'جزئي' : 'خالص'); 
     let typeTxt = r.subType === 'sessions' ? 'حصص' : 'زمني';
     let valTxt = r.subType === 'sessions' ? `${r.sessionsTotal} حصة` : `${r.months} شهر`;
     let safeTags = (r.tags||'').replace(/"/g, '""');
-    csv += `"${r.name||''}","${safeTags}","${r.email||''}","${phone}","${typeTxt}","${r.serviceType||''}","${valTxt}","${r.price||0} ${r.currency||'DZD'}","${payStat}","${r.start||''}","${r.end||''}","${r.sessionsLeft||''}"\n`; 
+    let attendanceCount = r.attendanceLog ? r.attendanceLog.length : 0;
+    csv += `"${r.name||''}","${safeTags}","${r.email||''}","${phone}","${typeTxt}","${r.serviceType||''}","${valTxt}","${r.price||0} ${r.currency||'DZD'}","${payStat}","${r.start||''}","${r.end||''}","${r.sessionsLeft||''}","${attendanceCount}"\n`; 
   }); 
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Subscriptions_Excel_${todayISO()}.csv`; a.click(); closeSideMenu(); showToast("تم التصدير بنجاح 📥"); 
 };
