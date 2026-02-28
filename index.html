@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>لوحة تسيير الاشتراكات - v12.4</title>
+<title>لوحة تسيير الاشتراكات - v12.5</title>
 
 <meta name="theme-color" content="#070a12" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -26,7 +26,7 @@ body{
   padding: 18px;
   -webkit-user-select: none; user-select: none;
 }
-input, textarea, table { -webkit-user-select: auto; user-select: auto; }
+input, textarea, table, select { -webkit-user-select: auto; user-select: auto; }
 
 .container{max-width:1200px;margin:0 auto}
 
@@ -142,8 +142,8 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.4 PWA</span></h1>
-    <div class="sub">⚡ الميزات الجديدة: رسائل واتساب جماعية 💬 + ملاحظات سرية + تقسيم صفحات</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.5 PWA</span></h1>
+    <div class="sub">⚡ الميزات الجديدة: إدارة الباقات الجاهزة لتعدد المجالات 📦 + نظام الـ ERP المُصغر</div>
   </div>
 
   <div class="card">
@@ -157,7 +157,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
         <div class="statChip sync" id="syncChip"><span class="ico">☁️</span> <span class="v" id="syncVal">—</span></div>
       </div>
       <div class="searchWrap">
-        <input id="search" oninput="window.currentPage=1; window.render()" placeholder="بحث بالاسم أو الإيميل، الهاتف، أو الخدمة..." />
+        <input id="search" oninput="window.currentPage=1; window.render()" placeholder="بحث بالاسم، الإيميل، الهاتف، أو الخدمة..." />
         <button class="btn soft" title="لصق البحث" style="padding: 10px 12px; border-radius: 12px; font-size: 15px;" onclick="pasteSearch()">📋</button>
         <button class="btn soft" title="مسح البحث" style="padding: 10px 12px; border-radius: 12px; font-size: 15px; color: var(--err);" onclick="clearSearch()">✕</button>
       </div>
@@ -199,6 +199,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
     <div class="modalHeader"><h2>⚙️ أدوات إضافية</h2><button class="btn danger btn-close" type="button" onclick="closeModal('toolsModal')">✕ إغلاق</button></div>
     <div class="modalBody">
       <div class="actGrid">
+        <button class="actBtn" style="color:#a855f7; border-color:rgba(168,85,247,0.4); background:rgba(168,85,247,0.1); grid-column: span 2;" onclick="closeModal('toolsModal'); openModal('packagesModal')">📦 إدارة الباقات الجاهزة (توفير الوقت)</button>
         <button class="actBtn" style="color:#10b981; border-color:rgba(16,185,129,0.4); background:rgba(16,185,129,0.1);" onclick="exportCSV()">📥 تصدير Excel</button>
         <button class="actBtn" style="color:#f59e0b; border-color:rgba(245,158,11,0.4); background:rgba(245,158,11,0.1);" onclick="undoDelete()">↩️ التراجع عن الحذف</button>
         <button class="actBtn" onclick="closeModal('toolsModal'); openModal('backupModal')">📦 النسخ الاحتياطي</button>
@@ -211,15 +212,58 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
   </div>
 </div>
 
+<div class="modal" id="packagesModal" aria-hidden="true">
+  <div class="box" style="width: 600px">
+    <div class="modalHeader">
+      <h2>📦 الباقات الجاهزة</h2>
+      <button class="btn danger btn-close" type="button" onclick="closeModal('packagesModal')">✕ إغلاق</button>
+    </div>
+    <div class="modalBody">
+      <div class="formGrid" style="margin-bottom: 20px; background: rgba(255,255,255,0.05); padding: 15px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
+        <div class="field full-width"><label>اسم الباقة الدلالي (مثال: جيم 3 أشهر VIP)</label><input id="pkgName" placeholder="اسم يعبر عن الباقة"></div>
+        <div class="field"><label>نوع الخدمة</label><input id="pkgService" placeholder="مثال: نادي رياضي"></div>
+        <div class="field"><label>المدة (أشهر)</label><input id="pkgMonths" type="number" min="1" placeholder="3"></div>
+        <div class="field"><label>السعر الافتراضي</label><input id="pkgPrice" type="number" min="0" placeholder="15000"></div>
+        <div class="field full-width"><button class="btn primary" style="width:100%; padding:12px; border-radius:12px;" onclick="savePackage()">➕ إضافة الباقة</button></div>
+      </div>
+      <div style="max-height: 250px; overflow: auto; border: 1px solid var(--line); border-radius: 12px;">
+        <table style="min-width: 100%; font-size: 13px;">
+          <thead style="background: rgba(0,0,0,0.4);"><tr><th>اسم الباقة</th><th>الخدمة</th><th>المدة</th><th>السعر</th><th>إجراء</th></tr></thead>
+          <tbody id="packagesTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal" id="formModal" aria-hidden="true">
   <div class="box" role="dialog" aria-modal="true">
     <div class="modalHeader"><div><h2 id="formTitle">إضافة اشتراك</h2><div class="hint">املأ البيانات ثم اضغط حفظ</div></div><button class="btn danger btn-close" type="button" onclick="closeModal('formModal')">✕ إغلاق</button></div>
     <div class="modalBody">
       <div class="formGrid">
+        <div class="field full-width" style="background:rgba(124,92,255,0.1); padding:12px 14px; border-radius:14px; border:1px solid rgba(124,92,255,0.3); margin-bottom:5px;">
+          <label style="color:#c4b5fd; margin-bottom:8px;">📦 التعبئة السريعة من الباقات الجاهزة (اختياري)</label>
+          <select id="packageSelector" onchange="window.applyPackage()" style="background:rgba(0,0,0,0.5); border-color:rgba(124,92,255,0.4); cursor:pointer;">
+            <option value="">— تخصيص يدوي —</option>
+          </select>
+        </div>
+
         <div class="field full-width"><label>الاسم <span style="color:var(--err)">*</span></label><input id="name" placeholder="مثال: Ahmed"></div>
         <div class="field full-width"><label>الهاتف (مع الرمز)</label><div style="display: flex; gap: 8px;"><select id="countryCode" style="width: 110px; direction: ltr;"><option value="+213">🇩🇿 +213</option><option value="+212">🇲🇦 +212</option><option value="+216">🇹🇳 +216</option><option value="">بدون رمز</option></select><input id="phone" type="tel" dir="ltr" placeholder="555000000" style="flex:1;"></div></div>
         <div class="field full-width"><label>الإيميل (إجباري) <span style="color:var(--err)">*</span></label><input id="email" placeholder="name@example.com" inputmode="email"></div>
-        <div class="field full-width"><label>الخدمة / الباقة <span style="color:var(--err)">*</span></label><input id="serviceType" list="serviceList" placeholder="اختر أو اكتب خدمة جديدة"><datalist id="serviceList"><option value="IPTV"><option value="Netflix"><option value="Canva Pro"><option value="YouTube Premium"><option value="Office 365"></datalist></div>
+        
+        <div class="field full-width">
+          <label>الخدمة / الباقة <span style="color:var(--err)">*</span></label>
+          <input id="serviceType" list="serviceList" placeholder="اختر أو اكتب أي خدمة (نادي، مدرسة، انترنت...)">
+          <datalist id="serviceList">
+            <option value="نادي رياضي (Gym)">
+            <option value="نقل مدرسي">
+            <option value="دورة لغات (انجليزية)">
+            <option value="IPTV">
+            <option value="Netflix">
+          </datalist>
+        </div>
+        
         <div class="field"><label>المدة (أشهر) <span style="color:var(--err)">*</span></label><input id="months" type="number" min="1" step="1"></div>
         <div class="field"><label>العملة</label><select id="currency"><option value="DZD">DZD</option><option value="EUR">EUR</option><option value="USD">USD</option><option value="MAD">MAD</option><option value="TND">TND</option></select></div>
         <div class="field full-width"><label>السعر الإجمالي</label><input id="price" type="number" min="0" step="0.01" placeholder="مثال: 5000" oninput="window.calcDebt()"></div>
@@ -228,7 +272,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
         <div class="field"><label>تاريخ البداية <span style="color:var(--err)">*</span></label><input id="start" type="date"></div>
         <div class="field"><label>تنبيه قبل (أيام)</label><input id="alertDays" type="number" min="1" step="1" value="7"></div>
         <div class="field"><label>اختيار سريع للمدة</label><select id="quickPlan" onchange="window.handleQuickPlan()"><option value="">— اختر —</option><option value="1">1 شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="12">12 شهر</option></select></div>
-        <div class="field full-width"><label>ملاحظات خاصة (لا تظهر للعميل)</label><textarea id="notes" rows="2" placeholder="أرقام سرية، MAC Address، إلخ..."></textarea></div>
+        <div class="field full-width"><label>ملاحظات خاصة (لا تظهر للعميل)</label><textarea id="notes" rows="2" placeholder="أرقام سرية، MAC Address، ملاحظات صحية... إلخ"></textarea></div>
       </div>
     </div>
     <div class="modalFooter"><button class="btn primary" type="button" style="padding: 12px 24px; font-size: 14px;" onclick="saveSubscription()">💾 حفظ البيانات</button></div>
@@ -239,7 +283,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
   <div class="box" style="width: 400px">
     <div class="modalHeader"><h2>⚙️ إعدادات المتجر (اللوجو)</h2><button class="btn danger btn-close" type="button" onclick="closeModal('storeSettingsModal')">✕ إغلاق</button></div>
     <div class="modalBody">
-       <div class="field" style="margin-bottom:15px"><label>اسم المتجر (يظهر في الفاتورة)</label><input id="setStoreName" placeholder="مثال: متجر الاشتراكات"></div>
+       <div class="field" style="margin-bottom:15px"><label>اسم المؤسسة / المتجر (يظهر في الفاتورة)</label><input id="setStoreName" placeholder="مثال: مؤسسة النجاح للغات"></div>
        <div class="field" style="margin-bottom:15px"><label>الشعار (Logo)</label><input type="file" id="setStoreLogo" accept="image/*" style="padding: 8px;" onchange="window.handleLogoUpload(event)"></div>
        <div style="text-align:center; padding:10px; background:rgba(255,255,255,0.05); border-radius:12px;"><div style="font-size:12px; color:var(--muted); margin-bottom:5px;">معاينة الشعار:</div><img id="logoPreview" src="" style="max-width:100px; max-height:100px; border-radius:10px; display:none; margin: 0 auto;"><div id="logoEmojiFallback" style="font-size:40px;">💎</div></div>
        <button class="btn primary" style="width:100%; margin-top:20px; padding:14px; border-radius:14px;" onclick="saveStoreSettings()">💾 حفظ الإعدادات</button>
@@ -318,7 +362,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
     </div>
     <div class="modalBody">
       <div style="margin-bottom:15px; background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3); padding:12px; border-radius:12px; color:#c8f7d9; font-size:13px; line-height:1.5;">
-        سيتم عرض المشتركين واحداً تلو الآخر لتتمكن من إرسال الرسائل بشكل آمن وتجنب حظر المتصفح للنوافذ المنبثقة.
+        سيتم عرض المشتركين واحداً تلو الآخر لتتمكن من إرسال الرسائل بشكل آمن.
         <div style="margin-top:8px; border-top:1px dashed rgba(34,197,94,0.3); padding-top:8px;">
           <b>عدد المستلمين:</b> <span id="bulkWaCount" style="font-weight:bold; font-size:16px;">0</span> مشترك (يملكون أرقام)
         </div>
@@ -328,7 +372,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
         <div style="font-size:11px; color:var(--muted); margin-bottom:8px; direction:ltr; text-align:right;">
           المتغيرات المتاحة: <code style="background:rgba(255,255,255,0.1); padding:2px 4px; border-radius:4px;">{name}</code> , <code style="background:rgba(255,255,255,0.1); padding:2px 4px; border-radius:4px;">{end}</code> , <code style="background:rgba(255,255,255,0.1); padding:2px 4px; border-radius:4px;">{service}</code>
         </div>
-        <textarea id="bulkWaMsg" rows="4">مرحباً {name}، نود تذكيرك بانتهاء اشتراكك في باقة {service} بتاريخ {end}. يرجى التجديد لتفادي انقطاع الخدمة.</textarea>
+        <textarea id="bulkWaMsg" rows="4">مرحباً {name}، نود تذكيرك بانتهاء اشتراكك في {service} بتاريخ {end}. يرجى التجديد لتفادي الانقطاع.</textarea>
       </div>
       <div style="text-align:center; padding:15px 0; background:rgba(0,0,0,0.2); border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
         <div id="bulkWaCurrentTarget" style="font-weight:bold; font-size:15px; margin-bottom:12px; color:var(--text);">العميل التالي: -</div>
@@ -401,7 +445,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
     const swCode = `self.addEventListener('install', (e) => self.skipWaiting()); self.addEventListener('activate', (e) => self.clients.claim()); self.addEventListener('fetch', (e) => {});`;
     const swBlob = new Blob([swCode], {type: 'text/javascript'});
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>console.log("إعدادات الـ SW مقيدة في هذه البيئة، لكن التطبيق سيعمل."));
+      navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>console.log("PWA SW Warning"));
     }
 
     let deferredPrompt;
@@ -426,18 +470,19 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 // ==========================================
 const FIREBASE_CONFIG = { apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ", authDomain: "dattta-6f497.firebaseapp.com", databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com", projectId: "dattta-6f497", storageBucket: "dattta-6f497.firebasestorage.app", messagingSenderId: "804914291938", appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb" };
 
-const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.4";
+const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.5";
 const $ = (id)=>document.getElementById(id);
 const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
 
-let data = []; let editingId = null; let currentRowId = null; let currentFilter = "all"; 
+let data = []; 
+let packagesData = []; // تخزين الباقات الجاهزة
+let editingId = null; let currentRowId = null; let currentFilter = "all"; 
 let selectedIds = new Set(); let extendMode = "single";
 let currentUser = null; let currentRole = null;
 let lastDeletedData = null; 
-let storeSettings = { name: "متجر الاشتراكات", logo: "" };
+let storeSettings = { name: "مؤسسة الاشتراكات", logo: "" };
 window.currentPage = 1; window.itemsPerPage = 50;
 
-// متغيرات الرسائل الجماعية عبر الواتساب
 let bulkWaQueue = [];
 
 if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
@@ -461,7 +506,7 @@ $("auditTbody").addEventListener("change", (e) => { if(e.target.classList.contai
 window.deleteSelectedLogs = async () => { if(!confirm(`تأكيد حذف ${selectedLogIds.size} من السجلات نهائياً؟`)) return; setSyncState("saving"); for(let id of selectedLogIds) { await db.ref("logs/" + id).remove(); } selectedLogIds.clear(); window.updateLogBulkUI(); setSyncState("ok"); showToast("تم حذف السجلات"); window.openAuditLog(); };
 window.openAuditLog = async () => { selectedLogIds.clear(); window.updateLogBulkUI(); const tb = $("auditTbody"); tb.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:20px;'>جاري تحميل السجل... ⏳</td></tr>"; openModal("auditLogModal"); try { const snap = await db.ref("logs").orderByChild("time").limitToLast(100).once("value"); const logsObj = snap.val() || {}; tb.innerHTML = ""; const logsArray = Object.entries(logsObj).map(([key, val]) => ({id: key, ...val})).sort((a,b) => new Date(b.time) - new Date(a.time)); if(logsArray.length === 0) { tb.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:20px; color:var(--muted);'>لا توجد نشاطات</td></tr>"; return; } logsArray.forEach(l => { const d = new Date(l.time); const timeStr = d.toLocaleDateString('en-GB') + " - " + d.toLocaleTimeString('en-GB'); let actionColor = "var(--text)"; if(l.action.includes("حذف")) actionColor = "#ef4444"; else if(l.action.includes("إضافة")) actionColor = "#22c55e"; else if(l.action.includes("تعديل") || l.action.includes("تجديد") || l.action.includes("وصل")) actionColor = "#f59e0b"; const isChecked = selectedLogIds.has(l.id) ? "checked" : ""; tb.innerHTML += `<tr><td style="text-align: center;"><input type="checkbox" class="logChk" value="${l.id}" ${isChecked}></td><td style="direction:ltr; text-align:right; color:var(--muted);">${timeStr}</td><td>${l.email}</td><td style="color:${actionColor}; font-weight:bold;">${l.action}</td><td>${l.details}</td></tr>`; }); } catch(err) { tb.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:20px; color:var(--err)'>حدث خطأ في جلب السجل</td></tr>"; } };
 
-auth.onAuthStateChanged(async (u)=>{ currentUser = u; if(u){ try { const roleSnap = await db.ref("admins/" + u.uid).once("value"); let roleData = roleSnap.val(); if(roleData === true) { try { roleData = { role: "owner", email: u.email }; await db.ref("admins/" + u.uid).set(roleData); } catch(writeErr) { roleData = { role: "owner", email: u.email }; } } currentRole = (roleData && roleData.role) ? roleData.role : "admin"; } catch(e) { currentRole = "admin"; } $("closeAuthBtn").style.display = "block"; closeModal("authModal"); await window.loadData(); } else { currentRole = null; data = []; window.render(); $("closeAuthBtn").style.display = "none"; openModal("authModal"); } window.updateAuthUI(); });
+auth.onAuthStateChanged(async (u)=>{ currentUser = u; if(u){ try { const roleSnap = await db.ref("admins/" + u.uid).once("value"); let roleData = roleSnap.val(); if(roleData === true) { try { roleData = { role: "owner", email: u.email }; await db.ref("admins/" + u.uid).set(roleData); } catch(writeErr) { roleData = { role: "owner", email: u.email }; } } currentRole = (roleData && roleData.role) ? roleData.role : "admin"; } catch(e) { currentRole = "admin"; } $("closeAuthBtn").style.display = "block"; closeModal("authModal"); await window.loadData(); } else { currentRole = null; data = []; packagesData = []; window.render(); $("closeAuthBtn").style.display = "none"; openModal("authModal"); } window.updateAuthUI(); });
 window.updateAuthUI = () => { if(currentUser) { $("authLoginSection").style.display = "none"; $("authLoggedInSection").style.display = "block"; const iconEl = $("authStatusIcon"); const textEl = $("authStateText"); if (currentRole === "owner") { iconEl.innerHTML = "👑"; iconEl.style.background = "linear-gradient(135deg, rgba(245,158,11,0.2), rgba(245,158,11,0.05))"; iconEl.style.borderColor = "rgba(245,158,11,0.4)"; textEl.innerHTML = `<span style="color:var(--warn); font-size:22px; font-weight:900;">المالك</span><br/><span style="color:var(--text); font-size:15px; margin-top:8px; display:inline-block; direction:ltr;">${currentUser.email}</span>`; } else { iconEl.innerHTML = "👤"; iconEl.style.background = "linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.05))"; iconEl.style.borderColor = "rgba(34,197,94,0.3)"; textEl.innerHTML = `<span style="color:var(--text); font-size:20px; font-weight:900;">أدمن</span><br/><span style="color:var(--text); font-size:15px; margin-top:8px; display:inline-block; direction:ltr;">${currentUser.email}</span>`; } $("ownerDashboard").style.display = currentRole === "owner" ? "block" : "none"; } else { $("authLoginSection").style.display = "block"; $("authLoggedInSection").style.display = "none"; } };
 window.handleLogoUpload = (e) => { const file = e.target.files[0]; if(file){ const reader = new FileReader(); reader.onload = (ev) => { $("logoPreview").src = ev.target.result; $("logoPreview").style.display = "block"; $("logoEmojiFallback").style.display = "none"; }; reader.readAsDataURL(file); } };
 window.saveStoreSettings = async () => { const name = $("setStoreName").value.trim() || "متجر الاشتراكات"; const logo = $("logoPreview").src || ""; storeSettings = { name, logo }; try { setSyncState("saving"); await db.ref("settings/storeInfo").set(storeSettings); setSyncState("ok"); closeModal("storeSettingsModal"); showToast("تم حفظ إعدادات المتجر ✨"); } catch(e) { showToast("ليس لديك صلاحية", "err"); } };
@@ -474,6 +519,10 @@ window.loadData = async () => {
   try { 
     setSyncState("saving"); 
     try { const settingsSnap = await db.ref("settings/storeInfo").once('value'); if(settingsSnap.exists()) { storeSettings = settingsSnap.val(); $("setStoreName").value = storeSettings.name || ""; if(storeSettings.logo) { $("logoPreview").src = storeSettings.logo; $("logoPreview").style.display = "block"; $("logoEmojiFallback").style.display = "none"; } } } catch(errSettings) {} 
+    
+    // تحميل الباقات الجاهزة
+    try { const pkgSnap = await db.ref("packages").once('value'); packagesData = pkgSnap.val() ? Object.values(pkgSnap.val()) : []; window.renderPackages(); } catch(errPkg) {}
+
     const snap = await db.ref("subscriptions").once('value'); data = snap.val() ? Object.values(snap.val()) : []; saveLocalBackup(); setSyncState("ok"); window.render(); 
   } catch(e) { setSyncState("fail"); showToast("تم عرض النسخة المحفوظة محلياً", "warn"); data = loadLocalBackup(); window.render(); } 
 };
@@ -549,22 +598,13 @@ window.bulkDeleteAction = async () => { if(!confirm(`تأكيد حذف ${selecte
 window.bulkExtendAction = () => { extendMode = "bulk"; $("extendTitle").textContent = `تجديد ${selectedIds.size} مشترك`; $("extendValue").value = 1; $("extendUnit").value = "months"; openModal("extendModal"); };
 window.confirmExtend = async () => { const val = parseInt($("extendValue").value); const unit = $("extendUnit").value; if(isNaN(val) || val < 1) return showToast("غير صالح", "err"); if(extendMode === "bulk") { logAction("تجديد جماعي", `عدد ${selectedIds.size} اشتراكات بمقدار ${val} ${unit}`); } else { const recToExtend = data.find(x => x.id === currentRowId); logAction("تجديد اشتراك", `الاسم: ${recToExtend.name}، المدة المضافة: ${val} ${unit}`); } const processRecord = (rec) => { const endD = new Date(rec.end); if(unit === "months") { endD.setMonth(endD.getMonth() + val); rec.months = (parseInt(rec.months)||0) + val; } else { endD.setDate(endD.getDate() + val); } rec.end = endD.toISOString().split('T')[0]; return rec; }; if(extendMode === "bulk") { data = data.map(x => selectedIds.has(x.id) ? processRecord(x) : x); selectedIds.clear(); window.updateBulkUI(); } else { data = data.map(x => x.id === currentRowId ? processRecord(x) : x); } await firebasePush(); window.render(); closeModal("extendModal"); showToast("تم التجديد 🔁"); };
 
-// ==========================================
-// 3. دوال رسائل الواتساب الجماعية الذكية
-// ==========================================
 window.openBulkWhatsAppModal = () => {
-  // تصفية المشتركين المحددين ليحتفظ فقط بمن لديهم رقم هاتف
   bulkWaQueue = data.filter(x => selectedIds.has(x.id) && x.phone && x.phone.trim() !== "");
-  
-  if(bulkWaQueue.length === 0) {
-    return showToast("لم يتم تحديد أي عميل يملك رقم هاتف صالح!", "err");
-  }
-  
+  if(bulkWaQueue.length === 0) return showToast("لم يتم تحديد أي عميل يملك رقم هاتف صالح!", "err");
   $("bulkWaCount").textContent = bulkWaQueue.length;
   window.updateBulkWaUI();
   openModal("bulkWhatsAppModal");
 };
-
 window.updateBulkWaUI = () => {
   if(bulkWaQueue.length === 0) {
     $("bulkWaCurrentTarget").textContent = "تم إرسال جميع الرسائل بنجاح ✅";
@@ -573,61 +613,35 @@ window.updateBulkWaUI = () => {
     setTimeout(() => { closeModal("bulkWhatsAppModal"); }, 3000);
     return;
   }
-  
   $("btnSendNextWa").style.display = "inline-block";
   $("bulkWaCurrentTarget").style.color = "var(--text)";
   const nextUser = bulkWaQueue[0];
   $("bulkWaCurrentTarget").textContent = `العميل التالي: ${nextUser.name} (${bulkWaQueue.length} متبقي)`;
 };
-
 window.sendNextBulkWhatsApp = () => {
   if(bulkWaQueue.length === 0) return;
-  
-  const user = bulkWaQueue.shift(); // سحب العميل الأول من الطابور
+  const user = bulkWaQueue.shift(); 
   const templateStr = $("bulkWaMsg").value;
-  
-  // استبدال المتغيرات الذكية ببيانات العميل الحقيقية
-  let msg = templateStr
-    .replace(/{name}/g, user.name || "عميلنا العزيز")
-    .replace(/{end}/g, user.end || "غير محدد")
-    .replace(/{service}/g, user.serviceType || "الخدمة الخاصة بك");
-    
+  let msg = templateStr.replace(/{name}/g, user.name || "عميلنا العزيز").replace(/{end}/g, user.end || "غير محدد").replace(/{service}/g, user.serviceType || "الخدمة الخاصة بك");
   let cleanPhone = ((user.countryCode||'')+user.phone).replace(/[^0-9+]/g, '');
-  
   logAction("رسالة واتساب جماعية", `أُرسلت إلى: ${user.name}`);
   window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
-  
-  // تحديث الواجهة لتجهيز العميل التالي
   window.updateBulkWaUI();
 };
-// ==========================================
 
 window.openRowActions = (id) => { 
   currentRowId = id; 
   const rec = data.find(x => x.id === id); 
   $("rowActionsHint").textContent = rec.name; 
-  
   const hasNotes = rec.notes && rec.notes.trim() !== "";
   const btnNotes = $("btnViewNotes");
-  if(hasNotes) {
-    btnNotes.disabled = false;
-    btnNotes.style.opacity = "1";
-    btnNotes.onclick = window.openNotesAction;
-  } else {
-    btnNotes.disabled = true;
-    btnNotes.style.opacity = "0.4";
-    btnNotes.onclick = null;
-  }
-  
+  if(hasNotes) { btnNotes.disabled = false; btnNotes.style.opacity = "1"; btnNotes.onclick = window.openNotesAction; } 
+  else { btnNotes.disabled = true; btnNotes.style.opacity = "0.4"; btnNotes.onclick = null; }
   openModal("rowActionsModal"); 
 };
-
 window.openNotesAction = () => {
-  const rec = data.find(x => x.id === currentRowId);
-  if(!rec || !rec.notes) return;
-  closeModal("rowActionsModal");
-  $("viewNotesContent").textContent = rec.notes;
-  openModal("viewNotesModal");
+  const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.notes) return;
+  closeModal("rowActionsModal"); $("viewNotesContent").textContent = rec.notes; openModal("viewNotesModal");
 };
 
 window.actExtendAction = () => { extendMode = "single"; const rec = data.find(x => x.id === currentRowId); $("extendTitle").textContent = `تجديد لـ ${rec.name}`; $("extendValue").value = 1; $("extendUnit").value = "months"; closeModal("rowActionsModal"); openModal("extendModal"); };
@@ -638,6 +652,70 @@ window.actDeleteAction = async () => { if(confirm("حذف؟")) { const recToDele
 window.calcDebt = () => { const p = parseFloat($("price").value) || 0; let valRaw = $("paidAmount").value; let a = valRaw === "" ? p : (parseFloat(valRaw) || 0); let d = p - a; $("debtAmount").value = d > 0 ? d : 0; };
 window.handleQuickPlan = () => { if($("quickPlan").value) $("months").value = $("quickPlan").value; };
 
+// ==========================================
+// 3. دوال إدارة الباقات الجاهزة (Packages)
+// ==========================================
+async function firebasePushPackages() { if(!navigator.onLine) return; try { await db.ref("packages").set(packagesData); } catch(e) {} }
+
+window.renderPackages = () => {
+  const tb = $("packagesTbody"); tb.innerHTML = "";
+  const sel = $("packageSelector"); 
+  sel.innerHTML = '<option value="">— تخصيص يدوي —</option>';
+  
+  if(packagesData.length === 0) {
+    tb.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--muted);">لا توجد باقات جاهزة حالياً. قم بإضافة باقة لتسهيل عملك.</td></tr>`;
+    return;
+  }
+  
+  packagesData.forEach(p => {
+    tb.innerHTML += `<tr><td style="font-weight:bold; color:var(--accent);">${p.name}</td><td>${p.serviceType}</td><td>${p.months} شهر</td><td style="font-weight:bold;">${p.price}</td><td><button class="btn danger" style="padding:6px 10px; font-size:12px; border-radius:10px;" onclick="deletePackage('${p.id}')">حذف</button></td></tr>`;
+    sel.innerHTML += `<option value="${p.id}">${p.name} (${p.price})</option>`;
+  });
+};
+
+window.savePackage = async () => {
+  const name = $("pkgName").value.trim();
+  const serviceType = $("pkgService").value.trim();
+  const months = parseInt($("pkgMonths").value);
+  const price = parseFloat($("pkgPrice").value) || 0;
+  
+  if(!name || !serviceType || isNaN(months)) return showToast("الرجاء إدخال اسم الباقة، الخدمة، والمدة!", "err");
+  
+  const pkg = { id: Date.now().toString(), name, serviceType, months, price };
+  packagesData.push(pkg);
+  setSyncState("saving");
+  await firebasePushPackages();
+  window.renderPackages();
+  $("pkgName").value = ""; $("pkgService").value = ""; $("pkgMonths").value = ""; $("pkgPrice").value = "";
+  setSyncState("ok");
+  showToast("تمت إضافة الباقة الجاهزة بنجاح 📦");
+};
+
+window.deletePackage = async (id) => {
+  if(!confirm("هل أنت متأكد من حذف هذه الباقة؟ (لن يؤثر ذلك على المشتركين الحاليين)")) return;
+  packagesData = packagesData.filter(x => x.id !== id);
+  setSyncState("saving");
+  await firebasePushPackages();
+  window.renderPackages();
+  setSyncState("ok");
+  showToast("تم حذف الباقة 🗑️");
+};
+
+window.applyPackage = () => {
+  const pid = $("packageSelector").value;
+  if(!pid) return; // العودة للتخصيص اليدوي
+  const p = packagesData.find(x => x.id === pid);
+  if(p) {
+    $("serviceType").value = p.serviceType;
+    $("months").value = p.months;
+    $("price").value = p.price;
+    // تصفير سريع للحقول الأخرى لتجنب التداخل
+    $("quickPlan").value = "";
+    window.calcDebt();
+  }
+};
+// ==========================================
+
 window.openAddSub = () => { 
   editingId=null; 
   $("formTitle").textContent="إضافة اشتراك"; 
@@ -645,6 +723,7 @@ window.openAddSub = () => {
   $("countryCode").value="+213"; $("serviceType").value=""; $("quickPlan").value=""; 
   $("months").value=""; $("price").value=""; $("start").value=todayISO(); 
   $("paidAmount").value = ""; $("notes").value = ""; 
+  $("packageSelector").value = ""; // تصفير محدد الباقات
   window.calcDebt(); 
   openModal("formModal"); 
 };
@@ -659,6 +738,7 @@ window.actEditAction = () => {
   $("price").value = rec.price||""; $("currency").value = rec.currency||"DZD"; 
   $("start").value = rec.start; $("alertDays").value = rec.alertDays||"7"; 
   $("notes").value = rec.notes || ""; 
+  $("packageSelector").value = ""; // تصفير الباقات عند التعديل
   if(rec.paymentStatus === 'unpaid') $("paidAmount").value = 0; else if(rec.paymentStatus === 'partial') $("paidAmount").value = rec.paidAmount || 0; else $("paidAmount").value = ""; 
   window.calcDebt(); openModal("formModal"); 
 };
@@ -668,7 +748,7 @@ window.saveSubscription = async () => {
   if(!$("name").value.trim() || !emailVal || !serviceVal || !start || isNaN(months)) { return showToast("الرجاء إدخال البيانات الإجبارية", "err"); }
   const priceInput = $("price").value; const priceFloat = parseFloat(priceInput) || 0; const paidInput = $("paidAmount").value; const paidFloat = paidInput === "" ? priceFloat : (parseFloat(paidInput) || 0);
   let pStatus = 'paid'; if(paidFloat === 0 && priceFloat > 0) pStatus = 'unpaid'; else if(paidFloat < priceFloat) pStatus = 'partial';
-  const actionName = editingId ? "تعديل اشتراك" : "إضافة اشتراك"; logAction(actionName, `الاسم: ${$("name").value} - الدفع: ${pStatus === 'paid' ? 'خالص' : 'دين'}`); 
+  const actionName = editingId ? "تعديل اشتراك" : "إضافة اشتراك"; logAction(actionName, `الاسم: ${$("name").value} - الخدمة: ${serviceVal}`); 
   const endD = new Date(start); endD.setMonth(endD.getMonth() + months); const alertEl = $("alertDays");
   const notesVal = $("notes").value; 
   const rec = { 
@@ -698,7 +778,7 @@ window.printSmartReceipt = () => { window.print(); };
 window.sendWhatsAppReceipt = () => {
   const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.phone) return showToast("العميل لا يملك رقم هاتف", "warn");
   let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, ''); let sName = storeSettings.name || "متجر الاشتراكات"; let pText = rec.paymentStatus === 'unpaid' ? '🔴 غير مدفوع' : (rec.paymentStatus === 'partial' ? '🟡 دفع جزئي' : '🟢 خالص');
-  let msg = `🧾 *فاتورة اشتراك إلكترونية* 🧾\n\n🏢 المتجر: *${sName}*\n👤 العميل: ${rec.name||'-'}\n📦 الخدمة: ${rec.serviceType||'غير محدد'}\n⏳ المدة: ${rec.months||0} شهر\n📅 البداية: ${rec.start||'-'}\n🏁 الانتهاء: ${rec.end||'-'}\n\n💰 *السعر الإجمالي:* ${parseFloat(rec.price||0).toLocaleString()} ${rec.currency||'DZD'}\n💳 *حالة الدفع:* ${pText}\n`;
+  let msg = `🧾 *فاتورة اشتراك إلكترونية* 🧾\n\n🏢 المؤسسة: *${sName}*\n👤 العميل: ${rec.name||'-'}\n📦 الخدمة: ${rec.serviceType||'غير محدد'}\n⏳ المدة: ${rec.months||0} شهر\n📅 البداية: ${rec.start||'-'}\n🏁 الانتهاء: ${rec.end||'-'}\n\n💰 *السعر الإجمالي:* ${parseFloat(rec.price||0).toLocaleString()} ${rec.currency||'DZD'}\n💳 *حالة الدفع:* ${pText}\n`;
   if(rec.paymentStatus === 'partial') { msg += `💸 *المبلغ المدفوع:* ${parseFloat(rec.paidAmount||0).toLocaleString()} ${rec.currency||'DZD'}\n`; }
   if(rec.paymentStatus === 'partial' || rec.paymentStatus === 'unpaid'){ let total = parseFloat(rec.price)||0; let paid = rec.paymentStatus === 'unpaid' ? 0 : parseFloat(rec.paidAmount)||0; msg += `❗ *المتبقي (دين):* ${(total - paid).toLocaleString()} ${rec.currency||'DZD'}\n`; }
   msg += `\n🤍 نشكركم على ثقتكم بنا!`; window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
