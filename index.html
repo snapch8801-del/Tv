@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>لوحة تسيير الاشتراكات - v12.9.8</title>
+<title>لوحة تسيير الاشتراكات - v12.9.9</title>
 
 <meta name="theme-color" content="#070a12" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -153,6 +153,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 .menu-section-title { font-size: 12px; color: var(--accent); font-weight: bold; margin: 25px 0 10px; padding-inline-start: 5px; }
 .side-menu .actBtn { margin-bottom: 8px; font-size: 13px; padding: 12px 14px; }
 
+/* الفاتورة المرنة - حل جذري لمشكلة اختفاء البيانات في الهاتف */
 .flex-row-receipt { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #cbd5e1; }
 .flex-row-receipt span.label { color: #64748b; }
 .flex-row-receipt strong.val, .flex-row-receipt span.val { color: #0f172a; text-align: left; }
@@ -166,8 +167,8 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.8 PWA</span></h1>
-    <div class="sub">⚡ النسخة المالية: نظام دقيق لتتبع الدفعات وسداد الديون.</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.9 PWA</span></h1>
+    <div class="sub">⚡ النسخة الذهبية المستقرة: إصلاح توافق الهواتف وسجلات الفواتير.</div>
   </div>
 
   <div class="card">
@@ -224,16 +225,23 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
     <button class="btn danger btn-close" onclick="closeSideMenu()" style="padding: 6px 12px;">✕</button>
   </div>
   <div style="flex:1; overflow-y:auto; padding-right: 5px;">
+    
+    <div class="menu-section-title">إصلاح وحل المشاكل</div>
+    <button class="actBtn" style="color:#60a5fa; border-color:rgba(96,165,250,0.4); background:rgba(96,165,250,0.1);" onclick="window.location.reload(true)">🔄 تفريغ الذاكرة وتحديث الصفحة</button>
+
     <div class="menu-section-title">إدارة النظام</div>
     <button class="actBtn" onclick="closeSideMenu(); openModal('authModal')" style="border-color:var(--accent); color:var(--accent); background: rgba(124,92,255,0.1);">👤 إدارة الحسابات والصلاحيات</button>
+    
     <div class="menu-section-title">البيانات والحماية</div>
     <button class="actBtn" style="color:#10b981; border-color:rgba(16,185,129,0.4); background:rgba(16,185,129,0.1);" onclick="closeSideMenu(); window.exportCSV()">📥 تحميل كملف Excel</button>
     <button class="actBtn" onclick="closeSideMenu(); openModal('backupModal')">📦 حفظ واسترجاع البيانات</button>
     <button class="actBtn" onclick="closeSideMenu(); openModal('syncModal')">☁️ المزامنة السحابية</button>
+    
     <div class="menu-section-title">أدوات إضافية</div>
     <button class="actBtn" style="color:#f59e0b; border-color:rgba(245,158,11,0.4); background:rgba(245,158,11,0.1);" onclick="closeSideMenu(); window.undoDelete()">↩️ التراجع عن آخر حذف</button>
     <button class="actBtn" onclick="closeSideMenu(); window.shareApp()">📤 مشاركة رابط اللوحة</button>
     <button class="actBtn" onclick="closeSideMenu(); window.print()">🖨️ طباعة الجدول</button>
+    
     <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(239,68,68,0.2);">
       <button class="actBtn danger" onclick="closeSideMenu(); window.clearAllData()" style="text-align: center;">⚠️ تصفير اللوحة بالكامل</button>
     </div>
@@ -405,9 +413,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
       
       <div id="receiptPaymentLogSection" style="display:none; margin-top: 15px; border-top: 1px dashed #cbd5e1; padding-top: 15px;">
          <div style="font-size: 12px; color: #64748b; margin-bottom: 8px; font-weight: bold;">سجل الدفعات بالتفصيل:</div>
-         <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
-           <tbody id="receiptPaymentLogTbody"></tbody>
-         </table>
+         <div id="receiptPaymentLogList"></div>
       </div>
 
       <div style="text-align: center; margin-top: 35px; font-size: 12px; color: #94a3b8; line-height: 1.6;">نشكركم على ثقتكم بنا 🤍<br><span style="font-size: 10px;">تم الإصدار بتاريخ <span id="recToday"></span></span></div>
@@ -475,8 +481,8 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 
       <div style="font-size:12px; color:var(--accent); margin-bottom:8px; font-weight:bold;">سجل الدفعات السابقة:</div>
       <div style="max-height: 200px; overflow: auto; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
-        <table style="width: 100%; font-size: 13px;">
-          <thead style="background: rgba(255,255,255,0.05);"><tr><th style="padding: 10px; text-align: right;">التاريخ</th><th style="padding: 10px; text-align: left;">المبلغ المسدد</th></tr></thead>
+        <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
+          <thead style="background: rgba(255,255,255,0.05);"><tr><th style="padding: 10px; text-align: right; color: var(--muted);">التاريخ والوقت</th><th style="padding: 10px; text-align: left; color: var(--muted);">المبلغ الذي تم دفعه</th></tr></thead>
           <tbody id="paymentTbody"></tbody>
         </table>
       </div>
@@ -507,7 +513,6 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
     </div>
     
     <div class="modalBody" style="padding: 20px;">
-      
       <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
         <button class="btn primary" style="padding: 14px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(124,92,255,0.2);" onclick="window.actExtendAction()">
           🔁 تجديد الاشتراك (رصيد / مدة)
@@ -529,6 +534,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
       <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; padding-top: 15px; border-top: 1px dashed rgba(255,255,255,0.1);">
         <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px;" onclick="window.actEditAction()">✏️ تعديل</button>
         <button class="btn soft" id="btnViewNotes" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #a855f7; border-color: rgba(168,85,247,.3);" onclick="window.openNotesAction()">📝 الملاحظات</button>
+        <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px;" onclick="window.actCopyEmailAction()">📋 نسخ Email</button>
         <button class="btn soft" id="btnViewAttendance" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #10b981; border-color: rgba(16,185,129,.3);" onclick="window.openAttendanceLog()">📅 سجل الحضور</button>
         <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #fbbf24; border-color: rgba(251,191,36,.3);" onclick="window.openPaymentModal()">💸 الدفعات والديون</button>
       </div>
@@ -538,7 +544,6 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
           🗑️ حذف المشترك نهائياً
         </button>
       </div>
-
     </div>
   </div>
 </div>
@@ -650,7 +655,7 @@ window.addEventListener('DOMContentLoaded', () => {
 })();
 
 const FIREBASE_CONFIG = { apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ", authDomain: "dattta-6f497.firebaseapp.com", databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com", projectId: "dattta-6f497", storageBucket: "dattta-6f497.firebasestorage.app", messagingSenderId: "804914291938", appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb" };
-const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.8"; 
+const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.9"; 
 const $ = (id)=>document.getElementById(id); 
 const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
 
@@ -787,52 +792,58 @@ window.render = () => {
       const startIdx = (window.currentPage - 1) * window.itemsPerPage;
       const paginatedRows = filteredRows.slice(startIdx, startIdx + window.itemsPerPage);
 
-      if(filteredRows.length === 0) { tb.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:40px; color:var(--muted); font-size:15px;">لا توجد بيانات 📭</td></tr>`; $("paginationControls").innerHTML = ""; return; }
+      if(filteredRows.length === 0) { 
+        tb.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:40px; color:var(--muted); font-size:15px;">لا توجد بيانات 📭</td></tr>`; 
+        $("paginationControls").innerHTML = ""; 
+        return; 
+      }
 
       paginatedRows.forEach(r => {
-        const st = getStatus(r, alertD); const isChecked = selectedIds.has(r.id) ? "checked" : ""; const tr = document.createElement("tr");
-        if(st.key === "expired") tr.className = "expired-row"; else if(st.key === "expiring") tr.className = "expiring-row";
-        
-        let pStatus = r.paymentStatus || 'paid'; let payBadge = '';
-        if(pStatus === 'unpaid') payBadge = '<span class="badge err" style="padding:4px 6px; font-size:10px;">🔴 غير مدفوع</span>';
-        else if(pStatus === 'partial') { let rem = (parseFloat(r.price)||0) - (parseFloat(r.paidAmount)||0); payBadge = `<span class="badge warn" style="padding:4px 6px; font-size:10px;" title="المتبقي: ${rem}">🟡 جزئي (${r.paidAmount||0})</span>`; }
-        else payBadge = '<span class="badge ok" style="padding:4px 6px; font-size:10px;">🟢 خالص</span>';
-        
-        const hasNotes = r.notes && r.notes.trim() !== "";
-        const notesIcon = hasNotes ? `<span title="ملاحظات سرية" style="font-size:12px; margin-inline-start:6px; cursor:help;">📝</span>` : "";
-        
-        let tagsHtml = "";
-        if(r.tags && r.tags.trim() !== "") {
-          const tagsArray = r.tags.split(',').map(t => t.trim()).filter(t => t !== "");
-          tagsArray.forEach(t => { tagsHtml += `<span class="tag-pill">${t}</span>`; });
-        }
+        try {
+            const st = getStatus(r, alertD); const isChecked = selectedIds.has(r.id) ? "checked" : ""; const tr = document.createElement("tr");
+            if(st.key === "expired") tr.className = "expired-row"; else if(st.key === "expiring") tr.className = "expiring-row";
+            
+            let pStatus = r.paymentStatus || 'paid'; let payBadge = '';
+            if(pStatus === 'unpaid') payBadge = '<span class="badge err" style="padding:4px 6px; font-size:10px;">🔴 غير مدفوع</span>';
+            else if(pStatus === 'partial') { let rem = (parseFloat(r.price)||0) - (parseFloat(r.paidAmount)||0); payBadge = `<span class="badge warn" style="padding:4px 6px; font-size:10px;" title="المتبقي: ${rem}">🟡 جزئي (${r.paidAmount||0})</span>`; }
+            else payBadge = '<span class="badge ok" style="padding:4px 6px; font-size:10px;">🟢 خالص</span>';
+            
+            const hasNotes = r.notes && r.notes.trim() !== "";
+            const notesIcon = hasNotes ? `<span title="ملاحظات سرية" style="font-size:12px; margin-inline-start:6px; cursor:help;">📝</span>` : "";
+            
+            let tagsHtml = "";
+            if(r.tags && r.tags.trim() !== "") {
+              const tagsArray = r.tags.split(',').map(t => t.trim()).filter(t => t !== "");
+              tagsArray.forEach(t => { tagsHtml += `<span class="tag-pill">${t}</span>`; });
+            }
 
-        const serviceHtml = `<span class="service-badge">${r.serviceType || "غير محدد"}</span>`;
-        
-        let dateOrSessionHtml = "";
-        if(r.subType === 'sessions') {
-          dateOrSessionHtml = `<div style="font-weight:bold; font-size:14px; color:var(--text);">${r.sessionsLeft||0} / ${r.sessionsTotal||0} حصة</div>
-          <button class="btn soft" style="padding:4px 8px; font-size:10px; margin-top:4px; border-color:#22c55e; color:#22c55e;" onclick="window.markAttendance('${r.id}')">✔️ حضور</button>`;
-        } else {
-          dateOrSessionHtml = `<span style="color:var(--text)">م:</span> ${r.start||"-"}<br><span style="color:var(--text)">إ:</span> ${r.end||"-"}
-          <div style="margin-top:4px;"><button class="btn soft" style="padding:4px 8px; font-size:10px; border-color:#22c55e; color:#22c55e;" onclick="window.markAttendance('${r.id}')">✔️ تسجيل دخول</button></div>`;
-        }
+            const serviceHtml = `<span class="service-badge">${r.serviceType || "غير محدد"}</span>`;
+            
+            let dateOrSessionHtml = "";
+            if(r.subType === 'sessions') {
+              dateOrSessionHtml = `<div style="font-weight:bold; font-size:14px; color:var(--text);">${r.sessionsLeft||0} / ${r.sessionsTotal||0} حصة</div>
+              <button class="btn soft" style="padding:4px 8px; font-size:10px; margin-top:4px; border-color:#22c55e; color:#22c55e;" onclick="window.markAttendance('${r.id}')">✔️ حضور</button>`;
+            } else {
+              dateOrSessionHtml = `<span style="color:var(--text)">م:</span> ${r.start||"-"}<br><span style="color:var(--text)">إ:</span> ${r.end||"-"}
+              <div style="margin-top:4px;"><button class="btn soft" style="padding:4px 8px; font-size:10px; border-color:#22c55e; color:#22c55e;" onclick="window.markAttendance('${r.id}')">✔️ تسجيل دخول</button></div>`;
+            }
 
-        tr.innerHTML = `
-          <td style="text-align: center;"><input type="checkbox" class="rowChk" value="${r.id}" ${isChecked}></td>
-          <td>
-             <div style="font-weight:bold; color:var(--text); font-size:14px;">${r.name||"-"}${notesIcon}</div>
-             ${r.email ? `<div style="font-size:11px; color:var(--muted); margin-bottom:2px; direction: ltr; text-align: right;">${r.email}</div>` : ''}
-             <div>${tagsHtml}</div>
-          </td>
-          <td dir="ltr" style="text-align:right; font-size:14px;">${r.phone?`${r.countryCode||''} ${r.phone}`:'-'}</td>
-          <td><div style="margin-bottom:4px;">${serviceHtml}</div><div style="font-size:11px; color:var(--muted); font-weight:bold;">${r.subType === 'sessions' ? 'نظام حصص' : `المدة: ${r.months||0} شهر`}</div></td>
-          <td><div style="font-weight:bold; font-size:14px;">${r.price||0} <span style="font-size:10px; color:var(--muted);">${r.currency||'DZD'}</span></div><div style="margin-top:4px;">${payBadge}</div></td>
-          <td style="font-size:12px; color:var(--muted); line-height:1.6;">${dateOrSessionHtml}</td>
-          <td><div style="margin-bottom:4px;"><span class="badge ${st.cls}">${st.label}</span></div><div style="font-size:11px; font-weight:bold; color:${st.key === 'expired' ? 'var(--err)' : 'var(--text)'};">${st.text}</div></td>
-          <td><button class="actionPill" onclick="window.openRowActions('${r.id}')">⚡ إجراء</button></td>
-        `;
-        tb.appendChild(tr);
+            tr.innerHTML = `
+              <td style="text-align: center;"><input type="checkbox" class="rowChk" value="${r.id}" ${isChecked}></td>
+              <td>
+                 <div style="font-weight:bold; color:var(--text); font-size:14px;">${r.name||"-"}${notesIcon}</div>
+                 ${r.email ? `<div style="font-size:11px; color:var(--muted); margin-bottom:4px;">${r.email}</div>` : ''}
+                 <div>${tagsHtml}</div>
+              </td>
+              <td dir="ltr" style="text-align:right; font-size:14px;">${r.phone?`${r.countryCode||''} ${r.phone}`:'-'}</td>
+              <td><div style="margin-bottom:4px;">${serviceHtml}</div><div style="font-size:11px; color:var(--muted); font-weight:bold;">${r.subType === 'sessions' ? 'نظام حصص' : `المدة: ${r.months||0} شهر`}</div></td>
+              <td><div style="font-weight:bold; font-size:14px;">${r.price||0} <span style="font-size:10px; color:var(--muted);">${r.currency||'DZD'}</span></div><div style="margin-top:4px;">${payBadge}</div></td>
+              <td style="font-size:12px; color:var(--muted); line-height:1.6;">${dateOrSessionHtml}</td>
+              <td><div style="margin-bottom:4px;"><span class="badge ${st.cls}">${st.label}</span></div><div style="font-size:11px; font-weight:bold; color:${st.key === 'expired' ? 'var(--err)' : 'var(--text)'};">${st.text}</div></td>
+              <td><button class="actionPill" onclick="window.openRowActions('${r.id}')">⚡ إجراء</button></td>
+            `;
+            tb.appendChild(tr);
+        } catch(rowErr) { console.error("Error rendering row:", rowErr); }
       });
 
       $("paginationControls").innerHTML = `
@@ -889,13 +900,13 @@ window.openPaymentModal = () => {
   const tb = $("paymentTbody"); tb.innerHTML = "";
   
   if(!rec.paymentLog || rec.paymentLog.length === 0) {
-    if(paid > 0) { tb.innerHTML = `<tr><td style="padding: 10px; color: var(--muted);">دفعات سابقة (غير مفصلة)</td><td style="padding: 10px; text-align: left; color: #10b981; font-weight: bold;">${paid.toLocaleString()} ${rec.currency||'DZD'}</td></tr>`; } 
+    if(paid > 0) { tb.innerHTML = `<tr><td style="padding: 10px; color: var(--muted);">دفعات سابقة (غير مفصلة)</td><td style="padding: 10px; text-align: left; color: #10b981; font-weight: bold; font-size:15px;">${paid.toLocaleString()} ${rec.currency||'DZD'}</td></tr>`; } 
     else { tb.innerHTML = `<tr><td colspan="2" style="text-align:center; padding:15px; color:var(--muted);">لا يوجد سجل دفعات.</td></tr>`; }
   } else {
     const sortedLogs = [...rec.paymentLog].reverse();
     sortedLogs.forEach((log) => {
       const d = new Date(log.time); const dateStr = d.toLocaleDateString('en-GB') + " " + d.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'}); 
-      tb.innerHTML += `<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);"><td style="padding: 10px; color: var(--text);">${dateStr}</td><td style="padding: 10px; text-align: left; color: #10b981; font-weight: bold;">${parseFloat(log.amount).toLocaleString()} ${rec.currency||'DZD'}</td></tr>`;
+      tb.innerHTML += `<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);"><td style="padding: 10px; color: #eaf0ff; font-weight:bold;">${dateStr}</td><td style="padding: 10px; text-align: left; color: #10b981; font-weight: bold; font-size:15px;">${parseFloat(log.amount).toLocaleString()} ${rec.currency||'DZD'}</td></tr>`;
     });
   } openModal("paymentModal");
 };
@@ -1021,9 +1032,8 @@ window.saveSubscription = async () => {
   if(editingId) {
     const oldRec = data.find(x => x.id === editingId);
     if(oldRec && oldRec.attendanceLog) rec.attendanceLog = oldRec.attendanceLog;
-    if(oldRec && oldRec.paymentLog) rec.paymentLog = oldRec.paymentLog; // الحفاظ على سجل الدفعات عند التعديل
+    if(oldRec && oldRec.paymentLog) rec.paymentLog = oldRec.paymentLog;
   } else {
-    // إنشاء سجل دفعة أولى إذا لم يكن تعديلاً وكان هناك مبلغ مدفوع
     if(paidFloat > 0) { rec.paymentLog = [{ time: new Date().toISOString(), amount: paidFloat, note: "دفعة مبدئية" }]; }
   }
 
@@ -1047,13 +1057,16 @@ window.openReceiptAction = () => {
   if(pStatus === 'partial') { $("recPaidAmountRow").style.display = "flex"; $("recPaidAmount").textContent = `${parseFloat(rec.paidAmount || 0).toLocaleString()} ${rec.currency || 'DZD'}`; } else { $("recPaidAmountRow").style.display = "none"; }
   if(pStatus === 'partial' || pStatus === 'unpaid') { $("recRemainingRow").style.display = "flex"; let total = parseFloat(rec.price) || 0; let paid = pStatus === 'unpaid' ? 0 : (parseFloat(rec.paidAmount) || 0); let rem = total - paid; $("recRemaining").textContent = `${rem.toLocaleString()} ${rec.currency || 'DZD'}`; } else { $("recRemainingRow").style.display = "none"; }
   
-  // عرض سجل الدفعات في الفاتورة
-  const pTbody = $("receiptPaymentLogTbody"); pTbody.innerHTML = "";
+  // سجل الدفعات داخل الفاتورة محول بالكامل إلى DIVs لمنع مشكلة الجداول
+  const pList = $("receiptPaymentLogList"); pList.innerHTML = "";
   if(rec.paymentLog && rec.paymentLog.length > 0) {
       $("receiptPaymentLogSection").style.display = "block";
       rec.paymentLog.forEach(log => {
-          const logD = new Date(log.time); const logDStr = logD.toLocaleDateString('en-GB');
-          pTbody.innerHTML += `<tr><td style="padding:4px 0; color:#64748b;">${logDStr}</td><td style="padding:4px 0; text-align:left; color:#10b981; font-weight:bold;">${parseFloat(log.amount).toLocaleString()} ${rec.currency||'DZD'}</td></tr>`;
+          const logD = new Date(log.time); const logDStr = logD.toLocaleDateString('en-GB') + " " + logD.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'});
+          pList.innerHTML += `<div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f1f5f9;">
+              <span style="color:#64748b; font-size: 13px;">${logDStr}</span>
+              <strong style="color:#10b981; font-size: 14px;">${parseFloat(log.amount).toLocaleString()} ${rec.currency||'DZD'}</strong>
+          </div>`;
       });
   } else { $("receiptPaymentLogSection").style.display = "none"; }
 
