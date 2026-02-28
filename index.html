@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>لوحة تسيير الاشتراكات - v12.3</title>
+<title>لوحة تسيير الاشتراكات - v12.4</title>
 
 <meta name="theme-color" content="#070a12" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -57,7 +57,7 @@ input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:foc
 .filterBtn{ padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line); background: rgba(0,0,0,.18); color: var(--muted); font-size: 13px; font-weight: 800; cursor: pointer; }
 .filterBtn.active{ background: var(--text); color: var(--bg0); border-color: var(--text); }
 
-.bulkBar{ display: none; align-items: center; gap: 10px; padding: 12px 14px; background: rgba(124,92,255,.15); border-bottom: 1px solid rgba(124,92,255,.3); }
+.bulkBar{ display: none; align-items: center; gap: 10px; padding: 12px 14px; background: rgba(124,92,255,.15); border-bottom: 1px solid rgba(124,92,255,.3); flex-wrap: wrap; }
 .bulkBar .selCount{ font-weight: 900; color: #fff; background: var(--accent); padding: 4px 10px; border-radius: 99px; font-size: 12px; }
 
 .statChip{ display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:999px; border:1px solid var(--line); background: rgba(0,0,0,.18); font-size:12px; font-weight:900; color: var(--text); margin-inline-start: auto; }
@@ -142,8 +142,8 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.3 PWA</span></h1>
-    <div class="sub">⚡ الميزات الجديدة: الملاحظات السرية + تقسيم الصفحات + تطبيق الهاتف</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.4 PWA</span></h1>
+    <div class="sub">⚡ الميزات الجديدة: رسائل واتساب جماعية 💬 + ملاحظات سرية + تقسيم صفحات</div>
   </div>
 
   <div class="card">
@@ -165,6 +165,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 
     <div class="bulkBar" id="bulkBar">
       <div class="selCount" id="selCount">0 محدد</div>
+      <button class="btn" style="border-color:#10b981; color:#10b981; background: rgba(16,185,129,0.1);" onclick="openBulkWhatsAppModal()">💬 رسائل جماعية</button>
       <button class="btn" style="border-color:var(--accent); color:var(--accent);" onclick="bulkExtendAction()">🔁 تجديد</button>
       <button class="btn danger" onclick="bulkDeleteAction()">🗑️ حذف</button>
       <button class="btn soft" style="margin-inline-start:auto;" onclick="clearSelectionAction()">إلغاء التحديد</button>
@@ -309,6 +310,34 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
   </div>
 </div>
 
+<div class="modal" id="bulkWhatsAppModal" aria-hidden="true">
+  <div class="box" style="width: 450px">
+    <div class="modalHeader">
+      <h2>💬 رسائل واتساب الجماعية</h2>
+      <button class="btn danger btn-close" type="button" onclick="closeModal('bulkWhatsAppModal')">✕ إغلاق</button>
+    </div>
+    <div class="modalBody">
+      <div style="margin-bottom:15px; background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.3); padding:12px; border-radius:12px; color:#c8f7d9; font-size:13px; line-height:1.5;">
+        سيتم عرض المشتركين واحداً تلو الآخر لتتمكن من إرسال الرسائل بشكل آمن وتجنب حظر المتصفح للنوافذ المنبثقة.
+        <div style="margin-top:8px; border-top:1px dashed rgba(34,197,94,0.3); padding-top:8px;">
+          <b>عدد المستلمين:</b> <span id="bulkWaCount" style="font-weight:bold; font-size:16px;">0</span> مشترك (يملكون أرقام)
+        </div>
+      </div>
+      <div class="field" style="margin-bottom:15px">
+        <label>نص الرسالة (تتغير تلقائياً لكل عميل)</label>
+        <div style="font-size:11px; color:var(--muted); margin-bottom:8px; direction:ltr; text-align:right;">
+          المتغيرات المتاحة: <code style="background:rgba(255,255,255,0.1); padding:2px 4px; border-radius:4px;">{name}</code> , <code style="background:rgba(255,255,255,0.1); padding:2px 4px; border-radius:4px;">{end}</code> , <code style="background:rgba(255,255,255,0.1); padding:2px 4px; border-radius:4px;">{service}</code>
+        </div>
+        <textarea id="bulkWaMsg" rows="4">مرحباً {name}، نود تذكيرك بانتهاء اشتراكك في باقة {service} بتاريخ {end}. يرجى التجديد لتفادي انقطاع الخدمة.</textarea>
+      </div>
+      <div style="text-align:center; padding:15px 0; background:rgba(0,0,0,0.2); border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
+        <div id="bulkWaCurrentTarget" style="font-weight:bold; font-size:15px; margin-bottom:12px; color:var(--text);">العميل التالي: -</div>
+        <button class="btn primary" id="btnSendNextWa" style="width:90%; padding:14px; font-size:15px; background:#22c55e; border-color:#16a34a; box-shadow: 0 8px 25px rgba(34,197,94,0.2);" onclick="sendNextBulkWhatsApp()">إرسال الرسالة 🚀</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal" id="authModal" aria-hidden="true">
   <div class="box" style="width: 420px; padding:0;">
     <div class="modalHeader" style="border-bottom:none; padding-bottom:0;"><button class="btn danger btn-close" type="button" id="closeAuthBtn" onclick="closeModal('authModal')" style="display:none; margin-inline-start:auto;">✕ إغلاق</button></div>
@@ -397,7 +426,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 // ==========================================
 const FIREBASE_CONFIG = { apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ", authDomain: "dattta-6f497.firebaseapp.com", databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com", projectId: "dattta-6f497", storageBucket: "dattta-6f497.firebasestorage.app", messagingSenderId: "804914291938", appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb" };
 
-const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.3";
+const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.4";
 const $ = (id)=>document.getElementById(id);
 const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
 
@@ -407,6 +436,9 @@ let currentUser = null; let currentRole = null;
 let lastDeletedData = null; 
 let storeSettings = { name: "متجر الاشتراكات", logo: "" };
 window.currentPage = 1; window.itemsPerPage = 50;
+
+// متغيرات الرسائل الجماعية عبر الواتساب
+let bulkWaQueue = [];
 
 if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
 const auth = firebase.auth(); const db = firebase.database();
@@ -485,7 +517,6 @@ window.render = () => {
     else if(pStatus === 'partial') { let rem = (parseFloat(r.price)||0) - (parseFloat(r.paidAmount)||0); payBadge = `<span class="badge warn" style="padding:4px 6px; font-size:10px;" title="المتبقي: ${rem}">🟡 جزئي (${r.paidAmount||0})</span>`; }
     else payBadge = '<span class="badge ok" style="padding:4px 6px; font-size:10px;">🟢 خالص</span>';
     
-    // إظهار أيقونة الملاحظة إذا كانت موجودة
     const hasNotes = r.notes && r.notes.trim() !== "";
     const notesIcon = hasNotes ? `<span title="يحتوي على ملاحظات" style="font-size:12px; margin-inline-start:6px; cursor:help;">📝</span>` : "";
     const serviceHtml = `<span class="service-badge">${r.serviceType || "غير محدد"}</span>`;
@@ -518,12 +549,64 @@ window.bulkDeleteAction = async () => { if(!confirm(`تأكيد حذف ${selecte
 window.bulkExtendAction = () => { extendMode = "bulk"; $("extendTitle").textContent = `تجديد ${selectedIds.size} مشترك`; $("extendValue").value = 1; $("extendUnit").value = "months"; openModal("extendModal"); };
 window.confirmExtend = async () => { const val = parseInt($("extendValue").value); const unit = $("extendUnit").value; if(isNaN(val) || val < 1) return showToast("غير صالح", "err"); if(extendMode === "bulk") { logAction("تجديد جماعي", `عدد ${selectedIds.size} اشتراكات بمقدار ${val} ${unit}`); } else { const recToExtend = data.find(x => x.id === currentRowId); logAction("تجديد اشتراك", `الاسم: ${recToExtend.name}، المدة المضافة: ${val} ${unit}`); } const processRecord = (rec) => { const endD = new Date(rec.end); if(unit === "months") { endD.setMonth(endD.getMonth() + val); rec.months = (parseInt(rec.months)||0) + val; } else { endD.setDate(endD.getDate() + val); } rec.end = endD.toISOString().split('T')[0]; return rec; }; if(extendMode === "bulk") { data = data.map(x => selectedIds.has(x.id) ? processRecord(x) : x); selectedIds.clear(); window.updateBulkUI(); } else { data = data.map(x => x.id === currentRowId ? processRecord(x) : x); } await firebasePush(); window.render(); closeModal("extendModal"); showToast("تم التجديد 🔁"); };
 
+// ==========================================
+// 3. دوال رسائل الواتساب الجماعية الذكية
+// ==========================================
+window.openBulkWhatsAppModal = () => {
+  // تصفية المشتركين المحددين ليحتفظ فقط بمن لديهم رقم هاتف
+  bulkWaQueue = data.filter(x => selectedIds.has(x.id) && x.phone && x.phone.trim() !== "");
+  
+  if(bulkWaQueue.length === 0) {
+    return showToast("لم يتم تحديد أي عميل يملك رقم هاتف صالح!", "err");
+  }
+  
+  $("bulkWaCount").textContent = bulkWaQueue.length;
+  window.updateBulkWaUI();
+  openModal("bulkWhatsAppModal");
+};
+
+window.updateBulkWaUI = () => {
+  if(bulkWaQueue.length === 0) {
+    $("bulkWaCurrentTarget").textContent = "تم إرسال جميع الرسائل بنجاح ✅";
+    $("bulkWaCurrentTarget").style.color = "#22c55e";
+    $("btnSendNextWa").style.display = "none";
+    setTimeout(() => { closeModal("bulkWhatsAppModal"); }, 3000);
+    return;
+  }
+  
+  $("btnSendNextWa").style.display = "inline-block";
+  $("bulkWaCurrentTarget").style.color = "var(--text)";
+  const nextUser = bulkWaQueue[0];
+  $("bulkWaCurrentTarget").textContent = `العميل التالي: ${nextUser.name} (${bulkWaQueue.length} متبقي)`;
+};
+
+window.sendNextBulkWhatsApp = () => {
+  if(bulkWaQueue.length === 0) return;
+  
+  const user = bulkWaQueue.shift(); // سحب العميل الأول من الطابور
+  const templateStr = $("bulkWaMsg").value;
+  
+  // استبدال المتغيرات الذكية ببيانات العميل الحقيقية
+  let msg = templateStr
+    .replace(/{name}/g, user.name || "عميلنا العزيز")
+    .replace(/{end}/g, user.end || "غير محدد")
+    .replace(/{service}/g, user.serviceType || "الخدمة الخاصة بك");
+    
+  let cleanPhone = ((user.countryCode||'')+user.phone).replace(/[^0-9+]/g, '');
+  
+  logAction("رسالة واتساب جماعية", `أُرسلت إلى: ${user.name}`);
+  window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+  
+  // تحديث الواجهة لتجهيز العميل التالي
+  window.updateBulkWaUI();
+};
+// ==========================================
+
 window.openRowActions = (id) => { 
   currentRowId = id; 
   const rec = data.find(x => x.id === id); 
   $("rowActionsHint").textContent = rec.name; 
   
-  // تفعيل/إلغاء تفعيل زر الملاحظات
   const hasNotes = rec.notes && rec.notes.trim() !== "";
   const btnNotes = $("btnViewNotes");
   if(hasNotes) {
@@ -575,7 +658,7 @@ window.actEditAction = () => {
   $("serviceType").value = rec.serviceType||""; $("months").value = rec.months||""; 
   $("price").value = rec.price||""; $("currency").value = rec.currency||"DZD"; 
   $("start").value = rec.start; $("alertDays").value = rec.alertDays||"7"; 
-  $("notes").value = rec.notes || ""; // تحميل الملاحظات إذا وجدت
+  $("notes").value = rec.notes || ""; 
   if(rec.paymentStatus === 'unpaid') $("paidAmount").value = 0; else if(rec.paymentStatus === 'partial') $("paidAmount").value = rec.paidAmount || 0; else $("paidAmount").value = ""; 
   window.calcDebt(); openModal("formModal"); 
 };
@@ -587,7 +670,7 @@ window.saveSubscription = async () => {
   let pStatus = 'paid'; if(paidFloat === 0 && priceFloat > 0) pStatus = 'unpaid'; else if(paidFloat < priceFloat) pStatus = 'partial';
   const actionName = editingId ? "تعديل اشتراك" : "إضافة اشتراك"; logAction(actionName, `الاسم: ${$("name").value} - الدفع: ${pStatus === 'paid' ? 'خالص' : 'دين'}`); 
   const endD = new Date(start); endD.setMonth(endD.getMonth() + months); const alertEl = $("alertDays");
-  const notesVal = $("notes").value; // حفظ قيمة الملاحظات
+  const notesVal = $("notes").value; 
   const rec = { 
     id: editingId || Date.now().toString(), name: $("name").value, email: emailVal, 
     phone: $("phone").value, countryCode: $("countryCode").value, serviceType: serviceVal, 
@@ -641,7 +724,7 @@ window.exportCSV = () => {
     let phone = r.phone ? `${r.countryCode||''}${r.phone}` : ''; 
     let payStat = r.paymentStatus === 'unpaid' ? 'غير مدفوع' : (r.paymentStatus === 'partial' ? 'جزئي' : 'خالص'); 
     let paidAmt = r.paymentStatus === 'unpaid' ? 0 : (r.paymentStatus === 'partial' ? (r.paidAmount||0) : (r.price||0)); 
-    let safeNotes = (r.notes||'').replace(/"/g, '""'); // حماية ملف الإكسل من الفواصل والأسطر
+    let safeNotes = (r.notes||'').replace(/"/g, '""'); 
     csv += `"${r.name||''}","${r.email||''}","${phone}","${r.serviceType||''}","${r.months||''} شهر","${r.price||0} ${r.currency||'DZD'}","${paidAmt}","${payStat}","${r.start||''}","${r.end||''}","${safeNotes}"\n`; 
   }); 
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Subscriptions_Excel_${todayISO()}.csv`; a.click(); closeModal('toolsModal'); showToast("تم التصدير بنجاح 📥"); 
