@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>لوحة تسيير الاشتراكات - v12.9.3</title>
+<title>لوحة تسيير الاشتراكات - v12.9.4</title>
 
 <meta name="theme-color" content="#070a12" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -24,7 +24,7 @@
 body{
   margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial; color: var(--text);
   background: radial-gradient(1200px 650px at 85% -10%, rgba(124,92,255,.25), transparent 60%), linear-gradient(180deg, var(--bg0), var(--bg1));
-  padding: 18px; -webkit-user-select: none; user-select: none;
+  padding: 18px; -webkit-user-select: none; user-select: none; overflow-x: hidden;
 }
 input, textarea, table, select { -webkit-user-select: auto; user-select: auto; }
 
@@ -101,7 +101,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 
 .actGrid{ display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; }
 @media (max-width: 640px){ .actGrid{ grid-template-columns: 1fr; } }
-.actBtn{ border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: var(--text); padding: 14px; border-radius: 18px; font-weight: 900; cursor:pointer; }
+.actBtn{ border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: var(--text); padding: 14px; border-radius: 18px; font-weight: 900; cursor:pointer; text-align: right; width: 100%; }
 .actBtn:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .toast{ position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%) translateY(20px); padding: 12px 14px; border-radius: 16px; background: rgba(10,14,26,.92); border: 1px solid rgba(255,255,255,.12); color: var(--text); display: flex; align-items: center; gap: 10px; opacity: 0; pointer-events: none; transition: all .2s ease; z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-weight:bold; }
@@ -131,6 +131,26 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 
 .id-card-wrap { border: 2px solid #e2e8f0; border-radius: 16px; padding: 25px; background: linear-gradient(135deg, #ffffff, #f1f5f9); position: relative; overflow: hidden; color: #0f172a; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
 .id-card-wrap::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, var(--accent), #4ade80); }
+
+/* تنسيقات القائمة الجانبية (Sidebar) الجديدة */
+.side-menu {
+  position: fixed; top: 0; right: -320px; width: 300px; height: 100vh;
+  background: rgba(10,14,26,.98); border-left: 1px solid rgba(255,255,255,.1);
+  box-shadow: -10px 0 50px rgba(0,0,0,0.8); z-index: 10001;
+  transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  display: flex; flex-direction: column; padding: 20px;
+  backdrop-filter: blur(15px);
+}
+.side-menu.open { right: 0; }
+.menu-backdrop {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 10000;
+  opacity: 0; pointer-events: none; transition: opacity 0.3s ease; backdrop-filter: blur(3px);
+}
+.menu-backdrop.open { opacity: 1; pointer-events: auto; }
+.side-menu-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,.1); padding-bottom: 15px; margin-bottom: 20px; }
+.side-menu-header h2 { margin: 0; font-size: 18px; color: var(--text); }
+.menu-section-title { font-size: 12px; color: var(--accent); font-weight: bold; margin: 25px 0 10px; padding-inline-start: 5px; }
+.side-menu .actBtn { margin-bottom: 8px; font-size: 13px; padding: 12px 14px; }
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -141,20 +161,25 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.3 PWA</span></h1>
-    <div class="sub">⚡ النسخة المبسطة: تسلسل منطقي واحترافي لنموذج إضافة عميل جديد.</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.4 PWA</span></h1>
+    <div class="sub">⚡ النسخة المطورة: قائمة جانبية احترافية لتسهيل الاستخدام وزر باقات مستقل.</div>
   </div>
 
   <div class="card">
     <div class="topbar">
       <div class="topbar-actions">
-        <button class="btn primary" type="button" onclick="openScannerModal()" style="background: linear-gradient(135deg, #10b981, #059669); border-color: #059669;">📷 مسح بطاقة (QR)</button>
+        <button class="btn soft" type="button" onclick="openSideMenu()" title="الإعدادات والأدوات" style="padding: 10px 14px; font-size: 18px; border-color: rgba(255,255,255,0.2);">☰</button>
+        
         <button class="btn primary" type="button" onclick="openAddSub()">➕ إضافة عميل</button>
+        <button class="btn primary" type="button" onclick="openScannerModal()" style="background: linear-gradient(135deg, #10b981, #059669); border-color: #059669;">📷 مسح بطاقة</button>
+        
+        <button class="btn soft" type="button" onclick="openModal('packagesModal')" style="border-color:#a855f7; color:#c084fc; background: rgba(168,85,247,0.15); font-weight: 900;">📦 الباقات</button>
+        
         <button class="btn soft" type="button" onclick="openTotalsReport()">💰 الإحصائيات</button>
-        <button class="btn soft" type="button" onclick="openModal('authModal')" style="border-color:var(--accent); color:var(--accent);">👤 الإدارة</button>
-        <button class="btn soft" type="button" onclick="openModal('toolsModal')">⚙️ أدوات وباقات</button>
+        
         <div class="statChip sync" id="syncChip"><span class="ico">☁️</span> <span class="v" id="syncVal">—</span></div>
       </div>
+      
       <div class="searchWrap">
         <input id="search" oninput="window.currentPage=1; window.render()" placeholder="بحث بالاسم، الإيميل، الوسام، الهاتف..." />
         <button class="btn soft" title="مسح البحث" style="padding: 10px 12px; border-radius: 12px; color: var(--err);" onclick="clearSearch()">✕</button>
@@ -192,6 +217,32 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
   </div>
 </div>
 
+<div class="menu-backdrop" id="menuBackdrop" onclick="closeSideMenu()"></div>
+<div class="side-menu" id="sideMenu">
+  <div class="side-menu-header">
+    <h2>⚙️ أدوات وإعدادات</h2>
+    <button class="btn danger btn-close" onclick="closeSideMenu()" style="padding: 6px 12px;">✕</button>
+  </div>
+  <div style="flex:1; overflow-y:auto; padding-right: 5px;">
+    
+    <div class="menu-section-title">إدارة النظام</div>
+    <button class="actBtn" onclick="closeSideMenu(); openModal('authModal')" style="border-color:var(--accent); color:var(--accent); background: rgba(124,92,255,0.1);">👤 إدارة الحسابات والصلاحيات</button>
+    
+    <div class="menu-section-title">البيانات والحماية</div>
+    <button class="actBtn" style="color:#10b981; border-color:rgba(16,185,129,0.4); background:rgba(16,185,129,0.1);" onclick="closeSideMenu(); window.exportCSV()">📥 تحميل كملف Excel</button>
+    <button class="actBtn" onclick="closeSideMenu(); openModal('backupModal')">📦 حفظ واسترجاع البيانات</button>
+    <button class="actBtn" onclick="closeSideMenu(); openModal('syncModal')">☁️ المزامنة السحابية</button>
+    
+    <div class="menu-section-title">أدوات إضافية</div>
+    <button class="actBtn" style="color:#f59e0b; border-color:rgba(245,158,11,0.4); background:rgba(245,158,11,0.1);" onclick="closeSideMenu(); window.undoDelete()">↩️ التراجع عن آخر حذف</button>
+    <button class="actBtn" onclick="closeSideMenu(); window.shareApp()">📤 مشاركة رابط اللوحة</button>
+    <button class="actBtn" onclick="closeSideMenu(); window.print()">🖨️ طباعة الجدول</button>
+    
+    <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(239,68,68,0.2);">
+      <button class="actBtn danger" onclick="closeSideMenu(); window.clearAllData()" style="text-align: center;">⚠️ تصفير اللوحة بالكامل</button>
+    </div>
+  </div>
+</div>
 <div class="modal" id="formModal" aria-hidden="true">
   <div class="box" role="dialog" aria-modal="true" style="width:min(600px, 100%)">
     <div class="modalHeader"><div><h2 id="formTitle">إضافة اشتراك</h2><div class="hint">املأ البيانات الأساسية ثم اضغط حفظ</div></div><button class="btn danger btn-close" type="button" onclick="closeModal('formModal')">✕ إغلاق</button></div>
@@ -264,6 +315,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
     <div class="modalFooter"><button class="btn primary" type="button" style="width:100%; padding: 16px; font-size: 16px; font-weight:bold; border-radius:14px; box-shadow: 0 8px 25px rgba(124,92,255,0.2);" onclick="window.saveSubscription()">💾 حفظ بيانات المشترك</button></div>
   </div>
 </div>
+
 <div class="modal" id="scannerModal" aria-hidden="true">
   <div class="box" style="width: 400px">
     <div class="modalHeader">
@@ -294,24 +346,6 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
   </div>
 </div>
 
-<div class="modal" id="toolsModal" aria-hidden="true">
-  <div class="box" style="width: 480px">
-    <div class="modalHeader"><h2>⚙️ أدوات إضافية</h2><button class="btn danger btn-close" type="button" onclick="closeModal('toolsModal')">✕ إغلاق</button></div>
-    <div class="modalBody">
-      <div class="actGrid">
-        <button class="actBtn" style="color:#a855f7; border-color:rgba(168,85,247,0.4); background:rgba(168,85,247,0.1); grid-column: span 2;" onclick="closeModal('toolsModal'); openModal('packagesModal')">📦 إدارة الباقات الجاهزة (توفير الوقت)</button>
-        <button class="actBtn" style="color:#10b981; border-color:rgba(16,185,129,0.4); background:rgba(16,185,129,0.1);" onclick="window.exportCSV()">📥 تصدير Excel</button>
-        <button class="actBtn" style="color:#f59e0b; border-color:rgba(245,158,11,0.4); background:rgba(245,158,11,0.1);" onclick="window.undoDelete()">↩️ التراجع عن الحذف</button>
-        <button class="actBtn" onclick="closeModal('toolsModal'); openModal('backupModal')">📦 النسخ الاحتياطي</button>
-        <button class="actBtn" onclick="closeModal('toolsModal'); openModal('syncModal')">☁️ حالة المزامنة</button>
-        <button class="actBtn" onclick="window.shareApp()">📤 مشاركة اللوحة</button>
-        <button class="actBtn" onclick="closeModal('toolsModal'); window.print()">🖨️ طباعة الجدول</button>
-        <button class="actBtn danger" style="grid-column: span 2;" onclick="window.clearAllData()">🗑️ حذف جميع البيانات نهائياً</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div class="modal" id="packagesModal" aria-hidden="true">
   <div class="box" style="width: 600px">
     <div class="modalHeader">
@@ -325,7 +359,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
         <div class="field"><label>النوع</label><select id="pkgType"><option value="time">زمني (أشهر)</option><option value="sessions">رصيد (حصص)</option></select></div>
         <div class="field"><label>القيمة (مدة أو حصص)</label><input id="pkgValue" type="number" min="1" placeholder="مثال: 12"></div>
         <div class="field"><label>السعر الافتراضي</label><input id="pkgPrice" type="number" min="0" placeholder="15000"></div>
-        <div class="field full-width"><button class="btn primary" style="width:100%; padding:12px; border-radius:12px;" onclick="window.savePackage()">➕ إضافة الباقة</button></div>
+        <div class="field full-width"><button class="btn primary" style="width:100%; padding:12px; border-radius:12px; text-align: center;" onclick="window.savePackage()">➕ إضافة الباقة</button></div>
       </div>
       <div style="max-height: 250px; overflow: auto; border: 1px solid var(--line); border-radius: 12px;">
         <table style="min-width: 100%; font-size: 13px;">
@@ -344,7 +378,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
        <div class="field" style="margin-bottom:15px"><label>اسم المؤسسة / المتجر</label><input id="setStoreName" placeholder="مثال: مؤسسة النجاح"></div>
        <div class="field" style="margin-bottom:15px"><label>الشعار (Logo)</label><input type="file" id="setStoreLogo" accept="image/*" style="padding: 8px;" onchange="window.handleLogoUpload(event)"></div>
        <div style="text-align:center; padding:10px; background:rgba(255,255,255,0.05); border-radius:12px;"><div style="font-size:12px; color:var(--muted); margin-bottom:5px;">معاينة الشعار:</div><img id="logoPreview" src="" style="max-width:100px; max-height:100px; border-radius:10px; display:none; margin: 0 auto;"><div id="logoEmojiFallback" style="font-size:40px;">💎</div></div>
-       <button class="btn primary" style="width:100%; margin-top:20px; padding:14px; border-radius:14px;" onclick="window.saveStoreSettings()">💾 حفظ الإعدادات</button>
+       <button class="btn primary" style="width:100%; margin-top:20px; padding:14px; border-radius:14px; text-align: center;" onclick="window.saveStoreSettings()">💾 حفظ الإعدادات</button>
     </div>
   </div>
 </div>
@@ -378,8 +412,8 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
       <div style="text-align: center; margin-top: 35px; font-size: 12px; color: #94a3b8; line-height: 1.6;">نشكركم على ثقتكم بنا 🤍<br><span style="font-size: 10px;">تم الإصدار بتاريخ <span id="recToday"></span></span></div>
     </div>
     <div class="modalFooter no-print" style="background: #f8fafc; border-top: 1px solid #e2e8f0; border-radius: 0 0 12px 12px; display:flex; gap:10px;">
-      <button class="btn primary" style="flex:1; padding: 14px; font-size: 14px; border-radius: 12px; background: #4f46e5; border-color: #4338ca;" onclick="window.printReceiptAction()">🖨️ طباعة أو PDF</button>
-      <button class="btn primary" style="flex:1; padding: 14px; font-size: 14px; border-radius: 12px; background: #22c55e; border-color: #16a34a;" onclick="window.sendWhatsAppReceipt()">💬 إرسال واتساب</button>
+      <button class="btn primary" style="flex:1; padding: 14px; font-size: 14px; border-radius: 12px; background: #4f46e5; border-color: #4338ca; text-align: center;" onclick="window.printReceiptAction()">🖨️ طباعة أو PDF</button>
+      <button class="btn primary" style="flex:1; padding: 14px; font-size: 14px; border-radius: 12px; background: #22c55e; border-color: #16a34a; text-align: center;" onclick="window.sendWhatsAppReceipt()">💬 إرسال واتساب</button>
     </div>
   </div>
 </div>
@@ -412,26 +446,26 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
       </div>
     </div>
     <div class="modalFooter no-print" style="background: #f8fafc; border-top: 1px solid #e2e8f0; border-radius: 0 0 16px 16px;">
-      <button class="btn primary" style="width: 100%; padding: 14px; font-size: 15px; border-radius: 12px; background: #0f172a; border-color: #000;" onclick="window.printIdCardAction()">🖨️ طباعة البطاقة</button>
+      <button class="btn primary" style="width: 100%; padding: 14px; font-size: 15px; border-radius: 12px; background: #0f172a; border-color: #000; text-align: center;" onclick="window.printIdCardAction()">🖨️ طباعة البطاقة</button>
     </div>
   </div>
 </div>
 
-<div class="modal" id="extendModal" aria-hidden="true"><div class="box" style="width: 350px"><div class="modalHeader"><h2 id="extendTitle">تجديد الاشتراك</h2><button class="btn danger btn-close" type="button" onclick="closeModal('extendModal')">✕ إغلاق</button></div><div class="modalBody"><div class="field" style="margin-bottom:15px"><label id="lblExtendValue">المدة المضافة</label><input id="extendValue" type="number" min="1" value="1"></div><div class="field" style="margin-bottom:20px" id="grpExtendUnit"><label>الوحدة</label><select id="extendUnit"><option value="months">أشهر</option><option value="days">أيام</option></select></div><button class="btn primary" style="width:100%" onclick="window.confirmExtend()">تأكيد التجديد</button></div></div></div>
+<div class="modal" id="extendModal" aria-hidden="true"><div class="box" style="width: 350px"><div class="modalHeader"><h2 id="extendTitle">تجديد الاشتراك</h2><button class="btn danger btn-close" type="button" onclick="closeModal('extendModal')">✕ إغلاق</button></div><div class="modalBody"><div class="field" style="margin-bottom:15px"><label id="lblExtendValue">المدة المضافة</label><input id="extendValue" type="number" min="1" value="1"></div><div class="field" style="margin-bottom:20px" id="grpExtendUnit"><label>الوحدة</label><select id="extendUnit"><option value="months">أشهر</option><option value="days">أيام</option></select></div><button class="btn primary" style="width:100%; text-align: center;" onclick="window.confirmExtend()">تأكيد التجديد</button></div></div></div>
 
 <div class="modal" id="rowActionsModal" aria-hidden="true">
   <div class="box" role="dialog" aria-modal="true" style="width:min(740px, 100%)">
     <div class="modalHeader"><div><h2>إجراءات</h2><div class="hint" id="rowActionsHint">—</div></div><button class="btn danger btn-close" type="button" onclick="closeModal('rowActionsModal')">✕ إغلاق</button></div>
     <div class="modalBody">
       <div class="actGrid">
-        <button class="actBtn" style="color: #fff; border-color: #3b82f6; background: linear-gradient(135deg, #3b82f6, #2563eb); box-shadow: 0 4px 15px rgba(59,130,246,0.3);" onclick="window.openMembershipCard()">🪪 بطاقة الانخراط (QR)</button>
-        <button class="actBtn" id="btnViewNotes" style="color: #a855f7; border-color: rgba(168,85,247,.5); background: rgba(168,85,247,.15);" onclick="window.openNotesAction()">📝 عرض الملاحظات</button>
-        <button class="actBtn" onclick="window.actExtendAction()">🔁 تجديد الرصيد/المدة</button>
-        <button class="actBtn" onclick="window.actEditAction()">✏️ تعديل</button>
-        <button class="actBtn" style="color: #60a5fa; border-color: rgba(96,165,250,.5); background: rgba(96,165,250,.15);" onclick="window.openReceiptAction()">📄 إصدار وصل</button>
-        <button class="actBtn" onclick="window.actCopyEmailAction()">📋 نسخ Email</button>
-        <button class="actBtn" style="border-color: rgba(37,211,102,.5); background: rgba(37,211,102,.15); color: #4ade80;" onclick="window.actWhatsAppAction()">💬 مراسلة واتساب</button>
-        <button class="actBtn danger" onclick="window.actDeleteAction()">🗑️ حذف المشترك</button>
+        <button class="actBtn" style="color: #fff; border-color: #3b82f6; background: linear-gradient(135deg, #3b82f6, #2563eb); box-shadow: 0 4px 15px rgba(59,130,246,0.3); text-align: center;" onclick="window.openMembershipCard()">🪪 بطاقة الانخراط (QR)</button>
+        <button class="actBtn" id="btnViewNotes" style="color: #a855f7; border-color: rgba(168,85,247,.5); background: rgba(168,85,247,.15); text-align: center;" onclick="window.openNotesAction()">📝 عرض الملاحظات</button>
+        <button class="actBtn" style="text-align: center;" onclick="window.actExtendAction()">🔁 تجديد الرصيد/المدة</button>
+        <button class="actBtn" style="text-align: center;" onclick="window.actEditAction()">✏️ تعديل</button>
+        <button class="actBtn" style="color: #60a5fa; border-color: rgba(96,165,250,.5); background: rgba(96,165,250,.15); text-align: center;" onclick="window.openReceiptAction()">📄 إصدار وصل</button>
+        <button class="actBtn" style="text-align: center;" onclick="window.actCopyEmailAction()">📋 نسخ Email</button>
+        <button class="actBtn" style="border-color: rgba(37,211,102,.5); background: rgba(37,211,102,.15); color: #4ade80; text-align: center;" onclick="window.actWhatsAppAction()">💬 مراسلة واتساب</button>
+        <button class="actBtn danger" style="text-align: center;" onclick="window.actDeleteAction()">🗑️ حذف المشترك</button>
       </div>
     </div>
   </div>
@@ -468,7 +502,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
       </div>
       <div style="text-align:center; padding:15px 0; background:rgba(0,0,0,0.2); border-radius:12px; border:1px solid rgba(255,255,255,0.05);">
         <div id="bulkWaCurrentTarget" style="font-weight:bold; font-size:15px; margin-bottom:12px; color:var(--text);">العميل التالي: -</div>
-        <button class="btn primary" id="btnSendNextWa" style="width:90%; padding:14px; font-size:15px; background:#22c55e; border-color:#16a34a; box-shadow: 0 8px 25px rgba(34,197,94,0.2);" onclick="window.sendNextBulkWhatsApp()">إرسال الرسالة 🚀</button>
+        <button class="btn primary" id="btnSendNextWa" style="width:90%; padding:14px; font-size:15px; background:#22c55e; border-color:#16a34a; box-shadow: 0 8px 25px rgba(34,197,94,0.2); text-align: center;" onclick="window.sendNextBulkWhatsApp()">إرسال الرسالة 🚀</button>
       </div>
     </div>
   </div>
@@ -478,17 +512,17 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
   <div class="box" style="width: 420px; padding:0;">
     <div class="modalHeader" style="border-bottom:none; padding-bottom:0;"><button class="btn danger btn-close" type="button" id="closeAuthBtn" onclick="closeModal('authModal')" style="display:none; margin-inline-start:auto;">✕ إغلاق</button></div>
     <div class="modalBody" style="padding-top:0;">
-      <div id="authLoginSection" class="auth-wrap"><div class="auth-icon-wrap">🔒</div><h2 class="auth-title">تسجيل الدخول</h2><div class="auth-sub">يرجى تسجيل الدخول للوصول إلى لوحة التحكم</div><div style="margin-bottom:20px;"><label class="auth-label">البريد الإلكتروني</label><input id="authEmailAuth" type="email" class="auth-input" placeholder="admin@example.com"></div><div style="margin-bottom:30px;"><label class="auth-label">كلمة المرور</label><input id="authPass" type="password" class="auth-input" placeholder="••••••••"></div><button class="btn primary" style="width:100%; padding:16px; font-size:16px; font-weight:900; border-radius:16px; box-shadow: 0 8px 25px rgba(124,92,255,0.3);" onclick="window.loginUser()">دخول 🚀</button></div>
+      <div id="authLoginSection" class="auth-wrap"><div class="auth-icon-wrap">🔒</div><h2 class="auth-title">تسجيل الدخول</h2><div class="auth-sub">يرجى تسجيل الدخول للوصول إلى لوحة التحكم</div><div style="margin-bottom:20px;"><label class="auth-label">البريد الإلكتروني</label><input id="authEmailAuth" type="email" class="auth-input" placeholder="admin@example.com"></div><div style="margin-bottom:30px;"><label class="auth-label">كلمة المرور</label><input id="authPass" type="password" class="auth-input" placeholder="••••••••"></div><button class="btn primary" style="width:100%; padding:16px; font-size:16px; font-weight:900; border-radius:16px; box-shadow: 0 8px 25px rgba(124,92,255,0.3); text-align: center;" onclick="window.loginUser()">دخول 🚀</button></div>
       <div id="authLoggedInSection" style="display:none; padding:10px;">
         <div style="text-align:center; margin-bottom:25px;"><div id="authStatusIcon" class="auth-icon-wrap" style="background:linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.05)); border-color:rgba(34,197,94,0.3); box-shadow: 0 10px 25px rgba(34,197,94,0.15);">✅</div><div id="authStateText" style="font-weight:900; font-size:15px; line-height:1.6;"></div></div>
-        <div id="ownerDashboard" style="display:none; padding:20px; background:rgba(124,92,255,0.08); border-radius:18px; border:1px solid rgba(124,92,255,0.2); margin-bottom:25px;"><h3 style="margin-top:0; color:#fff; font-size:15px; display:flex; align-items:center; gap:8px;">👑 أدوات المالك (Owner)</h3><button class="btn soft" onclick="closeModal('authModal'); openModal('storeSettingsModal')" style="width:100%; margin-bottom:12px; padding:12px; border-radius:12px; border-color:rgba(16,185,129,0.3); color:#10b981;">⚙️ إعدادات المتجر (الاسم واللوجو)</button><button class="btn primary" onclick="closeModal('authModal'); openModal('addAdminModal')" style="width:100%; margin-bottom:12px; padding:12px; border-radius:12px;">➕ إنشاء حساب مستخدم جديد</button><button class="btn soft" onclick="closeModal('authModal'); window.loadAdminsList()" style="width:100%; padding:12px; border-radius:12px; border-color:rgba(255,255,255,0.1);">👥 إدارة الصلاحيات للمستخدمين</button><button class="btn soft" onclick="closeModal('authModal'); window.openAuditLog()" style="width:100%; padding:12px; border-radius:12px; border-color:rgba(245,158,11,0.3); color:#f59e0b; margin-top:12px;">🕵️‍♂️ سجل نشاطات المدراء</button></div>
-        <button class="btn danger" style="width:100%; padding:14px; border-radius:14px; font-size:15px;" onclick="window.logoutUser()">تسجيل الخروج المآمن</button>
+        <div id="ownerDashboard" style="display:none; padding:20px; background:rgba(124,92,255,0.08); border-radius:18px; border:1px solid rgba(124,92,255,0.2); margin-bottom:25px;"><h3 style="margin-top:0; color:#fff; font-size:15px; display:flex; align-items:center; gap:8px;">👑 أدوات المالك (Owner)</h3><button class="btn soft" onclick="closeModal('authModal'); openModal('storeSettingsModal')" style="width:100%; margin-bottom:12px; padding:12px; border-radius:12px; border-color:rgba(16,185,129,0.3); color:#10b981; text-align: center;">⚙️ إعدادات المتجر (الاسم واللوجو)</button><button class="btn primary" onclick="closeModal('authModal'); openModal('addAdminModal')" style="width:100%; margin-bottom:12px; padding:12px; border-radius:12px; text-align: center;">➕ إنشاء حساب مستخدم جديد</button><button class="btn soft" onclick="closeModal('authModal'); window.loadAdminsList()" style="width:100%; padding:12px; border-radius:12px; border-color:rgba(255,255,255,0.1); text-align: center;">👥 إدارة الصلاحيات للمستخدمين</button><button class="btn soft" onclick="closeModal('authModal'); window.openAuditLog()" style="width:100%; padding:12px; border-radius:12px; border-color:rgba(245,158,11,0.3); color:#f59e0b; margin-top:12px; text-align: center;">🕵️‍♂️ سجل نشاطات المدراء</button></div>
+        <button class="btn danger" style="width:100%; padding:14px; border-radius:14px; font-size:15px; text-align: center;" onclick="window.logoutUser()">تسجيل الخروج المآمن</button>
       </div>
     </div>
   </div>
 </div>
 
-<div class="modal" id="addAdminModal" aria-hidden="true"><div class="box" style="width: 380px"><div class="modalHeader"><h2>➕ إضافة مستخدم جديد</h2><button class="btn danger btn-close" type="button" onclick="closeModal('addAdminModal')">✕ إغلاق</button></div><div class="modalBody"><div class="field" style="margin-bottom:15px"><label>البريد الإلكتروني</label><input id="newAdminEmail" type="email"></div><div class="field" style="margin-bottom:15px"><label>كلمة المرور (6 أحرف أو أكثر)</label><input id="newAdminPass" type="password"></div><div class="field" style="margin-bottom:25px"><label>نوع الصلاحية</label><select id="newAdminRole"><option value="admin">أدمن</option><option value="owner">مالك 👑</option></select></div><button class="btn primary" style="width:100%; padding:12px;" onclick="window.confirmAddAdmin()">تأكيد وإنشاء الحساب</button></div></div></div>
+<div class="modal" id="addAdminModal" aria-hidden="true"><div class="box" style="width: 380px"><div class="modalHeader"><h2>➕ إضافة مستخدم جديد</h2><button class="btn danger btn-close" type="button" onclick="closeModal('addAdminModal')">✕ إغلاق</button></div><div class="modalBody"><div class="field" style="margin-bottom:15px"><label>البريد الإلكتروني</label><input id="newAdminEmail" type="email"></div><div class="field" style="margin-bottom:15px"><label>كلمة المرور (6 أحرف أو أكثر)</label><input id="newAdminPass" type="password"></div><div class="field" style="margin-bottom:25px"><label>نوع الصلاحية</label><select id="newAdminRole"><option value="admin">أدمن</option><option value="owner">مالك 👑</option></select></div><button class="btn primary" style="width:100%; padding:12px; text-align: center;" onclick="window.confirmAddAdmin()">تأكيد وإنشاء الحساب</button></div></div></div>
 <div class="modal" id="manageAdminsModal" aria-hidden="true"><div class="box" style="width: 500px"><div class="modalHeader"><h2>👥 قائمة المستخدمين</h2><button class="btn danger btn-close" type="button" onclick="closeModal('manageAdminsModal')">✕ إغلاق</button></div><div class="modalBody"><div style="font-size:12px; color:var(--warn); margin-bottom:15px; padding:10px; background:rgba(245,158,11,0.1); border-radius:10px; border:1px solid rgba(245,158,11,0.3);"><b>ملاحظة هامة:</b> سحب الصلاحية يمنع المستخدم من الدخول للوحة.</div><div style="max-height:300px; overflow:auto;"><table style="min-width:100%;"><thead><tr><th>الإيميل</th><th>الصلاحية</th><th>إجراء</th></tr></thead><tbody id="adminsTbody"></tbody></table></div></div></div></div>
 
 <div class="modal" id="auditLogModal" aria-hidden="true">
@@ -508,8 +542,8 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
   </div>
 </div>
 
-<div class="modal" id="backupModal" aria-hidden="true"><div class="box" style="width:400px"><div class="modalHeader"><h2>📦 النسخ الاحتياطي (JSON)</h2><button class="btn danger btn-close" type="button" onclick="closeModal('backupModal')">✕ إغلاق</button></div><div class="modalBody"><div style="display:grid; gap:10px;"><button class="btn soft" onclick="window.exportJson()">⬇️ تصدير نسخة JSON</button><button class="btn soft" onclick="window.importFile()">⬆️ استيراد نسخة JSON</button><input id="fileInput" type="file" accept=".json" style="display:none" onchange="window.handleFileSelect(event)"><button class="btn soft" onclick="closeModal('backupModal'); openModal('pasteModal')">📋 استيراد باللصق</button></div></div></div></div>
-<div class="modal" id="pasteModal" aria-hidden="true"><div class="box"><div class="modalHeader"><h2>📋 استيراد باللصق</h2><button class="btn danger btn-close" type="button" onclick="closeModal('pasteModal')">✕ إغلاق</button></div><div class="modalBody"><textarea id="pasteArea" rows="10" style="width:100%; background:rgba(0,0,0,0.3); color:white; border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:10px; outline:none;"></textarea></div><div class="modalFooter"><button class="btn primary" onclick="window.confirmPaste()">استيراد البيانات</button></div></div></div>
+<div class="modal" id="backupModal" aria-hidden="true"><div class="box" style="width:400px"><div class="modalHeader"><h2>📦 النسخ الاحتياطي (JSON)</h2><button class="btn danger btn-close" type="button" onclick="closeModal('backupModal')">✕ إغلاق</button></div><div class="modalBody"><div style="display:grid; gap:10px;"><button class="btn soft" onclick="window.exportJson()" style="text-align: center;">⬇️ تصدير نسخة JSON</button><button class="btn soft" onclick="window.importFile()" style="text-align: center;">⬆️ استيراد نسخة JSON</button><input id="fileInput" type="file" accept=".json" style="display:none" onchange="window.handleFileSelect(event)"><button class="btn soft" onclick="closeModal('backupModal'); openModal('pasteModal')" style="text-align: center;">📋 استيراد باللصق</button></div></div></div></div>
+<div class="modal" id="pasteModal" aria-hidden="true"><div class="box"><div class="modalHeader"><h2>📋 استيراد باللصق</h2><button class="btn danger btn-close" type="button" onclick="closeModal('pasteModal')">✕ إغلاق</button></div><div class="modalBody"><textarea id="pasteArea" rows="10" style="width:100%; background:rgba(0,0,0,0.3); color:white; border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:10px; outline:none;"></textarea></div><div class="modalFooter"><button class="btn primary" style="text-align: center;" onclick="window.confirmPaste()">استيراد البيانات</button></div></div></div>
 <div class="modal" id="syncModal" aria-hidden="true"><div class="box"><div class="modalHeader"><h2>☁️ المزامنة والنسخ الاحتياطي</h2><button class="btn danger btn-close" type="button" onclick="closeModal('syncModal')">✕ إغلاق</button></div><div class="modalBody">ميزة المزامنة تعمل في الخلفية لحظياً وبشكل تلقائي ✅</div></div></div>
 <div class="modal" id="totalsModal" aria-hidden="true"><div class="box" style="width:400px"><div class="modalHeader"><h2>💰 المجموع العام</h2><button class="btn danger btn-close" type="button" onclick="closeModal('totalsModal')">✕ إغلاق</button></div><div class="modalBody"><div id="totalsBody" style="text-align:center; padding: 10px 0;"></div></div></div></div>
 
@@ -517,6 +551,16 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 
 <script>
 'use strict';
+
+// فتح وإغلاق القائمة الجانبية
+window.openSideMenu = () => {
+  $("sideMenu").classList.add("open");
+  $("menuBackdrop").classList.add("open");
+};
+window.closeSideMenu = () => {
+  $("sideMenu").classList.remove("open");
+  $("menuBackdrop").classList.remove("open");
+};
 
 // 1. نظام حماية المتصفح (Brave Anti-Freeze)
 window.addEventListener('DOMContentLoaded', () => {
@@ -545,7 +589,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // 3. إعداد Firebase
 const FIREBASE_CONFIG = { apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ", authDomain: "dattta-6f497.firebaseapp.com", databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com", projectId: "dattta-6f497", storageBucket: "dattta-6f497.firebasestorage.app", messagingSenderId: "804914291938", appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb" };
-const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.3"; 
+const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.4"; 
 const $ = (id)=>document.getElementById(id); 
 const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
 
@@ -980,7 +1024,6 @@ window.applyPackage = () => {
   }
 };
 
-// دالة التبديل السحرية للخيارات المتقدمة
 window.toggleAdvancedFields = (forceShow = false) => {
   const adv = $("advancedFields");
   const btn = $("btnToggleAdvanced");
@@ -1010,8 +1053,7 @@ window.openAddSub = () => {
   $("paidAmount").value = ""; $("notes").value = ""; 
   $("packageSelector").value = ""; $("subType").value = "time"; window.toggleSubType();
   
-  // إخفاء الحقول المتقدمة افتراضياً
-  $("advancedFields").style.display = "block"; // خدعة بسيطة لضمان عمل الدالة
+  $("advancedFields").style.display = "block"; 
   window.toggleAdvancedFields(false); 
 
   window.calcDebt(); openModal("formModal"); 
@@ -1031,7 +1073,6 @@ window.actEditAction = () => {
   $("notes").value = rec.notes || ""; $("packageSelector").value = ""; $("quickPlan").value = "";
   if(rec.paymentStatus === 'unpaid') $("paidAmount").value = 0; else if(rec.paymentStatus === 'partial') $("paidAmount").value = rec.paidAmount || 0; else $("paidAmount").value = ""; 
   
-  // إذا كان العميل لديه بيانات متقدمة، اعرض الحقول المتقدمة تلقائياً
   const hasAdvancedData = (rec.email && rec.email !== "") || (rec.tags && rec.tags !== "") || (rec.notes && rec.notes.trim() !== "") || (rec.currency && rec.currency !== "DZD");
   window.toggleAdvancedFields(hasAdvancedData);
 
@@ -1151,16 +1192,16 @@ window.exportCSV = () => {
     let safeTags = (r.tags||'').replace(/"/g, '""');
     csv += `"${r.name||''}","${safeTags}","${r.email||''}","${phone}","${typeTxt}","${r.serviceType||''}","${valTxt}","${r.price||0} ${r.currency||'DZD'}","${payStat}","${r.start||''}","${r.end||''}","${r.sessionsLeft||''}"\n`; 
   }); 
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Subscriptions_Excel_${todayISO()}.csv`; a.click(); closeModal('toolsModal'); showToast("تم التصدير بنجاح 📥"); 
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Subscriptions_Excel_${todayISO()}.csv`; a.click(); closeSideMenu(); showToast("تم التصدير بنجاح 📥"); 
 };
 
-window.undoDelete = async () => { if(!lastDeletedData || lastDeletedData.length === 0) { closeModal('toolsModal'); return showToast("لا يوجد أي حذف أخير لاسترجاعه", "warn"); } logAction("تراجع عن الحذف", `استرجاع ${lastDeletedData.length} اشتراكات`); data = [...lastDeletedData, ...data]; lastDeletedData = null; await firebasePush(); window.render(); closeModal('toolsModal'); showToast("تم الاسترجاع ↩️"); };
-window.exportJson = () => { if(data.length === 0) return showToast("لا توجد بيانات", "warn"); const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data)); const a = document.createElement("a"); a.href = dataStr; a.download = `Backup_${todayISO()}.json`; a.click(); closeModal("toolsModal"); showToast("تم التنزيل 📥"); };
+window.undoDelete = async () => { if(!lastDeletedData || lastDeletedData.length === 0) { closeSideMenu(); return showToast("لا يوجد أي حذف أخير لاسترجاعه", "warn"); } logAction("تراجع عن الحذف", `استرجاع ${lastDeletedData.length} اشتراكات`); data = [...lastDeletedData, ...data]; lastDeletedData = null; await firebasePush(); window.render(); closeSideMenu(); showToast("تم الاسترجاع ↩️"); };
+window.exportJson = () => { if(data.length === 0) return showToast("لا توجد بيانات", "warn"); const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data)); const a = document.createElement("a"); a.href = dataStr; a.download = `Backup_${todayISO()}.json`; a.click(); closeSideMenu(); showToast("تم التنزيل 📥"); };
 window.importFile = () => $("fileInput").click();
-window.handleFileSelect = (e) => { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = async (event) => { try { const imported = JSON.parse(event.target.result); if(Array.isArray(imported)) { data = imported; await firebasePush(); window.render(); closeModal("backupModal"); closeModal("toolsModal"); showToast("تم الاستيراد ✅"); } } catch(err) { showToast("ملف غير صالح", "err"); } }; reader.readAsText(file); };
-window.confirmPaste = async () => { try { const imported = JSON.parse($("pasteArea").value); if(Array.isArray(imported)) { data = imported; await firebasePush(); window.render(); closeModal("pasteModal"); closeModal("backupModal"); closeModal("toolsModal"); $("pasteArea").value=""; showToast("تم الاستيراد ✅"); } } catch(e) { showToast("كود غير صالح", "err"); } };
-window.clearAllData = async () => { if(confirm("⚠️ تحذير خطير: سيتم مسح كل البيانات!")) { logAction("تصفير اللوحة", "حذف كافة البيانات ⚠️"); lastDeletedData = [...data]; data = []; await firebasePush(); window.render(); closeModal("toolsModal"); showToast("تم المسح 🗑️ (يمكنك التراجع من الأدوات)"); } };
-window.shareApp = () => { closeModal("toolsModal"); if (navigator.share) { navigator.share({ title: 'لوحة الاشتراكات', url: window.location.href }); } else { showToast("المشاركة غير مدعومة", "warn"); } };
+window.handleFileSelect = (e) => { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = async (event) => { try { const imported = JSON.parse(event.target.result); if(Array.isArray(imported)) { data = imported; await firebasePush(); window.render(); closeModal("backupModal"); closeSideMenu(); showToast("تم الاستيراد ✅"); } } catch(err) { showToast("ملف غير صالح", "err"); } }; reader.readAsText(file); };
+window.confirmPaste = async () => { try { const imported = JSON.parse($("pasteArea").value); if(Array.isArray(imported)) { data = imported; await firebasePush(); window.render(); closeModal("pasteModal"); closeModal("backupModal"); closeSideMenu(); $("pasteArea").value=""; showToast("تم الاستيراد ✅"); } } catch(e) { showToast("كود غير صالح", "err"); } };
+window.clearAllData = async () => { if(confirm("⚠️ تحذير خطير: سيتم مسح كل البيانات!")) { logAction("تصفير اللوحة", "حذف كافة البيانات ⚠️"); lastDeletedData = [...data]; data = []; await firebasePush(); window.render(); closeSideMenu(); showToast("تم المسح 🗑️ (يمكنك التراجع من الأدوات)"); } };
+window.shareApp = () => { closeSideMenu(); if (navigator.share) { navigator.share({ title: 'لوحة الاشتراكات', url: window.location.href }); } else { showToast("المشاركة غير مدعومة", "warn"); } };
 
 window.loginUser = () => { auth.signInWithEmailAndPassword($("authEmailAuth").value, $("authPass").value).catch(e => showToast("بيانات الدخول خاطئة", "err")); };
 window.logoutUser = () => { auth.signOut(); };
