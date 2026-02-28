@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>لوحة تسيير الاشتراكات - v12.7.1</title>
+<title>لوحة تسيير الاشتراكات - v12.8</title>
 
 <meta name="theme-color" content="#070a12" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -128,7 +128,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
   body.print-mode-idcard > *:not(#idCardModal) { display: none !important; }
   body { background: white !important; padding: 0 !important; margin: 0 !important; }
   .modal.print-active { display: block !important; position: static !important; background: white !important; }
-  .modal.print-active .box { width: 100% !important; max-width: none !important; box-shadow: none !important; border: none !important; border-radius: 0 !important; padding: 0 !important; }
+  .modal.print-active .box { width: 100% !important; max-width: none !important; box-shadow: none !important; border: none !important; border-radius: 0 !important; padding: 0 !important; margin: 0 !important; }
   .no-print { display: none !important; }
 }
 
@@ -150,13 +150,17 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
   background: linear-gradient(90deg, var(--accent), #4ade80);
 }
 </style>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.7.1 PWA</span></h1>
-    <div class="sub">⚡ الميزات: بطاقات انخراط ذكية بـ QR Code 🪪 + نظام الحصص والأوسمة</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.8 PWA</span></h1>
+    <div class="sub">⚡ النسخة المستقرة (بدون أخطاء): الحصص، بطاقات QR، والرسائل الجماعية</div>
   </div>
 
   <div class="card">
@@ -255,16 +259,15 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
     <div class="modalHeader"><div><h2 id="formTitle">إضافة اشتراك</h2><div class="hint">املأ البيانات ثم اضغط حفظ</div></div><button class="btn danger btn-close" type="button" onclick="closeModal('formModal')">✕ إغلاق</button></div>
     <div class="modalBody">
       <div class="formGrid">
-        
         <div class="field full-width" style="background:rgba(124,92,255,0.1); padding:12px 14px; border-radius:14px; border:1px solid rgba(124,92,255,0.3); margin-bottom:5px;">
-          <label style="color:#c4b5fd; margin-bottom:8px;">📦 التعبئة السريعة من الباقات الجاهزة (اختياري)</label>
+          <label style="color:#c4b5fd; margin-bottom:8px;">📦 التعبئة السريعة من الباقات الجاهزة</label>
           <select id="packageSelector" onchange="window.applyPackage()" style="background:rgba(0,0,0,0.5); border-color:rgba(124,92,255,0.4); cursor:pointer;">
             <option value="">— تخصيص يدوي —</option>
           </select>
         </div>
 
         <div class="field full-width">
-          <label>طبيعة الاشتراك (زمني أم حصص) <span style="color:var(--err)">*</span></label>
+          <label>طبيعة الاشتراك <span style="color:var(--err)">*</span></label>
           <select id="subType" onchange="window.toggleSubType()" style="background:rgba(0,0,0,0.5); border:1px solid #10b981; color:#10b981; font-weight:bold;">
             <option value="time">⏳ اشتراك زمني (أشهر / تاريخ)</option>
             <option value="sessions">🎟️ اشتراك بالحصص (رصيد دخول)</option>
@@ -279,7 +282,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
         
         <div class="field full-width">
           <label>الخدمة / الباقة <span style="color:var(--err)">*</span></label>
-          <input id="serviceType" list="serviceList" placeholder="اختر أو اكتب أي خدمة (نادي، مدرسة، انترنت...)">
+          <input id="serviceType" list="serviceList" placeholder="اختر أو اكتب أي خدمة...">
           <datalist id="serviceList">
             <option value="دروس دعم فيزياء">
             <option value="نادي رياضي (Gym)">
@@ -289,23 +292,23 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
         </div>
         
         <div id="timeFieldsGrp" style="display:contents;">
-          <div class="field"><label>المدة (أشهر) <span style="color:var(--err)">*</span></label><input id="months" type="number" min="1" step="1"></div>
-          <div class="field"><label>تاريخ البداية <span style="color:var(--err)">*</span></label><input id="start" type="date"></div>
-          <div class="field"><label>تنبيه قبل (أيام)</label><input id="alertDays" type="number" min="1" step="1" value="7"></div>
+          <div class="field"><label>المدة (أشهر)</label><input id="months" type="number" min="1" step="1"></div>
+          <div class="field"><label>تاريخ البداية</label><input id="start" type="date"></div>
           <div class="field"><label>اختيار سريع للمدة</label><select id="quickPlan" onchange="window.handleQuickPlan()"><option value="">— اختر —</option><option value="1">1 شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="12">12 شهر</option></select></div>
         </div>
 
         <div id="sessionsFieldsGrp" style="display:none;">
-          <div class="field"><label>إجمالي عدد الحصص <span style="color:var(--err)">*</span></label><input id="sessionsTotal" type="number" min="1" step="1" placeholder="مثال: 12"></div>
+          <div class="field"><label>إجمالي عدد الحصص</label><input id="sessionsTotal" type="number" min="1" step="1" placeholder="مثال: 12"></div>
           <div class="field full-width"><label>الرصيد المتبقي (للتعديل اليدوي فقط)</label><input id="sessionsLeft" type="number" min="0" step="1" style="color:var(--warn); font-weight:bold;"></div>
         </div>
 
+        <div class="field"><label>تنبيه قبل (أيام)</label><input id="alertDays" type="number" min="1" step="1" value="7"></div>
         <div class="field"><label>العملة</label><select id="currency"><option value="DZD">DZD</option><option value="EUR">EUR</option><option value="USD">USD</option><option value="MAD">MAD</option><option value="TND">TND</option></select></div>
-        <div class="field"><label>السعر الإجمالي</label><input id="price" type="number" min="0" step="0.01" placeholder="5000" oninput="window.calcDebt()"></div>
+        <div class="field full-width"><label>السعر الإجمالي</label><input id="price" type="number" min="0" step="0.01" placeholder="5000" oninput="window.calcDebt()"></div>
         <div class="field"><label>المبلغ المدفوع</label><input id="paidAmount" type="number" min="0" step="0.01" placeholder="فارغ = دفع الكل" oninput="window.calcDebt()"></div>
         <div class="field full-width"><label>الدين المتبقي (آلي)</label><input id="debtAmount" type="text" readonly style="background: rgba(239,68,68,0.1); color: #ff8a8a; font-weight: bold; border-color: rgba(239,68,68,0.3); pointer-events: none;"></div>
         
-        <div class="field full-width"><label>ملاحظات خاصة (لا تظهر للعميل)</label><textarea id="notes" rows="2" placeholder="أرقام سرية، MAC Address، ملاحظات صحية... إلخ"></textarea></div>
+        <div class="field full-width"><label>ملاحظات خاصة (لا تظهر للعميل)</label><textarea id="notes" rows="2" placeholder="أرقام سرية، MAC Address..."></textarea></div>
       </div>
     </div>
     <div class="modalFooter"><button class="btn primary" type="button" style="padding: 12px 24px; font-size: 14px;" onclick="saveSubscription()">💾 حفظ البيانات</button></div>
@@ -316,7 +319,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
   <div class="box" style="width: 400px">
     <div class="modalHeader"><h2>⚙️ إعدادات المتجر (اللوجو)</h2><button class="btn danger btn-close" type="button" onclick="closeModal('storeSettingsModal')">✕ إغلاق</button></div>
     <div class="modalBody">
-       <div class="field" style="margin-bottom:15px"><label>اسم المؤسسة / المتجر (يظهر في الفاتورة)</label><input id="setStoreName" placeholder="مثال: مؤسسة النجاح"></div>
+       <div class="field" style="margin-bottom:15px"><label>اسم المؤسسة / المتجر</label><input id="setStoreName" placeholder="مثال: مؤسسة النجاح"></div>
        <div class="field" style="margin-bottom:15px"><label>الشعار (Logo)</label><input type="file" id="setStoreLogo" accept="image/*" style="padding: 8px;" onchange="window.handleLogoUpload(event)"></div>
        <div style="text-align:center; padding:10px; background:rgba(255,255,255,0.05); border-radius:12px;"><div style="font-size:12px; color:var(--muted); margin-bottom:5px;">معاينة الشعار:</div><img id="logoPreview" src="" style="max-width:100px; max-height:100px; border-radius:10px; display:none; margin: 0 auto;"><div id="logoEmojiFallback" style="font-size:40px;">💎</div></div>
        <button class="btn primary" style="width:100%; margin-top:20px; padding:14px; border-radius:14px;" onclick="saveStoreSettings()">💾 حفظ الإعدادات</button>
@@ -345,7 +348,6 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
         <tr id="recRowSessions" style="display:none; border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">رصيد الحصص:</td><td style="padding: 12px 0; text-align: left; color: #0f172a; font-weight:bold;" id="recSessions"></td></tr>
         <tr id="recRowStart" style="display:none; border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">تاريخ البداية:</td><td style="padding: 12px 0; text-align: left; color: #0f172a;" id="recStart"></td></tr>
         <tr id="recRowEnd" style="display:none; border-bottom: 1px solid #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">تاريخ الانتهاء:</td><td style="padding: 12px 0; text-align: left; color: #0f172a;" id="recEnd"></td></tr>
-        
         <tr><td style="padding: 20px 0 10px 0; color: #0f172a; font-size: 18px; font-weight: 900;">السعر الإجمالي:</td><td style="padding: 20px 0 10px 0; text-align: left; font-size: 20px; font-weight: 900; color: #10b981;" id="recPrice"></td></tr>
         <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 10px 0; color: #64748b;">حالة الدفع:</td><td style="padding: 10px 0; text-align: left; font-weight:bold;" id="recPaymentStatus"></td></tr>
         <tr id="recPaidAmountRow" style="display:none; border-bottom: 1px dashed #cbd5e1;"><td style="padding: 10px 0; color: #64748b;">المبلغ المدفوع:</td><td style="padding: 10px 0; text-align: left; font-weight:bold; color: #3b82f6;" id="recPaidAmount"></td></tr>
@@ -370,14 +372,11 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
       <div class="id-card-wrap" style="width: 100%; max-width: 350px;">
         <h2 id="idCardStoreName" style="margin: 0 0 5px 0; color: #4f46e5; font-size: 22px;">المؤسسة</h2>
         <div style="font-size: 11px; color: #94a3b8; margin-bottom: 20px; letter-spacing: 1px;">بطاقة عضوية رقمية - MEMBERSHIP CARD</div>
-        
         <div style="display: flex; justify-content: center; margin-bottom: 20px;">
-          <div id="idCardQR" style="padding: 10px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;"></div>
+          <div id="idCardQR" style="padding: 10px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; display: inline-block;"></div>
         </div>
-        
         <h3 id="idCardClientName" style="margin: 0 0 5px 0; font-size: 24px; font-weight: 900;">الاسم</h3>
         <div id="idCardService" style="font-weight: bold; color: #8b5cf6; font-size: 15px; margin-bottom: 15px; background: rgba(139,92,246,0.1); display: inline-block; padding: 4px 12px; border-radius: 99px;">الخدمة</div>
-        
         <div style="display: flex; justify-content: space-between; font-size: 13px; border-top: 1px dashed #cbd5e1; padding-top: 15px; text-align: right;">
            <div style="flex:1;">
              <span style="color:#64748b; display:block; font-size: 11px;">نوع الاشتراك</span>
@@ -391,7 +390,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
       </div>
     </div>
     <div class="modalFooter no-print" style="background: #f8fafc; border-top: 1px solid #e2e8f0; border-radius: 0 0 16px 16px;">
-      <button class="btn primary" style="width: 100%; padding: 14px; font-size: 15px; border-radius: 12px; background: #0f172a; border-color: #000;" onclick="window.printIdCardAction()">🖨️ طباعة البطاقة (حجم مخصص)</button>
+      <button class="btn primary" style="width: 100%; padding: 14px; font-size: 15px; border-radius: 12px; background: #0f172a; border-color: #000;" onclick="window.printIdCardAction()">🖨️ طباعة البطاقة</button>
     </div>
   </div>
 </div>
@@ -509,7 +508,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 })();
 
 const FIREBASE_CONFIG = { apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ", authDomain: "dattta-6f497.firebaseapp.com", databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com", projectId: "dattta-6f497", storageBucket: "dattta-6f497.firebasestorage.app", messagingSenderId: "804914291938", appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb" };
-const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.7.1"; const $ = (id)=>document.getElementById(id); const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
+const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.8"; const $ = (id)=>document.getElementById(id); const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
 
 let data = []; let packagesData = []; let editingId = null; let currentRowId = null; let currentFilter = "all"; 
 let selectedIds = new Set(); let extendMode = "single"; let currentUser = null; let currentRole = null;
@@ -751,7 +750,6 @@ window.openRowActions = (id) => {
   openModal("rowActionsModal"); 
 };
 
-// دوال فتح بطاقة الانخراط والـ QR Code
 window.openMembershipCard = () => {
   const rec = data.find(x => x.id === currentRowId); if(!rec) return;
   closeModal("rowActionsModal");
@@ -767,7 +765,6 @@ window.openMembershipCard = () => {
   
   $("idCardType").textContent = rec.subType === 'sessions' ? 'نظام حصص' : 'زمني';
   
-  // توليد QR Code بالـ ID السري فقط لتفادي مشاكل الحروف العربية
   const qrBox = $("idCardQR");
   qrBox.innerHTML = "";
   const qrData = "ID:" + String(rec.id); 
@@ -899,13 +896,22 @@ window.saveSubscription = async () => {
 
 window.printReceiptAction = () => { 
   document.body.classList.add("print-mode-receipt"); 
+  $("receiptModal").classList.add("print-active");
   window.print(); 
-  setTimeout(()=>document.body.classList.remove("print-mode-receipt"), 500); 
+  setTimeout(()=>{
+    document.body.classList.remove("print-mode-receipt");
+    $("receiptModal").classList.remove("print-active");
+  }, 500); 
 };
+
 window.printIdCardAction = () => { 
   document.body.classList.add("print-mode-idcard"); 
+  $("idCardModal").classList.add("print-active");
   window.print(); 
-  setTimeout(()=>document.body.classList.remove("print-mode-idcard"), 500); 
+  setTimeout(()=>{
+    document.body.classList.remove("print-mode-idcard");
+    $("idCardModal").classList.remove("print-active");
+  }, 500); 
 };
 
 window.openReceiptAction = () => {
