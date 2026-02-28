@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>لوحة تسيير الاشتراكات - v12.9.19</title>
+<title>لوحة تسيير الاشتراكات - v12.9.23</title>
 
 <meta name="theme-color" content="#070a12" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -12,6 +12,46 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+<script>
+const _urlParams = new URLSearchParams(window.location.search);
+const _portalData = _urlParams.get('p');
+
+if (_portalData) {
+    window.onload = () => {
+        try {
+            const jsonStr = decodeURIComponent(atob(_portalData));
+            const d = JSON.parse(jsonStr);
+            document.body.innerHTML = `
+            <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: radial-gradient(circle at 50% -20%, #7c5cff30, transparent 60%), #070a12; font-family: system-ui, -apple-system, sans-serif; direction: rtl;">
+                <div style="width: 100%; max-width: 400px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 35px 25px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); backdrop-filter: blur(20px);">
+                    <div style="font-size: 50px; margin-bottom: 10px; filter: drop-shadow(0 10px 15px rgba(124,92,255,0.3));">👤</div>
+                    <h2 style="color: #eaf0ff; margin: 0 0 5px 0; font-size: 22px; font-weight: 900;">${d.sn}</h2>
+                    <div style="color: rgba(234,240,255,0.5); font-size: 13px; margin-bottom: 30px; letter-spacing: 1px;">بوابة المشترك الرقمية</div>
+                    <h1 style="color: white; font-size: 28px; margin: 0 0 10px 0; font-weight: 900;">${d.n}</h1>
+                    <div style="display: inline-block; background: rgba(124,92,255,0.15); color: #c4b5fd; padding: 6px 16px; border-radius: 99px; font-weight: bold; font-size: 14px; border: 1px solid rgba(124,92,255,0.3); margin-bottom: 30px;">${d.srv}</div>
+                    <div style="background: rgba(0,0,0,0.3); border-radius: 18px; padding: 20px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.03); text-align: right;">
+                        <div style="color: rgba(234,240,255,0.5); font-size: 13px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;"><span>📊</span> تفاصيل الاشتراك:</div>
+                        ${d.ty === 'sessions'
+                            ? `<div style="font-size: 16px; color: white; font-weight: bold;">متبقي <span style="color: #10b981; font-size: 26px; font-weight: 900; margin: 0 4px;">${d.sl}</span> من ${d.st} حصة</div>`
+                            : `<div style="font-size: 15px; color: white; font-weight: bold; line-height: 1.8;">البداية: <span style="color:#eaf0ff;">${d.sd}</span><br>الانتهاء: <span style="color:#ef4444; font-size:18px;">${d.ed}</span></div>`
+                        }
+                    </div>
+                    <div style="background: ${d.db > 0 ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)'}; border-radius: 18px; padding: 20px; border: 1px solid ${d.db > 0 ? 'rgba(239,68,68,0.2)' : 'rgba(16,185,129,0.2)'}; text-align: right;">
+                        <div style="color: ${d.db > 0 ? '#fca5a5' : '#6ee7b7'}; font-size: 13px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;"><span>💳</span> الوضعية المالية:</div>
+                        <div style="font-size: 18px; color: ${d.db > 0 ? '#ef4444' : '#10b981'}; font-weight: bold;">
+                            ${d.db > 0 ? `متبقي للدفع: <span style="font-size: 24px; font-weight: 900;">${d.db}</span> ${d.cr}` : 'خالص بالكامل 🟢'}
+                        </div>
+                    </div>
+                    <div style="margin-top: 35px; font-size: 11px; color: rgba(234,240,255,0.2);">Powered by Subscription Manager v12</div>
+                </div>
+            </div>`;
+        } catch(e) {
+            document.body.innerHTML = `<div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #070a12;"><div style="text-align:center; padding:50px; color:#ef4444; background: rgba(239,68,68,0.1); border-radius:20px; border: 1px solid rgba(239,68,68,0.3);">❌<br><br>عذراً، الرابط تالف أو غير صالح.</div></div>`;
+        }
+    };
+}
+</script>
 
 <style>
 :root{
@@ -67,13 +107,13 @@ input[type="checkbox"] { appearance: none; width: 18px; height: 18px; border: 2p
 input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
 input[type="checkbox"]:checked::after { content: "✔"; position: absolute; color: white; font-size: 12px; left: 3px; top: -1px; font-weight: bold; }
 
-/* 🌟 الجدول الكلاسيكي القوي والمستقر - خالي من أخطاء الموبايل 🌟 */
-.tableWrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-table { width: 100%; border-collapse: collapse; min-width: 850px; }
-thead th { position: sticky; top: 0; z-index: 5; background: rgba(0,0,0,0.3); color: var(--muted); text-align: right; font-size: 12px; font-weight: 900; padding: 12px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
-tbody tr { transition: background 0.2s; }
-tbody tr:hover { background: rgba(255,255,255,0.02); }
-tbody td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; white-space: nowrap; }
+/* 🌟 الجدول الكلاسيكي القوي 🌟 */
+.tableWrap { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; border-top: 1px solid var(--line); }
+table { width: 100%; border-collapse: collapse; min-width: 900px; text-align: right; }
+thead th { position: sticky; top: 0; z-index: 5; background: rgba(0,0,0,0.4); color: var(--muted); padding: 14px 12px; border-bottom: 1px solid var(--line); font-size: 12px; font-weight: 900; white-space: nowrap; }
+tbody tr { transition: background 0.2s; border-bottom: 1px solid rgba(255,255,255,0.05); }
+tbody tr:hover { background: rgba(255,255,255,0.03); }
+tbody td { padding: 12px; vertical-align: middle; white-space: nowrap; }
 
 tr.expired-row{ background: rgba(239,68,68,.08); }
 tr.expiring-row{ background: rgba(245,158,11,.06); }
@@ -161,74 +201,13 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 .flex-row-receipt span.label { color: #64748b; }
 .flex-row-receipt strong.val, .flex-row-receipt span.val { color: #0f172a; text-align: left; }
 </style>
-
-<script>
-// 🌟 السحر التقني: استكشاف ما إذا كان الزائر "عميلاً" أم "مديراً" 🌟
-const _urlParams = new URLSearchParams(window.location.search);
-const _portalData = _urlParams.get('p');
-
-if (_portalData) {
-    // ==========================================
-    // 🌐 وضع بوابة العميل (Client Portal Mode) 🌐
-    // ==========================================
-    window.onload = () => {
-        try {
-            // فك التشفير عن الرابط
-            const jsonStr = decodeURIComponent(escape(atob(_portalData)));
-            const d = JSON.parse(jsonStr);
-            
-            // تدمير واجهة الإدارة وبناء واجهة بطاقة العميل الفخمة
-            document.body.innerHTML = `
-            <div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; background: radial-gradient(circle at 50% -20%, #7c5cff30, transparent 60%), #070a12; font-family: system-ui, -apple-system, sans-serif; direction: rtl;">
-                <div style="width: 100%; max-width: 400px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 35px 25px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); backdrop-filter: blur(20px);">
-                    <div style="font-size: 50px; margin-bottom: 10px; filter: drop-shadow(0 10px 15px rgba(124,92,255,0.3));">👤</div>
-                    <h2 style="color: #eaf0ff; margin: 0 0 5px 0; font-size: 22px; font-weight: 900;">${d.sn}</h2>
-                    <div style="color: rgba(234,240,255,0.5); font-size: 13px; margin-bottom: 30px; letter-spacing: 1px;">بوابة المشترك الرقمية</div>
-
-                    <h1 style="color: white; font-size: 28px; margin: 0 0 10px 0; font-weight: 900;">${d.n}</h1>
-                    <div style="display: inline-block; background: rgba(124,92,255,0.15); color: #c4b5fd; padding: 6px 16px; border-radius: 99px; font-weight: bold; font-size: 14px; border: 1px solid rgba(124,92,255,0.3); margin-bottom: 30px;">${d.srv}</div>
-
-                    <div style="background: rgba(0,0,0,0.3); border-radius: 18px; padding: 20px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.03); text-align: right;">
-                        <div style="color: rgba(234,240,255,0.5); font-size: 13px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;"><span>📊</span> تفاصيل الاشتراك:</div>
-                        ${d.ty === 'sessions'
-                            ? `<div style="font-size: 16px; color: white; font-weight: bold;">متبقي <span style="color: #10b981; font-size: 26px; font-weight: 900; margin: 0 4px;">${d.sl}</span> من ${d.st} حصة</div>`
-                            : `<div style="font-size: 15px; color: white; font-weight: bold; line-height: 1.8;">البداية: <span style="color:#eaf0ff;">${d.sd}</span><br>الانتهاء: <span style="color:#ef4444; font-size:18px;">${d.ed}</span></div>`
-                        }
-                    </div>
-
-                    <div style="background: ${d.db > 0 ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)'}; border-radius: 18px; padding: 20px; border: 1px solid ${d.db > 0 ? 'rgba(239,68,68,0.2)' : 'rgba(16,185,129,0.2)'}; text-align: right;">
-                        <div style="color: ${d.db > 0 ? '#fca5a5' : '#6ee7b7'}; font-size: 13px; margin-bottom: 8px; display: flex; align-items: center; gap: 6px;"><span>💳</span> الوضعية المالية:</div>
-                        <div style="font-size: 18px; color: ${d.db > 0 ? '#ef4444' : '#10b981'}; font-weight: bold;">
-                            ${d.db > 0 ? `متبقي للدفع: <span style="font-size: 24px; font-weight: 900;">${d.db}</span> ${d.cr}` : 'خالص بالكامل 🟢'}
-                        </div>
-                    </div>
-
-                    <div style="margin-top: 35px; font-size: 11px; color: rgba(234,240,255,0.2);">Powered by Subscription Manager v12.9.19</div>
-                </div>
-            </div>
-            `;
-        } catch(e) {
-            document.body.innerHTML = `<div style="min-height: 100vh; display: flex; align-items: center; justify-content: center; background: #070a12;"><div style="text-align:center; padding:50px; color:#ef4444; background: rgba(239,68,68,0.1); border-radius:20px; border: 1px solid rgba(239,68,68,0.3);">❌<br><br>عذراً، الرابط تالف أو غير صالح.</div></div>`;
-        }
-    };
-} else {
-    // ==========================================
-    // ⚙️ وضع الإدارة (Admin Dashboard Mode) ⚙️
-    // ==========================================
-    // (فقط إذا لم يكن هناك رابط للعميل، سيتم تشغيل كود اللوحة بالكامل أدناه)
-}
-</script>
-
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 
 <body>
-<div class="container" id="adminAppContainer">
+<div class="container" id="adminAppContainer" style="display: none;">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.19 PWA</span></h1>
-    <div class="sub">⚡ النسخة الذهبية الكبرى: تم دمج بوابة العميل الذكية والجدول الكلاسيكي.</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.23 PWA</span></h1>
+    <div class="sub">⚡ النسخة الكاملة والمستقرة: جدول كلاسيكي قوي، تشفير آمن، وبوابة للعميل.</div>
   </div>
 
   <div class="card">
@@ -552,7 +531,7 @@ if (_portalData) {
       <div style="font-size:12px; color:var(--accent); margin-bottom:8px; font-weight:bold;">سجل الدفعات السابقة:</div>
       <div style="max-height: 200px; overflow: auto; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
         <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
-          <thead style="background: rgba(255,255,255,0.05);"><tr><th style="padding: 10px; text-align: right; color: var(--muted);">التاريخ والوقت</th><th style="padding: 10px; text-align: left; color: var(--muted);">الدفعة المالية</th></tr></thead>
+          <thead style="background: rgba(255,255,255,0.05);"><tr><th style="padding: 10px; text-align: right; color: var(--muted);">التاريخ والوقت</th><th style="padding: 10px; text-align: left; color: var(--muted);">المبلغ الذي تم دفعه</th></tr></thead>
           <tbody id="paymentTbody"></tbody>
         </table>
       </div>
@@ -617,7 +596,7 @@ if (_portalData) {
         <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px;" onclick="window.actCopyEmailAction()">📋 نسخ Email</button>
         <button class="btn soft" id="btnViewAttendance" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #10b981; border-color: rgba(16,185,129,.3);" onclick="window.openAttendanceLog()">📅 سجل الحضور</button>
         <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #fbbf24; border-color: rgba(251,191,36,.3);" onclick="window.openPaymentModal()">💸 الدفعات والديون</button>
-        <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #c084fc; border-color: rgba(192,132,252,.3); width: 100%;" onclick="window.copyPortalLink()">🌐 نسخ رابط بوابة العميل الذكية</button>
+        <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #c084fc; border-color: rgba(192,132,252,.3); width: 100%; font-weight:bold; background: rgba(192,132,252,0.1);" onclick="window.copyPortalLink()">🌐 نسخ رابط بوابة العميل الذكية</button>
       </div>
 
       <div style="padding-top: 15px; border-top: 1px solid rgba(239,68,68,0.2);">
@@ -716,7 +695,6 @@ window.copyPortalLink = () => {
     let debt = (parseFloat(rec.price)||0) - (parseFloat(rec.paidAmount)||0);
     if(debt < 0) debt = 0;
 
-    // تغليف بيانات العميل في كبسولة صغيرة جداً
     const payload = {
         n: rec.name || "عميل",
         srv: rec.serviceType || "غير محدد",
@@ -730,26 +708,578 @@ window.copyPortalLink = () => {
         sn: storeSettings.name || "المؤسسة"
     };
 
-    // تشفير الكبسولة وتوليد الرابط النهائي
-    const jsonStr = JSON.stringify(payload);
-    const base64 = btoa(unescape(encodeURIComponent(jsonStr)));
-    const link = window.location.origin + window.location.pathname + "?p=" + base64;
+    try {
+        const jsonStr = JSON.stringify(payload);
+        const base64 = btoa(encodeURIComponent(jsonStr));
+        const link = window.location.origin + window.location.pathname + "?p=" + base64;
 
-    // نسخ الرابط تلقائياً
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(link).then(() => {
-            showToast("تم نسخ رابط البوابة بنجاح 🔗");
-            closeModal("rowActionsModal");
-        }).catch(() => {
-            prompt("فشل النسخ التلقائي، قم بنسخ الرابط يدوياً:", link);
-            closeModal("rowActionsModal");
-        });
-    } else {
-        prompt("متصفحك لا يدعم النسخ التلقائي، انسخ الرابط يدوياً:", link);
+        const textArea = document.createElement("textarea");
+        textArea.value = link;
+        textArea.style.position = "fixed"; 
+        textArea.style.left = "-9999px"; 
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand("copy");
+        document.body.removeChild(textArea);
+
+        showToast("تم نسخ رابط بوابة العميل بنجاح 🔗");
         closeModal("rowActionsModal");
+    } catch(err) {
+        showToast("حدث خطأ أثناء توليد الرابط", "err");
     }
 };
-</script>
 
-</div> </body>
+window.openSideMenu = () => { $("sideMenu").classList.add("open"); $("menuBackdrop").classList.add("open"); };
+window.closeSideMenu = () => { $("sideMenu").classList.remove("open"); $("menuBackdrop").classList.remove("open"); };
+
+window.addEventListener('DOMContentLoaded', () => {
+    if(!_portalData) {
+        document.getElementById('adminAppContainer').style.display = 'block';
+        data = loadLocalBackup();
+        window.render();
+        setTimeout(() => {
+            if(data.length === 0 && !currentUser) {
+                $("syncVal").textContent = "أوفلاين 📴";
+            }
+        }, 3000);
+    }
+});
+
+let data = []; let packagesData = []; let editingId = null; let currentRowId = null; let currentFilter = "all"; 
+let selectedIds = new Set(); let extendMode = "single"; let currentUser = null; let currentRole = null;
+let lastDeletedData = null; let storeSettings = { name: "المؤسسة", logo: "" }; let editingPkgId = null;
+window.currentPage = 1; window.itemsPerPage = 50; let bulkWaQueue = [];
+
+try {
+    if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    var auth = firebase.auth(); 
+    var db = firebase.database();
+} catch(e) {}
+
+window.openModal = (id) => { const el = $(id); if(el) el.setAttribute("aria-hidden","false"); };
+window.closeModal = (id) => { const el = $(id); if(el) el.setAttribute("aria-hidden","true"); if(id === 'receiptModal' || id === 'idCardModal') document.title = BASE_APP_TITLE; };
+window.showToast = (m, type="ok") => { const t=$("toast"); t.textContent=m; t.style.borderColor = type==="err"?"#ef4444":"#22c55e"; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"), 3000); };
+function todayISO(){ const d=new Date(); d.setHours(0,0,0,0); return d.toISOString().slice(0,10); }
+
+function toDate(iso){ 
+    if(!iso) return new Date();
+    const d = new Date(iso+"T00:00:00"); d.setHours(0,0,0,0); 
+    return isNaN(d) ? new Date() : d;
+}
+
+function saveLocalBackup(){ 
+  localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(data)); 
+  localStorage.setItem(LOCAL_PACKAGES_KEY, JSON.stringify(packagesData));
+}
+
+function loadLocalBackup(){ 
+  try { const j = JSON.parse(localStorage.getItem(LOCAL_BACKUP_KEY)); data = Array.isArray(j) ? j : []; } catch { data = []; } 
+  try { const p = JSON.parse(localStorage.getItem(LOCAL_PACKAGES_KEY)); packagesData = Array.isArray(p) ? p : []; } catch { packagesData = []; }
+  window.renderPackages();
+  return data;
+}
+
+function setSyncState(state){ const chip = $("syncChip"); const val = $("syncVal"); chip.className = "statChip sync " + state; if(!navigator.onLine) val.textContent = "أوفلاين 📴"; else if(state==="saving") val.textContent = "جاري الحفظ..."; else if(state==="ok") { const d = new Date(); val.textContent = d.getHours()+":"+String(d.getMinutes()).padStart(2,"0") + " ✅"; } else if(state==="fail") { val.textContent = "خطأ ❌"; chip.style.borderColor="var(--err)"; chip.style.background="rgba(239,68,68,0.1)"; } }
+
+async function logAction(actionName, detailsStr) { if (!currentUser || typeof db === 'undefined') return; try { await db.ref("logs").push({ email: currentUser.email, action: actionName, details: detailsStr || "-", time: new Date().toISOString() }); } catch(e) {} }
+
+let html5QrcodeScanner;
+window.openScannerModal = () => { openModal('scannerModal'); if (typeof Html5QrcodeScanner !== "undefined") { if (!html5QrcodeScanner) { html5QrcodeScanner = new Html5QrcodeScanner("qr-reader", { fps: 10, qrbox: {width: 250, height: 250} }, false); } html5QrcodeScanner.render(onScanSuccess, onScanFailure); } else { $("qr-reader-results").textContent = "لم يتم تحميل مكتبة الكاميرا، قد يكون متصفحك يمنعها."; } };
+window.closeScannerModal = () => { closeModal('scannerModal'); if (html5QrcodeScanner) { html5QrcodeScanner.clear().catch(e => {}); } };
+function onScanSuccess(decodedText, decodedResult) { if(decodedText.startsWith("ID:")) { window.closeScannerModal(); const scId = decodedText.split("ID:")[1]; window.processScannedId(scId); } else { $("qr-reader-results").textContent = "رمز غير صالح! يرجى مسح بطاقة انخراط نظامية."; } }
+function onScanFailure(error) {}
+
+window.processScannedId = (id) => {
+  const rec = data.find(x => x.id === id);
+  if(!rec) return showToast("هذا المشترك غير مسجل في النظام!", "err");
+  currentRowId = rec.id;
+  const alertD = parseInt($("alertDays")?.value) || 7;
+  const st = getStatus(rec, alertD);
+  $("chkInName").textContent = rec.name; $("chkInService").textContent = rec.serviceType; $("chkInStatus").textContent = st.label; $("chkInStatus").className = "badge " + st.cls;
+  const btnAct = $("btnChkInAction");
+  if(st.key === 'expired') { $("chkInAlert").innerHTML = "❌ الاشتراك منتهي! لا يمكن الدخول."; $("chkInAlert").style.color = "#ef4444"; btnAct.style.display = "none"; } 
+  else { $("chkInAlert").innerHTML = "✅ الاشتراك صالح، يمكن الدخول."; $("chkInAlert").style.color = "#10b981"; btnAct.style.display = "block"; btnAct.style.background = "#10b981"; btnAct.style.borderColor = "#059669"; if(rec.subType === 'sessions') { btnAct.textContent = `✔️ خصم حصة وتسجيل الدخول (باقي: ${rec.sessionsLeft})`; } else { btnAct.textContent = `✔️ تسجيل الدخول (زمني)`; } btnAct.onclick = () => { window.markAttendance(rec.id); closeModal('checkInModal'); }; }
+  openModal('checkInModal');
+};
+
+let selectedLogIds = new Set();
+window.updateLogBulkUI = () => { if(selectedLogIds.size > 0) { $("deleteSelectedLogsBtn").style.display = "block"; $("deleteSelectedLogsBtn").textContent = `🗑️ حذف (${selectedLogIds.size})`; } else { $("deleteSelectedLogsBtn").style.display = "none"; $("selectAllLogs").checked = false; } };
+window.toggleAllLogs = (e) => { const isChkd = e.target.checked; document.querySelectorAll(".logChk").forEach(chk => { chk.checked = isChkd; if(isChkd) selectedLogIds.add(chk.value); else selectedLogIds.delete(chk.value); }); window.updateLogBulkUI(); };
+$("auditTbody").addEventListener("change", (e) => { if(e.target.classList.contains("logChk")) { if(e.target.checked) selectedLogIds.add(e.target.value); else selectedLogIds.delete(e.target.value); window.updateLogBulkUI(); } });
+window.deleteSelectedLogs = async () => { if(!confirm(`تأكيد حذف ${selectedLogIds.size} من السجلات نهائياً؟`)) return; setSyncState("saving"); for(let id of selectedLogIds) { await db.ref("logs/" + id).remove(); } selectedLogIds.clear(); window.updateLogBulkUI(); setSyncState("ok"); showToast("تم الحذف"); window.openAuditLog(); };
+window.openAuditLog = async () => { selectedLogIds.clear(); window.updateLogBulkUI(); const tb = $("auditTbody"); tb.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:20px;'>جاري تحميل السجل... ⏳</td></tr>"; openModal("auditLogModal"); try { const snap = await db.ref("logs").orderByChild("time").limitToLast(100).once("value"); const logsObj = snap.val() || {}; tb.innerHTML = ""; const logsArray = Object.entries(logsObj).map(([key, val]) => ({id: key, ...val})).sort((a,b) => new Date(b.time) - new Date(a.time)); if(logsArray.length === 0) { tb.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:20px; color:var(--muted);'>لا توجد نشاطات</td></tr>"; return; } logsArray.forEach(l => { const d = new Date(l.time); const timeStr = d.toLocaleDateString('en-GB') + " - " + d.toLocaleTimeString('en-GB'); let actionColor = "var(--text)"; if(l.action.includes("حذف")) actionColor = "#ef4444"; else if(l.action.includes("إضافة")) actionColor = "#22c55e"; else if(l.action.includes("تعديل") || l.action.includes("تجديد") || l.action.includes("تسديد")) actionColor = "#f59e0b"; const isChecked = selectedLogIds.has(l.id) ? "checked" : ""; tb.innerHTML += `<tr><td style="text-align: center;"><input type="checkbox" class="logChk" value="${l.id}" ${isChecked}></td><td style="direction:ltr; text-align:right; color:var(--muted);">${timeStr}</td><td>${l.email}</td><td style="color:${actionColor}; font-weight:bold;">${l.action}</td><td>${l.details}</td></tr>`; }); } catch(err) {} };
+
+if(typeof auth !== 'undefined') {
+    auth.onAuthStateChanged(async (u)=>{ 
+        currentUser = u; 
+        if(u){ 
+            try { const roleSnap = await db.ref("admins/" + u.uid).once("value"); let roleData = roleSnap.val(); if(roleData === true) { try { roleData = { role: "owner", email: u.email }; await db.ref("admins/" + u.uid).set(roleData); } catch(writeErr) { roleData = { role: "owner", email: u.email }; } } currentRole = (roleData && roleData.role) ? roleData.role : "admin"; } catch(e) { currentRole = "admin"; } 
+            $("closeAuthBtn").style.display = "block"; closeModal("authModal"); await window.loadData(); 
+        } else { 
+            currentRole = null; data = []; packagesData = []; window.render(); $("closeAuthBtn").style.display = "none"; openModal("authModal"); 
+        } 
+        window.updateAuthUI(); 
+    });
+}
+
+window.updateAuthUI = () => { if(currentUser) { $("authLoginSection").style.display = "none"; $("authLoggedInSection").style.display = "block"; const iconEl = $("authStatusIcon"); const textEl = $("authStateText"); if (currentRole === "owner") { iconEl.innerHTML = "👑"; iconEl.style.background = "linear-gradient(135deg, rgba(245,158,11,0.2), rgba(245,158,11,0.05))"; iconEl.style.borderColor = "rgba(245,158,11,0.4)"; textEl.innerHTML = `<span style="color:var(--warn); font-size:22px; font-weight:900;">المالك</span><br/><span style="color:var(--text); font-size:15px; margin-top:8px; display:inline-block; direction:ltr;">${currentUser.email}</span>`; } else { iconEl.innerHTML = "👤"; iconEl.style.background = "linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.05))"; iconEl.style.borderColor = "rgba(34,197,94,0.3)"; textEl.innerHTML = `<span style="color:var(--text); font-size:20px; font-weight:900;">أدمن</span><br/><span style="color:var(--text); font-size:15px; margin-top:8px; display:inline-block; direction:ltr;">${currentUser.email}</span>`; } $("ownerDashboard").style.display = currentRole === "owner" ? "block" : "none"; } else { $("authLoginSection").style.display = "block"; $("authLoggedInSection").style.display = "none"; } };
+
+window.handleLogoUpload = (e) => { 
+  const file = e.target.files[0]; 
+  if(file){ 
+    const reader = new FileReader(); 
+    reader.onload = (ev) => { 
+      const img = new Image();
+      img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 300; 
+          const scaleSize = MAX_WIDTH / img.width;
+          canvas.width = MAX_WIDTH;
+          canvas.height = img.height * scaleSize;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7); 
+          $("logoPreview").src = compressedDataUrl; 
+          $("logoPreview").style.display = "block"; 
+          $("logoEmojiFallback").style.display = "none"; 
+      };
+      img.src = ev.target.result;
+    }; 
+    reader.readAsDataURL(file); 
+  } 
+};
+
+window.saveStoreSettings = async () => { const name = $("setStoreName").value.trim() || "المؤسسة"; const logo = $("logoPreview").src || ""; storeSettings = { name, logo }; try { setSyncState("saving"); await db.ref("settings/storeInfo").set(storeSettings); setSyncState("ok"); closeModal("storeSettingsModal"); showToast("تم حفظ الإعدادات ✨"); } catch(e) { showToast("ليس لديك صلاحية", "err"); } };
+window.confirmAddAdmin = async () => { const email = $("newAdminEmail").value.trim(); const pass = $("newAdminPass").value; const role = $("newAdminRole").value; if(!email || pass.length < 6) return showToast("بيانات غير صالحة", "err"); try { setSyncState("saving"); const secondaryApp = firebase.initializeApp(FIREBASE_CONFIG, "SecondaryApp"); const userCredential = await secondaryApp.auth().createUserWithEmailAndPassword(email, pass); await db.ref("admins/" + userCredential.user.uid).set({ role: role, email: email }); await secondaryApp.auth().signOut(); await secondaryApp.delete(); closeModal("addAdminModal"); $("newAdminEmail").value = ""; $("newAdminPass").value = ""; showToast(`✅ تم الإنشاء!`); setSyncState("ok"); } catch (error) { setSyncState("fail"); } };
+window.loadAdminsList = async () => { openModal("manageAdminsModal"); const tb = $("adminsTbody"); tb.innerHTML = "<tr><td colspan='3' style='text-align:center; padding:20px;'>جاري التحميل...</td></tr>"; try { const snap = await db.ref("admins").once("value"); const adminsObj = snap.val() || {}; tb.innerHTML = ""; for(let uid in adminsObj) { let uData = adminsObj[uid]; let isOwner = uData.role === "owner" || uData === true; let actionBtn = uid === currentUser.uid ? `<span style="color:var(--muted); font-size:12px;">حسابك</span>` : `<button class="btn danger" style="padding:6px 10px; font-size:12px; border-radius:10px;" onclick="window.revokeAdmin('${uid}')">سحب</button>`; tb.innerHTML += `<tr><td>${uData.email || "غير محدد"}</td><td>${isOwner?"مالك 👑":"أدمن 👤"}</td><td>${actionBtn}</td></tr>`; } } catch(err) {} };
+window.revokeAdmin = async (uid) => { if(confirm("تأكيد السحب؟")) { await db.ref("admins/" + uid).remove(); showToast("تم السحب ✅"); window.loadAdminsList(); } };
+
+window.loadDataOffline = () => { data = loadLocalBackup(); window.render(); window.renderPackages(); };
+window.loadData = async () => { 
+  if(!navigator.onLine) { window.loadDataOffline(); return; } 
+  try { 
+    setSyncState("saving"); 
+    try { const settingsSnap = await db.ref("settings/storeInfo").once('value'); if(settingsSnap.exists()) { storeSettings = settingsSnap.val(); $("setStoreName").value = storeSettings.name || ""; if(storeSettings.logo) { $("logoPreview").src = storeSettings.logo; $("logoPreview").style.display = "block"; $("logoEmojiFallback").style.display = "none"; } } } catch(errSettings) {} 
+    try { const pkgSnap = await db.ref("packages").once('value'); packagesData = pkgSnap.exists() ? Object.values(pkgSnap.val()) : []; window.renderPackages(); } catch(errPkg) {}
+    const snap = await db.ref("subscriptions").once('value'); data = snap.exists() ? Object.values(snap.val()) : []; saveLocalBackup(); setSyncState("ok"); window.render(); 
+  } catch(e) { setSyncState("fail"); window.loadDataOffline(); } 
+};
+async function firebasePush() { if(!navigator.onLine) return; try { setSyncState("saving"); await db.ref("subscriptions").set(data); saveLocalBackup(); setSyncState("ok"); } catch(e) { showToast("خطأ", "err"); } }
+
+function getStatus(r, alertDays) {
+  if (r.subType === 'sessions') {
+    let left = parseInt(r.sessionsLeft) || 0;
+    if (left <= 0) return { key: "expired", label: "منتهي الرصيد", cls: "err", text: "0 حصة" };
+    if (left <= 2) return { key: "expiring", label: "قارب على الانتهاء", cls: "warn", text: `بقي ${left} حصص` };
+    return { key: "active", label: "رصيد فعّال", cls: "ok", text: `بقي ${left} حصص` };
+  } else {
+    if (!r.end) return { key:"expired", label:"غير محدد", cls:"err", text:`-` };
+    const left = Math.round((toDate(r.end) - toDate(todayISO()))/(1000*60*60*24));
+    if (isNaN(left)) return { key:"expired", label:"خطأ تاريخ", cls:"err", text:`-` };
+    if(left < 0) return { key:"expired", label:"منتهي", cls:"err", text:`منذ ${Math.abs(left)} يوم` };
+    if(left <= alertDays) return { key:"expiring", label:"قريب ينتهي", cls:"warn", text:`بقي ${left} يوم` };
+    return { key:"active", label:"فعّال", cls:"ok", text:`بقي ${left} يوم` };
+  }
+}
+
+window.toggleSubType = () => {
+  const val = $("subType").value;
+  if(val === 'sessions') { $("timeFieldsGrp").style.display = "none"; $("sessionsFieldsGrp").style.display = "contents"; } 
+  else { $("timeFieldsGrp").style.display = "contents"; $("sessionsFieldsGrp").style.display = "none"; }
+};
+
+window.changePage = (step) => { window.currentPage += step; window.render(); };
+
+window.render = () => {
+  try {
+      const searchInput = $("search"); const q = searchInput ? (searchInput.value || "").trim().toLowerCase() : "";
+      const tb = $("tbody"); if(!tb) return; tb.innerHTML = ""; if($("selectAll")) $("selectAll").checked = false;
+      const alertEl = $("alertDays"); const alertD = (alertEl && alertEl.value) ? parseInt(alertEl.value) : 7;
+      
+      let filteredRows = data.filter(r => { 
+        if(!r) return false;
+        const n = (r.name || "").toString().toLowerCase(); const p = (r.phone || "").toString().toLowerCase();
+        const e = (r.email || "").toString().toLowerCase(); const srv = (r.serviceType || "").toString().toLowerCase(); 
+        const tagsSearch = (r.tags || "").toString().toLowerCase();
+        const match = !q || n.includes(q) || p.includes(q) || e.includes(q) || srv.includes(q) || tagsSearch.includes(q); 
+        const st = getStatus(r, alertD); 
+        if(currentFilter !== "all" && currentFilter !== st.key) return false; return match; 
+      });
+      
+      const totalPages = Math.ceil(filteredRows.length / window.itemsPerPage) || 1;
+      if (window.currentPage > totalPages) window.currentPage = totalPages;
+      if (window.currentPage < 1) window.currentPage = 1;
+      
+      const startIdx = (window.currentPage - 1) * window.itemsPerPage;
+      const paginatedRows = filteredRows.slice(startIdx, startIdx + window.itemsPerPage);
+
+      if(filteredRows.length === 0) { 
+        tb.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:40px; color:var(--muted); font-size:15px;">لا توجد بيانات 📭</td></tr>`; 
+        $("paginationControls").innerHTML = ""; 
+        return; 
+      }
+
+      paginatedRows.forEach(r => {
+        try {
+            const st = getStatus(r, alertD); const isChecked = selectedIds.has(r.id) ? "checked" : ""; const tr = document.createElement("tr");
+            if(st.key === "expired") tr.className = "expired-row"; else if(st.key === "expiring") tr.className = "expiring-row";
+            
+            let pStatus = r.paymentStatus || 'paid'; let payBadge = '';
+            if(pStatus === 'unpaid') payBadge = '<span class="badge err" style="padding:4px 6px; font-size:10px;">🔴 غير مدفوع</span>';
+            else if(pStatus === 'partial') { let rem = (parseFloat(r.price)||0) - (parseFloat(r.paidAmount)||0); payBadge = `<span class="badge warn" style="padding:4px 6px; font-size:10px;" title="المتبقي: ${rem}">🟡 جزئي (${r.paidAmount||0})</span>`; }
+            else payBadge = '<span class="badge ok" style="padding:4px 6px; font-size:10px;">🟢 خالص</span>';
+            
+            const hasNotes = r.notes && r.notes.trim() !== "";
+            const notesIcon = hasNotes ? `<span title="ملاحظات سرية" style="font-size:12px; margin-inline-start:6px; cursor:help;">📝</span>` : "";
+            
+            let tagsHtml = "";
+            if(r.tags && r.tags.trim() !== "") {
+              const tagsArray = r.tags.split(',').map(t => t.trim()).filter(t => t !== "");
+              tagsArray.forEach(t => { tagsHtml += `<span class="tag-pill">${t}</span>`; });
+            }
+
+            const serviceHtml = `<span class="service-badge">${r.serviceType || "غير محدد"}</span>`;
+            
+            let dateOrSessionHtml = "";
+            if(r.subType === 'sessions') {
+              dateOrSessionHtml = `<div style="font-weight:bold; font-size:14px; color:var(--text);">${r.sessionsLeft||0} / ${r.sessionsTotal||0} حصة</div>
+              <button class="btn soft" style="padding:4px 8px; font-size:10px; margin-top:4px; border-color:#22c55e; color:#22c55e;" onclick="window.markAttendance('${r.id}')">✔️ حضور</button>`;
+            } else {
+              dateOrSessionHtml = `<span style="color:var(--text)">م:</span> ${r.start||"-"}<br><span style="color:var(--text)">إ:</span> ${r.end||"-"}
+              <div style="margin-top:4px;"><button class="btn soft" style="padding:4px 8px; font-size:10px; border-color:#22c55e; color:#22c55e;" onclick="window.markAttendance('${r.id}')">✔️ تسجيل دخول</button></div>`;
+            }
+
+            tr.innerHTML = `
+              <td style="text-align: center;"><input type="checkbox" class="rowChk" value="${r.id}" ${isChecked}></td>
+              <td>
+                 <div style="font-weight:bold; color:var(--text); font-size:14px;">${r.name||"-"}${notesIcon}</div>
+                 ${r.email ? `<div style="font-size:11px; color:var(--muted); margin-bottom:4px; direction: ltr; text-align: right;">${r.email}</div>` : ''}
+                 <div>${tagsHtml}</div>
+              </td>
+              <td dir="ltr" style="text-align:right; font-size:14px;">${r.phone?`${r.countryCode||''} ${r.phone}`:'-'}</td>
+              <td><div style="margin-bottom:4px;">${serviceHtml}</div><div style="font-size:11px; color:var(--muted); font-weight:bold;">${r.subType === 'sessions' ? 'نظام حصص' : `المدة: ${r.months||0} شهر`}</div></td>
+              <td><div style="font-weight:bold; font-size:14px;">${r.price||0} <span style="font-size:10px; color:var(--muted);">${r.currency||'DZD'}</span></div><div style="margin-top:4px;">${payBadge}</div></td>
+              <td style="font-size:12px; color:var(--muted); line-height:1.6;">${dateOrSessionHtml}</td>
+              <td><div style="margin-bottom:4px;"><span class="badge ${st.cls}">${st.label}</span></div><div style="font-size:11px; font-weight:bold; color:${st.key === 'expired' ? 'var(--err)' : 'var(--text)'};">${st.text}</div></td>
+              <td><button class="actionPill" onclick="window.openRowActions('${r.id}')">⚡ إجراء</button></td>
+            `;
+            tb.appendChild(tr);
+        } catch(rowErr) {}
+      });
+
+      $("paginationControls").innerHTML = `
+        <button class="page-btn" onclick="window.changePage(1)" ${window.currentPage === totalPages ? 'disabled' : ''}>التالي ◀</button>
+        <span class="page-info">صفحة ${window.currentPage} من ${totalPages} <span style="margin: 0 8px; color:var(--line);">|</span> الإجمالي: ${filteredRows.length} مشترك</span>
+        <button class="page-btn" onclick="window.changePage(-1)" ${window.currentPage === 1 ? 'disabled' : ''}>▶ السابق</button>
+      `;
+  } catch(e) {}
+};
+
+window.markAttendance = async (id) => {
+  let rec = data.find(x => x.id === id);
+  if(rec) {
+    if (rec.subType === 'sessions' && rec.sessionsLeft <= 0) return showToast("الرصيد منتهي، لا يمكن الخصم!", "err");
+    if (rec.subType === 'time') {
+      const alertD = parseInt($("alertDays")?.value) || 7;
+      const st = getStatus(rec, alertD);
+      if(st.key === 'expired') return showToast("الاشتراك الزمني منتهي، لا يمكن الدخول!", "err");
+    }
+    if(rec.subType === 'sessions') rec.sessionsLeft--;
+    if(!rec.attendanceLog) rec.attendanceLog = [];
+    rec.attendanceLog.push({ time: new Date().toISOString() });
+    let logDetails = rec.subType === 'sessions' ? `الرصيد المتبقي: ${rec.sessionsLeft}` : `اشتراك زمني`;
+    logAction("تسجيل حضور ✔️", `العميل: ${rec.name}، ${logDetails}`);
+    setSyncState("saving"); await firebasePush(); window.render(); showToast("تم تسجيل الدخول بنجاح ✔️");
+  }
+};
+
+window.openAttendanceLog = () => {
+  const rec = data.find(x => x.id === currentRowId); if(!rec) return; closeModal("rowActionsModal");
+  $("attendanceClientName").textContent = `👤 ${rec.name}`; const tb = $("attendanceTbody"); tb.innerHTML = "";
+  if(!rec.attendanceLog || rec.attendanceLog.length === 0) { tb.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:20px; color:var(--muted);">لا يوجد سجل حضور لهذا المشترك بعد.</td></tr>`; } 
+  else {
+    const sortedLogs = [...rec.attendanceLog].reverse();
+    sortedLogs.forEach((log, index) => {
+      const d = new Date(log.time); const dateStr = d.toLocaleDateString('en-GB'); const timeStr = d.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'}); 
+      tb.innerHTML += `<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);"><td style="padding: 10px; color: var(--muted);">${sortedLogs.length - index}</td><td style="padding: 10px; text-align: right; font-weight: bold; color: var(--text);">${dateStr}</td><td style="padding: 10px; text-align: left; color: var(--accent); direction: ltr; font-weight: bold;">${timeStr}</td></tr>`;
+    });
+  } openModal("attendanceModal");
+};
+
+window.openPaymentModal = () => {
+  const rec = data.find(x => x.id === currentRowId); if(!rec) return; closeModal("rowActionsModal");
+  $("paymentClientName").textContent = `👤 ${rec.name} (${rec.serviceType})`;
+  
+  let total = parseFloat(rec.price) || 0; let paid = parseFloat(rec.paidAmount) || 0; let debt = total - paid;
+  
+  $("payTotal").textContent = total.toLocaleString(); $("payPaid").textContent = paid.toLocaleString(); $("payDebt").textContent = debt > 0 ? debt.toLocaleString() : "0";
+  
+  if(debt <= 0) { $("newPaymentWrap").style.display = "none"; } 
+  else { $("newPaymentWrap").style.display = "block"; $("newPaymentAmount").value = debt; }
+  
+  const tb = $("paymentTbody"); tb.innerHTML = "";
+  
+  if(!rec.paymentLog || rec.paymentLog.length === 0) {
+    if(paid > 0) { tb.innerHTML = `<tr><td style="padding: 10px; color: var(--muted);">دفعات سابقة (غير مفصلة)</td><td style="padding: 10px; text-align: left; color: #10b981; font-weight: bold; font-size:15px;">${paid.toLocaleString()} ${rec.currency||'DZD'}</td></tr>`; } 
+    else { tb.innerHTML = `<tr><td colspan="2" style="text-align:center; padding:15px; color:var(--muted);">لا يوجد سجل دفعات.</td></tr>`; }
+  } else {
+    const sortedLogs = [...rec.paymentLog].reverse();
+    sortedLogs.forEach((log) => {
+      const d = new Date(log.time); const dateStr = d.toLocaleDateString('en-GB') + " " + d.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'}); 
+      tb.innerHTML += `<tr style="border-bottom: 1px solid rgba(255,255,255,0.05);"><td style="padding: 10px; color: #eaf0ff; font-weight:bold;">${dateStr}</td><td style="padding: 10px; text-align: left; color: #10b981; font-weight: bold; font-size:15px;">${parseFloat(log.amount).toLocaleString()} ${rec.currency||'DZD'}</td></tr>`;
+    });
+  } openModal("paymentModal");
+};
+
+window.confirmNewPayment = async () => {
+  const amount = parseFloat($("newPaymentAmount").value);
+  if(isNaN(amount) || amount <= 0) return showToast("أدخل مبلغاً صحيحاً", "err");
+  const rec = data.find(x => x.id === currentRowId); if(!rec) return;
+
+  let currentPaid = parseFloat(rec.paidAmount) || 0; let total = parseFloat(rec.price) || 0;
+  rec.paidAmount = currentPaid + amount;
+  
+  if(rec.paidAmount >= total) { rec.paidAmount = total; rec.paymentStatus = 'paid'; } else { rec.paymentStatus = 'partial'; }
+  if(!rec.paymentLog) rec.paymentLog = [];
+  if(rec.paymentLog.length === 0 && currentPaid > 0) { rec.paymentLog.push({ time: new Date(rec.createdAt || Date.now()).toISOString(), amount: currentPaid, note: "دفعة أولية سابقة" }); }
+  
+  rec.paymentLog.push({ time: new Date().toISOString(), amount: amount, note: "تسديد" });
+  logAction("تسديد دفعة 💸", `العميل: ${rec.name}، مبلغ: ${amount}`);
+  setSyncState("saving"); await firebasePush(); window.render();
+  showToast(`تم تسديد ${amount} بنجاح ✅`); window.openPaymentModal(); 
+};
+
+window.updateBulkUI = () => { const bar = $("bulkBar"); if(selectedIds.size > 0) { bar.style.display = "flex"; $("selCount").textContent = `${selectedIds.size} محدد`; } else { bar.style.display = "none"; $("selectAll").checked = false; } };
+$("tbody").addEventListener("change", (e) => { if(e.target.classList.contains("rowChk")) { if(e.target.checked) selectedIds.add(e.target.value); else selectedIds.delete(e.target.value); window.updateBulkUI(); } });
+window.toggleSelectAll = (el) => { const isChkd = el.checked; document.querySelectorAll(".rowChk").forEach(chk => { chk.checked = isChkd; if(isChkd) selectedIds.add(chk.value); else selectedIds.delete(chk.value); }); window.updateBulkUI(); };
+window.clearSelectionAction = () => { selectedIds.clear(); window.render(); window.updateBulkUI(); };
+window.bulkDeleteAction = async () => { if(!confirm(`تأكيد حذف ${selectedIds.size} اشتراكات؟`)) return; logAction("حذف جماعي", `عدد ${selectedIds.size} اشتراكات`); lastDeletedData = data.filter(x => selectedIds.has(x.id)); data = data.filter(x => !selectedIds.has(x.id)); selectedIds.clear(); await firebasePush(); window.render(); window.updateBulkUI(); showToast("تم الحذف، التراجع ممكن من الأدوات 🗑️"); };
+
+window.bulkExtendAction = () => { 
+  extendMode = "bulk"; $("extendTitle").textContent = `تجديد ${selectedIds.size} مشترك`; 
+  $("extendValue").value = 1; $("extendUnit").value = "months"; $("lblExtendValue").textContent = "المدة المضافة (أو الحصص المضافة)"; openModal("extendModal"); 
+};
+window.confirmExtend = async () => { 
+  const val = parseInt($("extendValue").value); const unit = $("extendUnit").value; 
+  if(isNaN(val) || val < 1) return showToast("غير صالح", "err"); 
+  if(extendMode === "bulk") { logAction("تجديد جماعي", `عدد ${selectedIds.size} بمقدار ${val} ${unit}`); } 
+  else { const recToExtend = data.find(x => x.id === currentRowId); logAction("تجديد اشتراك", `الاسم: ${recToExtend.name}، إضافة: ${val} ${unit}`); } 
+  const processRecord = (rec) => { 
+    if(rec.subType === 'sessions') { rec.sessionsLeft = (parseInt(rec.sessionsLeft)||0) + val; rec.sessionsTotal = (parseInt(rec.sessionsTotal)||0) + val; } 
+    else { const endD = new Date(rec.end); if(unit === "months") { endD.setMonth(endD.getMonth() + val); rec.months = (parseInt(rec.months)||0) + val; } else { endD.setDate(endD.getDate() + val); } rec.end = endD.toISOString().split('T')[0]; } return rec; 
+  }; 
+  if(extendMode === "bulk") { data = data.map(x => selectedIds.has(x.id) ? processRecord(x) : x); selectedIds.clear(); window.updateBulkUI(); } 
+  else { data = data.map(x => x.id === currentRowId ? processRecord(x) : x); } await firebasePush(); window.render(); closeModal("extendModal"); showToast("تم التجديد 🔁"); 
+};
+
+window.openBulkWhatsAppModal = () => {
+  bulkWaQueue = data.filter(x => selectedIds.has(x.id) && x.phone && x.phone.trim() !== "");
+  if(bulkWaQueue.length === 0) return showToast("لم يتم تحديد أي عميل يملك رقم هاتف!", "err");
+  $("bulkWaCount").textContent = bulkWaQueue.length; window.updateBulkWaUI(); openModal("bulkWhatsAppModal");
+};
+window.updateBulkWaUI = () => {
+  if(bulkWaQueue.length === 0) { $("bulkWaCurrentTarget").textContent = "تم الإرسال للجميع ✅"; $("bulkWaCurrentTarget").style.color = "#22c55e"; $("btnSendNextWa").style.display = "none"; setTimeout(() => { closeModal("bulkWhatsAppModal"); }, 3000); return; }
+  $("btnSendNextWa").style.display = "inline-block"; $("bulkWaCurrentTarget").style.color = "var(--text)"; const nextUser = bulkWaQueue[0]; $("bulkWaCurrentTarget").textContent = `العميل التالي: ${nextUser.name} (${bulkWaQueue.length} متبقي)`;
+};
+window.sendNextBulkWhatsApp = () => {
+  if(bulkWaQueue.length === 0) return; const user = bulkWaQueue.shift(); const templateStr = $("bulkWaMsg").value;
+  let endDateStr = user.subType === 'sessions' ? `الرصيد المتبقي: ${user.sessionsLeft} حصة` : `تاريخ: ${user.end}`;
+  let msg = templateStr.replace(/{name}/g, user.name || "عميلنا العزيز").replace(/{end}/g, endDateStr).replace(/{service}/g, user.serviceType || "الخدمة");
+  let cleanPhone = ((user.countryCode||'')+user.phone).replace(/[^0-9+]/g, ''); logAction("رسالة واتساب جماعية", `إلى: ${user.name}`);
+  window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank'); window.updateBulkWaUI();
+};
+
+window.openRowActions = (id) => { 
+  currentRowId = id; const rec = data.find(x => x.id === id); $("rowActionsHint").textContent = rec.name; 
+  
+  const hasNotes = rec.notes && rec.notes.trim() !== ""; const btnNotes = $("btnViewNotes");
+  if(hasNotes) { btnNotes.disabled = false; btnNotes.style.opacity = "1"; btnNotes.onclick = window.openNotesAction; } 
+  else { btnNotes.disabled = true; btnNotes.style.opacity = "0.4"; btnNotes.onclick = null; }
+  
+  const btnMsg = $("btnMessengerAction");
+  if(btnMsg) {
+      if(rec.messengerLink && rec.messengerLink.trim() !== "") { btnMsg.disabled = false; btnMsg.style.opacity = "1"; }
+      else { btnMsg.disabled = true; btnMsg.style.opacity = "0.4"; }
+  }
+
+  const logCount = rec.attendanceLog ? rec.attendanceLog.length : 0; $("btnViewAttendance").textContent = `📅 سجل الحضور (${logCount})`;
+  openModal("rowActionsModal"); 
+};
+
+window.openMembershipCard = () => {
+  const rec = data.find(x => x.id === currentRowId); if(!rec) return; closeModal("rowActionsModal");
+  $("idCardStoreName").textContent = storeSettings.name || "المؤسسة"; $("idCardClientName").textContent = rec.name || "-"; $("idCardService").textContent = rec.serviceType || "غير محدد";
+  let alertD = parseInt($("alertDays")?.value) || 7; let st = getStatus(rec, alertD);
+  $("idCardStatus").textContent = st.label; $("idCardStatus").style.color = st.cls === 'ok' ? '#10b981' : (st.cls === 'warn' ? '#f59e0b' : '#ef4444');
+  $("idCardType").textContent = rec.subType === 'sessions' ? 'نظام حصص' : 'زمني';
+  const qrBox = $("idCardQR"); qrBox.innerHTML = "";
+  if(typeof QRCode !== 'undefined') { new QRCode(qrBox, { text: "ID:" + String(rec.id), width: 130, height: 130, colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.M }); } else { qrBox.innerHTML = "<span style='color:red;'>مكتبة QR محظورة</span>"; }
+  openModal("idCardModal");
+};
+
+window.openNotesAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.notes) return; closeModal("rowActionsModal"); $("viewNotesContent").textContent = rec.notes; openModal("viewNotesModal"); };
+
+window.actExtendAction = () => { extendMode = "single"; const rec = data.find(x => x.id === currentRowId); $("extendTitle").textContent = `تجديد لـ ${rec.name}`; $("lblExtendValue").textContent = rec.subType === 'sessions' ? "الحصص المضافة" : "المدة المضافة"; if(rec.subType === 'sessions') $("grpExtendUnit").style.display = "none"; else $("grpExtendUnit").style.display = "block"; $("extendValue").value = 1; $("extendUnit").value = "months"; closeModal("rowActionsModal"); openModal("extendModal"); };
+window.actCopyEmailAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.email) { closeModal("rowActionsModal"); return showToast("لا يوجد بريد.", "err"); } navigator.clipboard.writeText(rec.email); closeModal("rowActionsModal"); showToast("تم نسخ الإيميل 📋"); };
+window.actWhatsAppAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.phone) { closeModal("rowActionsModal"); return showToast("لا يوجد هاتف.", "err"); } let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, ''); let endTxt = rec.subType === 'sessions' ? `رصيدك المتبقي: ${rec.sessionsLeft} حصة` : `ينتهي بتاريخ: ${rec.end}`; window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`مرحباً ${rec.name}، نود تذكيرك بخصوص اشتراكك الذي ${endTxt}.`)}`, '_blank'); closeModal("rowActionsModal"); };
+
+window.actMessengerAction = () => { 
+  const rec = data.find(x => x.id === currentRowId); 
+  if(!rec || !rec.messengerLink) { closeModal("rowActionsModal"); return showToast("لا يوجد رابط تواصل مسجل لهذا العميل.", "err"); } 
+  let link = rec.messengerLink.trim();
+  if (link.includes("facebook.com/messages/t/")) { let id = link.split("facebook.com/messages/t/")[1].split("/")[0].split("?")[0]; link = "https://m.me/" + id; } 
+  else if (link.includes("facebook.com/profile.php?id=")) { let id = link.split("id=")[1].split("&")[0]; link = "https://m.me/" + id; } 
+  else if (link.includes("facebook.com/") && !link.includes("m.me")) { let id = link.split("facebook.com/")[1].split("/")[0].split("?")[0]; link = "https://m.me/" + id; }
+  logAction("مراسلة العميل", `إلى: ${rec.name}`);
+  window.open(link, '_blank'); closeModal("rowActionsModal"); 
+};
+
+window.actSMSAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.phone) { closeModal("rowActionsModal"); return showToast("لا يوجد هاتف مسجل لهذا العميل.", "err"); } let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, ''); let endTxt = rec.subType === 'sessions' ? `رصيدك المتبقي: ${rec.sessionsLeft} حصة` : `ينتهي بتاريخ: ${rec.end}`; let msg = `مرحباً ${rec.name}، نود تذكيرك بخصوص اشتراكك الذي ${endTxt}.`; logAction("إرسال SMS", `إلى: ${rec.name}`); window.open(`sms:${cleanPhone}?body=${encodeURIComponent(msg)}`, '_self'); closeModal("rowActionsModal"); };
+
+window.actDeleteAction = async () => { if(confirm("حذف المشترك نهائياً؟")) { const recToDelete = data.find(x => x.id === currentRowId); logAction("حذف اشتراك", `الاسم: ${recToDelete.name}`); lastDeletedData = data.filter(x => x.id === currentRowId); data = data.filter(x => x.id !== currentRowId); await firebasePush(); window.render(); closeModal("rowActionsModal"); showToast("تم الحذف 🗑️"); } };
+
+window.calcDebt = () => { const p = parseFloat($("price").value) || 0; let valRaw = $("paidAmount").value; let a = valRaw === "" ? p : (parseFloat(valRaw) || 0); let d = p - a; $("debtAmount").value = d > 0 ? d : 0; };
+window.handleQuickPlan = () => { if($("quickPlan").value) $("months").value = $("quickPlan").value; };
+
+async function firebasePushPackages() { if(!navigator.onLine) return; try { await db.ref("packages").set(packagesData); saveLocalBackup(); } catch(e) {} }
+
+window.renderPackages = () => {
+  const tb = $("packagesTbody"); if(tb) tb.innerHTML = ""; const sel = $("packageSelector"); if(sel) sel.innerHTML = '<option value="">✍️ لا أريد باقة، سأكتب البيانات بنفسي</option>';
+  if(packagesData.length === 0) { if(tb) tb.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--muted);">لا توجد باقات جاهزة.</td></tr>`; return; }
+  packagesData.forEach(p => { 
+    let typeTxt = p.type === 'sessions' ? `${p.value} حصص` : `${p.value} شهر`; 
+    if(tb) tb.innerHTML += `<tr><td style="font-weight:bold; color:var(--accent);">${p.name}</td><td>${p.serviceType}</td><td>${typeTxt}</td><td style="font-weight:bold;">${p.price}</td><td style="display:flex; gap:4px;">
+      <button class="btn soft" style="padding:6px 10px; font-size:12px; border-radius:10px;" onclick="window.editPackage('${p.id}')">✏️</button>
+      <button class="btn danger" style="padding:6px 10px; font-size:12px; border-radius:10px;" onclick="window.deletePackage('${p.id}')">🗑️</button>
+    </td></tr>`; 
+    if(sel) sel.innerHTML += `<option value="${p.id}">${p.name} - ${p.serviceType} (${p.price} DZD)</option>`; 
+  });
+};
+
+window.editPackage = (id) => {
+  const p = packagesData.find(x => x.id === id); if(!p) return;
+  editingPkgId = id; $("pkgName").value = p.name; $("pkgService").value = p.serviceType; $("pkgType").value = p.type; $("pkgValue").value = p.value; $("pkgPrice").value = p.price;
+  $("btnSavePackage").innerHTML = "💾 حفظ التعديل"; $("btnSavePackage").style.background = "#f59e0b"; $("btnSavePackage").style.borderColor = "#d97706";
+  $("btnCancelPkgEdit").style.display = "block";
+};
+
+window.cancelEditPackage = () => {
+  editingPkgId = null; $("pkgName").value = ""; $("pkgService").value = ""; $("pkgValue").value = ""; $("pkgPrice").value = "";
+  $("btnSavePackage").innerHTML = "➕ إضافة الباقة"; $("btnSavePackage").style.background = ""; $("btnSavePackage").style.borderColor = "";
+  $("btnCancelPkgEdit").style.display = "none";
+};
+
+window.savePackage = async () => { 
+  const name = $("pkgName").value.trim(); const serviceType = $("pkgService").value.trim(); const type = $("pkgType").value; const val = parseInt($("pkgValue").value); const price = parseFloat($("pkgPrice").value) || 0; 
+  if(!name || !serviceType || isNaN(val)) return showToast("بيانات ناقصة!", "err"); 
+  const newId = editingPkgId || Date.now().toString(); const pkg = { id: newId, name, serviceType, type, value: val, price }; 
+  if(editingPkgId) packagesData = packagesData.map(x => x.id === editingPkgId ? pkg : x); else packagesData.push(pkg); 
+  setSyncState("saving"); await firebasePushPackages(); window.renderPackages(); window.cancelEditPackage(); setSyncState("ok"); showToast("تم حفظ الباقة 📦"); 
+  const formModal = $("formModal"); if(formModal && formModal.getAttribute("aria-hidden") === "false") { $("packageSelector").value = newId; window.applyPackage(); closeModal('packagesModal'); }
+};
+
+window.deletePackage = async (id) => { if(!confirm("حذف الباقة؟")) return; packagesData = packagesData.filter(x => x.id !== id); setSyncState("saving"); await firebasePushPackages(); window.renderPackages(); setSyncState("ok"); showToast("تم الحذف"); };
+window.applyPackage = () => { const pid = $("packageSelector").value; if(!pid) return; const p = packagesData.find(x => x.id === pid); if(p) { $("subType").value = p.type || 'time'; window.toggleSubType(); $("serviceType").value = p.serviceType; if(p.type === 'sessions') { $("sessionsTotal").value = p.value; } else { $("months").value = p.value; } $("price").value = p.price; $("quickPlan").value = ""; window.calcDebt(); } };
+
+window.toggleAdvancedFields = (forceShow = false) => { const adv = $("advancedFields"); const btn = $("btnToggleAdvanced"); if(!adv || !btn) return; if (adv.style.display === "none" || forceShow === true) { adv.style.display = "block"; btn.innerHTML = "🔼 إخفاء الخيارات الإضافية"; btn.style.background = "rgba(124,92,255,0.1)"; btn.style.borderColor = "rgba(124,92,255,0.3)"; btn.style.color = "var(--text)"; } else { adv.style.display = "none"; btn.innerHTML = "🔽 إظهار الخيارات الإضافية (الإيميل، الملاحظات، الأوسمة، الميسنجر...)"; btn.style.background = "rgba(255,255,255,0.04)"; btn.style.borderColor = "rgba(255,255,255,0.14)"; btn.style.color = "var(--muted)"; } };
+
+window.openAddSub = () => { editingId=null; $("formTitle").textContent="إضافة اشتراك"; $("name").value=""; $("email").value=""; $("phone").value=""; $("tags").value=""; $("messengerLink").value=""; $("countryCode").value="+213"; $("serviceType").value=""; $("quickPlan").value=""; $("months").value=""; $("sessionsTotal").value=""; $("sessionsLeft").value=""; $("price").value=""; $("start").value=todayISO(); $("paidAmount").value = ""; $("notes").value = ""; $("packageSelector").value = ""; $("subType").value = "time"; window.toggleSubType(); $("advancedFields").style.display = "block"; window.toggleAdvancedFields(false); window.calcDebt(); openModal("formModal"); };
+
+window.actEditAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec) return; closeModal("rowActionsModal"); editingId = rec.id; $("formTitle").textContent = "تعديل اشتراك"; $("subType").value = rec.subType || "time"; window.toggleSubType(); $("name").value = rec.name||""; $("email").value = rec.email||""; $("phone").value = rec.phone||""; $("messengerLink").value = rec.messengerLink||""; $("countryCode").value = rec.countryCode||"+213"; $("tags").value = rec.tags||""; $("serviceType").value = rec.serviceType||""; $("months").value = rec.months||""; $("sessionsTotal").value = rec.sessionsTotal||""; $("sessionsLeft").value = rec.sessionsLeft||""; $("price").value = rec.price||""; $("currency").value = rec.currency||"DZD"; $("start").value = rec.start; $("alertDays").value = rec.alertDays||"7"; $("notes").value = rec.notes || ""; $("packageSelector").value = ""; $("quickPlan").value = ""; if(rec.paymentStatus === 'unpaid') $("paidAmount").value = 0; else if(rec.paymentStatus === 'partial') $("paidAmount").value = rec.paidAmount || 0; else $("paidAmount").value = ""; const hasAdvancedData = (rec.email && rec.email !== "") || (rec.tags && rec.tags !== "") || (rec.messengerLink && rec.messengerLink !== "") || (rec.notes && rec.notes.trim() !== "") || (rec.currency && rec.currency !== "DZD"); window.toggleAdvancedFields(hasAdvancedData); window.calcDebt(); openModal("formModal"); };
+
+window.saveSubscription = async () => {
+  const subType = $("subType").value; const start = $("start").value; const emailVal = $("email") ? $("email").value.trim() : ""; const messengerLinkVal = $("messengerLink") ? $("messengerLink").value.trim() : ""; const serviceVal = $("serviceType").value.trim(); const nameVal = $("name").value.trim(); let months = parseInt($("months").value); let sessionsTot = parseInt($("sessionsTotal").value); let sessionsLft = parseInt($("sessionsLeft").value);
+  if(!nameVal || !serviceVal) return showToast("أدخل الاسم والخدمة", "err"); if(subType === 'time' && (!start || isNaN(months))) return showToast("أدخل تاريخ البداية والمدة", "err"); if(subType === 'sessions' && isNaN(sessionsTot)) return showToast("أدخل إجمالي الحصص", "err");
+  const priceInput = $("price").value; const priceFloat = parseFloat(priceInput) || 0; const paidInput = $("paidAmount").value; const paidFloat = paidInput === "" ? priceFloat : (parseFloat(paidInput) || 0);
+  let pStatus = 'paid'; if(paidFloat === 0 && priceFloat > 0) pStatus = 'unpaid'; else if(paidFloat < priceFloat) pStatus = 'partial';
+  const actionName = editingId ? "تعديل اشتراك" : "إضافة اشتراك"; logAction(actionName, `الاسم: ${nameVal} - الخدمة: ${serviceVal}`); 
+  let endISO = ""; if(subType === 'time') { const endD = new Date(start); endD.setMonth(endD.getMonth() + months); endISO = endD.toISOString().split('T')[0]; } if(subType === 'sessions' && isNaN(sessionsLft)) sessionsLft = sessionsTot; 
+  const alertEl = $("alertDays");
+  const rec = { id: editingId || Date.now().toString(), subType, name: nameVal, email: emailVal, messengerLink: messengerLinkVal, tags: $("tags").value, phone: $("phone").value, countryCode: $("countryCode").value, serviceType: serviceVal, alertDays: (alertEl && alertEl.value)?alertEl.value:7, price: priceInput, currency: $("currency").value, paymentStatus: pStatus, paidAmount: paidFloat, notes: $("notes").value };
+  if(subType === 'time') { rec.start = start; rec.months = months; rec.end = endISO; } else { rec.sessionsTotal = sessionsTot; rec.sessionsLeft = sessionsLft; }
+  
+  if(editingId) {
+    const oldRec = data.find(x => x.id === editingId);
+    if(oldRec && oldRec.attendanceLog) rec.attendanceLog = oldRec.attendanceLog;
+    if(oldRec && oldRec.paymentLog) rec.paymentLog = oldRec.paymentLog;
+  } else {
+    if(paidFloat > 0) { rec.paymentLog = [{ time: new Date().toISOString(), amount: paidFloat, note: "دفعة مبدئية" }]; }
+  }
+
+  if(editingId) data = data.map(x => x.id === editingId ? rec : x); else data.unshift(rec);
+  await firebasePush(); window.render(); closeModal("formModal"); showToast("تم الحفظ ✨");
+};
+
+window.openReceiptAction = () => {
+  const rec = data.find(x => x.id === currentRowId); if(!rec) return; closeModal("rowActionsModal"); 
+  const sName = (storeSettings.name || "متجر_الاشتراكات").replace(/[^a-zA-Z0-9\u0600-\u06FF\s]/g, '').trim().replace(/\s+/g, '_'); const cName = (rec.name || "عميل").replace(/[^a-zA-Z0-9\u0600-\u06FF\s]/g, '').trim().replace(/\s+/g, '_'); const d = new Date(); const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  document.title = `فاتورة_${sName}_${cName}_${dateStr}`;
+  $("receiptStoreName").textContent = storeSettings.name || "المؤسسة";
+  if(storeSettings.logo) { $("receiptLogoImg").src = storeSettings.logo; $("receiptLogoImg").style.display = "block"; $("receiptLogoEmoji").style.display = "none"; } else { $("receiptLogoImg").style.display = "none"; $("receiptLogoEmoji").style.display = "block"; }
+  $("recName").textContent = rec.name || "-"; $("recPhone").textContent = rec.phone ? `${rec.countryCode||''}${rec.phone}` : "-"; $("recService").textContent = rec.serviceType || "غير محدد"; 
+  
+  if(rec.subType === 'sessions') { $("recRowSessions").style.display = "flex"; $("recSessions").textContent = `${rec.sessionsTotal} حصة`; $("recRowMonths").style.display = "none"; $("recRowStart").style.display = "none"; $("recRowEnd").style.display = "none"; } 
+  else { $("recRowMonths").style.display = "flex"; $("recMonths").textContent = `${rec.months || 0} شهر`; $("recRowStart").style.display = "flex"; $("recStart").textContent = rec.start || "-"; $("recRowEnd").style.display = "flex"; $("recEnd").textContent = rec.end || "-"; $("recRowSessions").style.display = "none"; }
+
+  $("recPrice").textContent = `${parseFloat(rec.price || 0).toLocaleString()} ${rec.currency || 'DZD'}`;
+  let pStatus = rec.paymentStatus || 'paid'; let pText = pStatus === 'paid' ? '🟢 مدفوع بالكامل' : (pStatus === 'unpaid' ? '🔴 غير مدفوع' : '🟡 دفع جزئي'); $("recPaymentStatus").textContent = pText;
+  if(pStatus === 'partial') { $("recPaidAmountRow").style.display = "flex"; $("recPaidAmount").textContent = `${parseFloat(rec.paidAmount || 0).toLocaleString()} ${rec.currency || 'DZD'}`; } else { $("recPaidAmountRow").style.display = "none"; }
+  if(pStatus === 'partial' || pStatus === 'unpaid') { $("recRemainingRow").style.display = "flex"; let total = parseFloat(rec.price) || 0; let paid = pStatus === 'unpaid' ? 0 : (parseFloat(rec.paidAmount) || 0); let rem = total - paid; $("recRemaining").textContent = `${rem.toLocaleString()} ${rec.currency || 'DZD'}`; } else { $("recRemainingRow").style.display = "none"; }
+  
+  const pList = $("receiptPaymentLogList"); pList.innerHTML = "";
+  if(rec.paymentLog && rec.paymentLog.length > 0) {
+      $("receiptPaymentLogSection").style.display = "block";
+      rec.paymentLog.forEach(log => {
+          const logD = new Date(log.time); const logDStr = logD.toLocaleDateString('en-GB') + " " + logD.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'});
+          pList.innerHTML += `<div style="display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f1f5f9;">
+              <span style="color:#64748b; font-size: 13px;">${logDStr}</span>
+              <strong style="color:#10b981; font-size: 14px;">${parseFloat(log.amount).toLocaleString()} ${rec.currency||'DZD'}</strong>
+          </div>`;
+      });
+  } else { $("receiptPaymentLogSection").style.display = "none"; }
+
+  $("recToday").textContent = `${d.toLocaleDateString('en-GB')} - ${d.toLocaleTimeString('en-GB')}`; logAction("إصدار وصل", `للعميل: ${rec.name}`); openModal("receiptModal"); 
+};
+
+window.printReceiptAction = () => { document.body.classList.add("print-mode-receipt"); $("receiptModal").classList.add("print-active"); window.print(); setTimeout(()=>{ document.body.classList.remove("print-mode-receipt"); $("receiptModal").classList.remove("print-active"); }, 500); };
+window.printIdCardAction = () => { document.body.classList.add("print-mode-idcard"); $("idCardModal").classList.add("print-active"); window.print(); setTimeout(()=>{ document.body.classList.remove("print-mode-idcard"); $("idCardModal").classList.remove("print-active"); }, 500); };
+
+window.openTotalsReport = () => { 
+  const alertEl = $("alertDays"); const alertD = (alertEl && alertEl.value) ? parseInt(alertEl.value) : 7; const activeData = data.filter(r => getStatus(r, alertD).key !== "expired"); const totalsByCurrency = {}; const debtsByCurrency = {}; const serviceCounts = {};
+  activeData.forEach(r => { const curr = r.currency || "DZD"; const price = parseFloat(r.price) || 0; if(r.paymentStatus === 'unpaid') { debtsByCurrency[curr] = (debtsByCurrency[curr] || 0) + price; } else if(r.paymentStatus === 'partial') { const paid = parseFloat(r.paidAmount) || 0; totalsByCurrency[curr] = (totalsByCurrency[curr] || 0) + paid; debtsByCurrency[curr] = (debtsByCurrency[curr] || 0) + (price - paid); } else { totalsByCurrency[curr] = (totalsByCurrency[curr] || 0) + price; } const srv = r.serviceType || "غير محدد"; serviceCounts[srv] = (serviceCounts[srv] || 0) + 1; });
+  let totalsHtml = ""; if (Object.keys(totalsByCurrency).length === 0) { totalsHtml = `<div style="color:var(--accent); font-size:32px; margin-bottom:10px;">0 <span style="font-size:18px; color:var(--muted);">DZD</span></div>`; } else { for (let curr in totalsByCurrency) { totalsHtml += `<div style="color:var(--accent); font-size:32px; margin-bottom:5px;">${totalsByCurrency[curr].toLocaleString()} <span style="font-size:18px; color:var(--muted);">${curr}</span></div>`; } }
+  let debtsHtml = ""; if (Object.keys(debtsByCurrency).length > 0) { debtsHtml = `<div style="margin-top:10px; padding:10px; background:rgba(239,68,68,0.1); border-radius:12px; border:1px solid rgba(239,68,68,0.3);"><div style="color:#ef4444; font-size:12px; font-weight:bold; margin-bottom:5px;">❗ الديون المعلقة (غير المحصلة):</div>`; for (let curr in debtsByCurrency) { debtsHtml += `<div style="color:#ef4444; font-size:16px; font-weight:900;">${debtsByCurrency[curr].toLocaleString()} ${curr}</div>`; } debtsHtml += `</div>`; }
+  let servicesHtml = `<div style="margin-top:15px; display:flex; flex-wrap:wrap; gap:5px; justify-content:center; padding-top:15px; border-top:1px solid rgba(255,255,255,0.1);">`; for(let s in serviceCounts) { servicesHtml += `<span class="statChip" style="font-size:11px; background:rgba(124,92,255,0.1); border-color:rgba(124,92,255,0.3); color:#eaf0ff;">${s}: ${serviceCounts[s]}</span>`; } servicesHtml += `</div>`;
+  $("totalsBody").innerHTML = `${totalsHtml}<div style="font-size:13px; color:var(--muted);">المداخيل الصافية من الاشتراكات الفعّالة (الزمنية ورصيد الحصص).</div>${debtsHtml}${servicesHtml}`; openModal("totalsModal"); 
+};
+
+window.exportCSV = () => { 
+  if(data.length === 0) return showToast("لا توجد بيانات لتصديرها", "warn"); 
+  let csv = "\uFEFFالاسم,الأوسمة,الإيميل,الهاتف,رابط ميسنجر,النوع,الخدمة,المدة/الحصص,السعر,حالة الدفع,تاريخ البداية,تاريخ الانتهاء,الرصيد المتبقي,عدد مرات الدخول\n"; 
+  data.forEach(r => { 
+    let phone = r.phone ? `${r.countryCode||''}${r.phone}` : ''; let payStat = r.paymentStatus === 'unpaid' ? 'غير مدفوع' : (r.paymentStatus === 'partial' ? 'جزئي' : 'خالص'); let typeTxt = r.subType === 'sessions' ? 'حصص' : 'زمني'; let valTxt = r.subType === 'sessions' ? `${r.sessionsTotal} حصة` : `${r.months} شهر`; let safeTags = (r.tags||'').replace(/"/g, '""'); let attendanceCount = r.attendanceLog ? r.attendanceLog.length : 0;
+    csv += `"${r.name||''}","${safeTags}","${r.email||''}","${phone}","${r.messengerLink||''}","${typeTxt}","${r.serviceType||''}","${valTxt}","${r.price||0} ${r.currency||'DZD'}","${payStat}","${r.start||''}","${r.end||''}","${r.sessionsLeft||''}","${attendanceCount}"\n`; 
+  }); 
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Subscriptions_Excel_${todayISO()}.csv`; a.click(); closeSideMenu(); showToast("تم التصدير بنجاح 📥"); 
+};
+
+window.undoDelete = async () => { if(!lastDeletedData || lastDeletedData.length === 0) { closeSideMenu(); return showToast("لا يوجد أي حذف أخير لاسترجاعه", "warn"); } logAction("تراجع عن الحذف", `استرجاع ${lastDeletedData.length} اشتراكات`); data = [...lastDeletedData, ...data]; lastDeletedData = null; await firebasePush(); window.render(); closeSideMenu(); showToast("تم الاسترجاع ↩️"); };
+window.exportJson = () => { if(data.length === 0) return showToast("لا توجد بيانات", "warn"); const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(data)); const a = document.createElement("a"); a.href = dataStr; a.download = `Backup_${todayISO()}.json`; a.click(); closeSideMenu(); showToast("تم التنزيل 📥"); };
+window.importFile = () => $("fileInput").click();
+window.handleFileSelect = (e) => { const file = e.target.files[0]; if(!file) return; const reader = new FileReader(); reader.onload = async (event) => { try { const imported = JSON.parse(event.target.result); if(Array.isArray(imported)) { data = imported; await firebasePush(); window.render(); closeModal("backupModal"); closeSideMenu(); showToast("تم الاستيراد ✅"); } } catch(err) { showToast("ملف غير صالح", "err"); } }; reader.readAsText(file); };
+window.confirmPaste = async () => { try { const imported = JSON.parse($("pasteArea").value); if(Array.isArray(imported)) { data = imported; await firebasePush(); window.render(); closeModal("pasteModal"); closeModal("backupModal"); closeSideMenu(); $("pasteArea").value=""; showToast("تم الاستيراد ✅"); } } catch(e) { showToast("كود غير صالح", "err"); } };
+window.clearAllData = async () => { if(confirm("⚠️ تحذير خطير: سيتم مسح كل البيانات!")) { logAction("تصفير اللوحة", "حذف كافة البيانات ⚠️"); lastDeletedData = [...data]; data = []; await firebasePush(); window.render(); closeSideMenu(); showToast("تم المسح 🗑️ (يمكنك التراجع من الأدوات)"); } };
+window.shareApp = () => { closeSideMenu(); if (navigator.share) { navigator.share({ title: 'لوحة الاشتراكات', url: window.location.href }); } else { showToast("المشاركة غير مدعومة", "warn"); } };
+
+window.loginUser = () => { auth.signInWithEmailAndPassword($("authEmailAuth").value, $("authPass").value).catch(e => showToast("بيانات الدخول خاطئة", "err")); };
+window.logoutUser = () => { auth.signOut(); };
+
+let searchTimeout;
+window.debounceSearch = () => { clearTimeout(searchTimeout); searchTimeout = setTimeout(() => { window.currentPage = 1; window.render(); }, 400); };
+window.clearSearch = () => { $("search").value = ""; window.currentPage = 1; window.render(); };
+window.pasteSearch = async () => { try { const text = await navigator.clipboard.readText(); $("search").value = text; window.currentPage = 1; window.render(); } catch(e) { showToast("فشل اللصق، يرجى منح صلاحية الحافظة", "warn"); } };
+window.setFilter = (btn, filterType) => { document.querySelectorAll(".filterBtn").forEach(x=>x.classList.remove("active")); btn.classList.add("active"); currentFilter = filterType; window.currentPage = 1; window.render(); };
+
+</script>
+</body>
 </html>
