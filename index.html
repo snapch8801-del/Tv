@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>لوحة تسيير الاشتراكات - v12.9.12</title>
+<title>لوحة تسيير الاشتراكات - v12.9.13</title>
 
 <meta name="theme-color" content="#070a12" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -166,8 +166,8 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.12 PWA</span></h1>
-    <div class="sub">⚡ النسخة المتطورة: إضافة المراسلة عبر ميسنجر و SMS بشكل ذكي والروابط.</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.13 PWA</span></h1>
+    <div class="sub">⚡ النسخة العالمية: التحويل الذكي لروابط (ميسنجر، انستغرام، ويب).</div>
   </div>
 
   <div class="card">
@@ -302,7 +302,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
         </div>
         <div id="advancedFields" class="full-width" style="display: none; background: rgba(0,0,0,0.2); padding: 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05); margin-top: 10px;">
           <div class="formGrid">
-            <div class="field full-width"><label>🔗 رابط المحادثة (ميسنجر / ماركت بلايس)</label><input id="messengerLink" type="url" dir="ltr" placeholder="https://m.me/..." title="انسخ رابط حساب الزبون أو رابط محادثة الماركت بلايس والصقه هنا"></div>
+            <div class="field full-width"><label>🔗 رابط المحادثة (ميسنجر / انستغرام / ويب)</label><input id="messengerLink" type="url" dir="ltr" placeholder="https://..." title="انسخ رابط حساب الزبون أو رابط المحادثة والصقه هنا"></div>
             
             <div class="field full-width"><label>الإيميل (اختياري)</label><input id="email" placeholder="مثال: name@example.com" inputmode="email"></div>
             <div class="field full-width"><label>الأوسمة / التصنيفات (مفصولة بفاصلة)</label><input id="tags" placeholder="مثال: سنة 4 متوسط, فوج الأحد, VIP..."></div>
@@ -537,7 +537,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
           💬 واتساب
         </button>
         <button class="btn soft" id="btnMessengerAction" style="color: #0ea5e9; border-color: rgba(14,165,233,.3); background: rgba(14,165,233,.1);" onclick="window.actMessengerAction()">
-          💬 ميسنجر
+          💬 ميسنجر / انستا
         </button>
       </div>
       
@@ -553,6 +553,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
       <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; padding-top: 15px; border-top: 1px dashed rgba(255,255,255,0.1);">
         <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px;" onclick="window.actEditAction()">✏️ تعديل</button>
         <button class="btn soft" id="btnViewNotes" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #a855f7; border-color: rgba(168,85,247,.3);" onclick="window.openNotesAction()">📝 الملاحظات</button>
+        <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px;" onclick="window.actCopyEmailAction()">📋 نسخ Email</button>
         <button class="btn soft" id="btnViewAttendance" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #10b981; border-color: rgba(16,185,129,.3);" onclick="window.openAttendanceLog()">📅 سجل الحضور</button>
         <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #fbbf24; border-color: rgba(251,191,36,.3);" onclick="window.openPaymentModal()">💸 الدفعات والديون</button>
       </div>
@@ -674,7 +675,7 @@ window.addEventListener('DOMContentLoaded', () => {
 })();
 
 const FIREBASE_CONFIG = { apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ", authDomain: "dattta-6f497.firebaseapp.com", databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com", projectId: "dattta-6f497", storageBucket: "dattta-6f497.firebasestorage.app", messagingSenderId: "804914291938", appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb" };
-const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.12"; 
+const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.13"; 
 const $ = (id)=>document.getElementById(id); 
 const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
 const LOCAL_PACKAGES_KEY = "subs_packages_backup_v12";
@@ -1001,12 +1002,10 @@ window.sendNextBulkWhatsApp = () => {
 window.openRowActions = (id) => { 
   currentRowId = id; const rec = data.find(x => x.id === id); $("rowActionsHint").textContent = rec.name; 
   
-  // تفعيل وإلغاء تفعيل زر الملاحظات
   const hasNotes = rec.notes && rec.notes.trim() !== ""; const btnNotes = $("btnViewNotes");
   if(hasNotes) { btnNotes.disabled = false; btnNotes.style.opacity = "1"; btnNotes.onclick = window.openNotesAction; } 
   else { btnNotes.disabled = true; btnNotes.style.opacity = "0.4"; btnNotes.onclick = null; }
   
-  // تفعيل وإلغاء تفعيل زر الميسنجر
   const btnMsg = $("btnMessengerAction");
   if(btnMsg) {
       if(rec.messengerLink && rec.messengerLink.trim() !== "") { btnMsg.disabled = false; btnMsg.style.opacity = "1"; }
@@ -1034,26 +1033,33 @@ window.actExtendAction = () => { extendMode = "single"; const rec = data.find(x 
 window.actCopyEmailAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.email) { closeModal("rowActionsModal"); return showToast("لا يوجد بريد.", "err"); } navigator.clipboard.writeText(rec.email); closeModal("rowActionsModal"); showToast("تم نسخ الإيميل 📋"); };
 window.actWhatsAppAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.phone) { closeModal("rowActionsModal"); return showToast("لا يوجد هاتف.", "err"); } let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, ''); let endTxt = rec.subType === 'sessions' ? `رصيدك المتبقي: ${rec.sessionsLeft} حصة` : `ينتهي بتاريخ: ${rec.end}`; window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`مرحباً ${rec.name}، نود تذكيرك بخصوص اشتراكك الذي ${endTxt}.`)}`, '_blank'); closeModal("rowActionsModal"); };
 
-// وظيفة الميسنجر الجديدة
+// دالة الميسنجر الذكية الجديدة
 window.actMessengerAction = () => { 
   const rec = data.find(x => x.id === currentRowId); 
-  if(!rec || !rec.messengerLink) { closeModal("rowActionsModal"); return showToast("لا يوجد رابط ميسنجر مسجل لهذا العميل.", "err"); } 
-  logAction("مراسلة ميسنجر", `إلى: ${rec.name}`);
-  window.open(rec.messengerLink, '_blank'); 
+  if(!rec || !rec.messengerLink) { 
+      closeModal("rowActionsModal"); 
+      return showToast("لا يوجد رابط تواصل مسجل لهذا العميل.", "err"); 
+  } 
+  
+  let link = rec.messengerLink.trim();
+  
+  if (link.includes("facebook.com/messages/t/")) {
+      let id = link.split("facebook.com/messages/t/")[1].split("/")[0].split("?")[0];
+      link = "https://m.me/" + id;
+  } else if (link.includes("facebook.com/profile.php?id=")) {
+      let id = link.split("id=")[1].split("&")[0];
+      link = "https://m.me/" + id;
+  } else if (link.includes("facebook.com/") && !link.includes("m.me")) {
+      let id = link.split("facebook.com/")[1].split("/")[0].split("?")[0];
+      link = "https://m.me/" + id;
+  }
+
+  logAction("مراسلة العميل", `إلى: ${rec.name}`);
+  window.open(link, '_blank'); 
   closeModal("rowActionsModal"); 
 };
 
-// وظيفة الـ SMS الجديدة
-window.actSMSAction = () => { 
-  const rec = data.find(x => x.id === currentRowId); 
-  if(!rec || !rec.phone) { closeModal("rowActionsModal"); return showToast("لا يوجد هاتف مسجل لهذا العميل.", "err"); } 
-  let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, ''); 
-  let endTxt = rec.subType === 'sessions' ? `رصيدك المتبقي: ${rec.sessionsLeft} حصة` : `ينتهي بتاريخ: ${rec.end}`; 
-  let msg = `مرحباً ${rec.name}، نود تذكيرك بخصوص اشتراكك الذي ${endTxt}.`;
-  logAction("إرسال SMS", `إلى: ${rec.name}`);
-  window.open(`sms:${cleanPhone}?body=${encodeURIComponent(msg)}`, '_self'); 
-  closeModal("rowActionsModal"); 
-};
+window.actSMSAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.phone) { closeModal("rowActionsModal"); return showToast("لا يوجد هاتف مسجل لهذا العميل.", "err"); } let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, ''); let endTxt = rec.subType === 'sessions' ? `رصيدك المتبقي: ${rec.sessionsLeft} حصة` : `ينتهي بتاريخ: ${rec.end}`; let msg = `مرحباً ${rec.name}، نود تذكيرك بخصوص اشتراكك الذي ${endTxt}.`; logAction("إرسال SMS", `إلى: ${rec.name}`); window.open(`sms:${cleanPhone}?body=${encodeURIComponent(msg)}`, '_self'); closeModal("rowActionsModal"); };
 
 window.actDeleteAction = async () => { if(confirm("حذف المشترك نهائياً؟")) { const recToDelete = data.find(x => x.id === currentRowId); logAction("حذف اشتراك", `الاسم: ${recToDelete.name}`); lastDeletedData = data.filter(x => x.id === currentRowId); data = data.filter(x => x.id !== currentRowId); await firebasePush(); window.render(); closeModal("rowActionsModal"); showToast("تم الحذف 🗑️"); } };
 
