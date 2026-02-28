@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>لوحة تسيير الاشتراكات - v12.7</title>
+<title>لوحة تسيير الاشتراكات - v12.7.1</title>
 
 <meta name="theme-color" content="#070a12" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -150,16 +150,12 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
   background: linear-gradient(90deg, var(--accent), #4ade80);
 }
 </style>
-
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 </head>
 
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.7 PWA</span></h1>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.7.1 PWA</span></h1>
     <div class="sub">⚡ الميزات: بطاقات انخراط ذكية بـ QR Code 🪪 + نظام الحصص والأوسمة</div>
   </div>
 
@@ -513,7 +509,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 })();
 
 const FIREBASE_CONFIG = { apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ", authDomain: "dattta-6f497.firebaseapp.com", databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com", projectId: "dattta-6f497", storageBucket: "dattta-6f497.firebasestorage.app", messagingSenderId: "804914291938", appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb" };
-const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.7"; const $ = (id)=>document.getElementById(id); const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
+const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.7.1"; const $ = (id)=>document.getElementById(id); const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
 
 let data = []; let packagesData = []; let editingId = null; let currentRowId = null; let currentFilter = "all"; 
 let selectedIds = new Set(); let extendMode = "single"; let currentUser = null; let currentRole = null;
@@ -771,10 +767,10 @@ window.openMembershipCard = () => {
   
   $("idCardType").textContent = rec.subType === 'sessions' ? 'نظام حصص' : 'زمني';
   
-  // توليد QR Code
+  // توليد QR Code بالـ ID السري فقط لتفادي مشاكل الحروف العربية
   const qrBox = $("idCardQR");
-  qrBox.innerHTML = ""; // تنظيف الكود السابق
-  const qrData = JSON.stringify({ id: rec.id, n: rec.name, s: rec.serviceType });
+  qrBox.innerHTML = "";
+  const qrData = "ID:" + String(rec.id); 
   
   new QRCode(qrBox, {
     text: qrData,
@@ -901,7 +897,6 @@ window.saveSubscription = async () => {
   await firebasePush(); window.render(); closeModal("formModal"); showToast("تم الحفظ ✨");
 };
 
-// دوال الطباعة الذكية
 window.printReceiptAction = () => { 
   document.body.classList.add("print-mode-receipt"); 
   window.print(); 
