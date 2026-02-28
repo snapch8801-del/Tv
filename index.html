@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>لوحة تسيير الاشتراكات - v12.9.10</title>
+<title>لوحة تسيير الاشتراكات - v12.9.11</title>
 
 <meta name="theme-color" content="#070a12" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -166,8 +166,8 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.10 PWA</span></h1>
-    <div class="sub">⚡ النسخة الشاملة: تم إصلاح حفظ الباقات، وإضافة التعديل، وزر اللصق.</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.11 PWA</span></h1>
+    <div class="sub">⚡ النسخة السريعة: إضافة باقات مباشرة من نافذة العميل وحل مشكلة التشابه.</div>
   </div>
 
   <div class="card">
@@ -253,12 +253,17 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
     <div class="modalHeader"><div><h2 id="formTitle">إضافة اشتراك</h2><div class="hint">املأ البيانات الأساسية ثم اضغط حفظ</div></div><button class="btn danger btn-close" type="button" onclick="closeModal('formModal')">✕ إغلاق</button></div>
     <div class="modalBody">
       <div class="formGrid">
+        
         <div class="field full-width" style="background:rgba(124,92,255,0.08); padding:12px 14px; border-radius:14px; border:1px dashed rgba(124,92,255,0.3); margin-bottom:5px;">
           <label style="color:#c4b5fd; margin-bottom:8px;">📦 اختصار: اختر باقة جاهزة (اختياري)</label>
-          <select id="packageSelector" onchange="window.applyPackage()" style="background:rgba(0,0,0,0.5); border-color:rgba(124,92,255,0.4); cursor:pointer;">
-            <option value="">✍️ لا أريد باقة، سأكتب البيانات بنفسي</option>
-          </select>
+          <div style="display:flex; gap:8px;">
+            <select id="packageSelector" onchange="window.applyPackage()" style="background:rgba(0,0,0,0.5); border-color:rgba(124,92,255,0.4); cursor:pointer; flex:1;">
+              <option value="">✍️ لا أريد باقة، سأكتب البيانات بنفسي</option>
+            </select>
+            <button class="btn primary" type="button" style="padding:0 16px; border-radius:12px; font-size:16px;" onclick="openModal('packagesModal')" title="إنشاء باقة جديدة الآن">➕</button>
+          </div>
         </div>
+
         <div class="field full-width"><label>الاسم <span style="color:var(--err)">*</span></label><input id="name" placeholder="مثال: أحمد محمد"></div>
         <div class="field full-width"><label>الهاتف (مع الرمز)</label><div style="display: flex; gap: 8px;"><select id="countryCode" style="width: 110px; direction: ltr;"><option value="+213">🇩🇿 +213</option><option value="+212">🇲🇦 +212</option><option value="+216">🇹🇳 +216</option><option value="">بدون رمز</option></select><input id="phone" type="tel" dir="ltr" placeholder="555000000" style="flex:1;"></div></div>
         <div class="field full-width" style="margin-top: 5px;">
@@ -352,13 +357,13 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
         <div class="field"><label>القيمة (مدة أو حصص)</label><input id="pkgValue" type="number" min="1" placeholder="مثال: 12"></div>
         <div class="field"><label>السعر الافتراضي</label><input id="pkgPrice" type="number" min="0" placeholder="15000"></div>
         <div class="field full-width" style="display:flex; gap:10px;">
-          <button id="btnSavePackage" class="btn primary" style="flex:1; padding:12px; border-radius:12px; text-align: center;" onclick="window.savePackage()">➕ إضافة الباقة</button>
+          <button id="btnSavePackage" class="btn primary" style="flex:1; padding:12px; border-radius:12px; text-align: center;" onclick="window.savePackage()">➕ حفظ الباقة</button>
           <button id="btnCancelPkgEdit" class="btn soft" style="display:none; padding:12px; border-radius:12px; text-align: center; color:var(--err);" onclick="window.cancelEditPackage()">✕ إلغاء التعديل</button>
         </div>
       </div>
       <div style="max-height: 250px; overflow: auto; border: 1px solid var(--line); border-radius: 12px;">
         <table style="min-width: 100%; font-size: 13px;">
-          <thead style="background: rgba(0,0,0,0.4);"><tr><th>اسم الباقة</th><th>الخدمة</th><th>النوع/القيمة</th><th>السعر</th><th>إجراء</th></tr></thead>
+          <thead style="background: rgba(0,0,0,0.4);"><tr><th>اسم الباقة والخدمة</th><th>النوع/القيمة</th><th>السعر</th><th>إجراء</th></tr></thead>
           <tbody id="packagesTbody"></tbody>
         </table>
       </div>
@@ -485,7 +490,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
       <div style="font-size:12px; color:var(--accent); margin-bottom:8px; font-weight:bold;">سجل الدفعات السابقة:</div>
       <div style="max-height: 200px; overflow: auto; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
         <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
-          <thead style="background: rgba(255,255,255,0.05);"><tr><th style="padding: 10px; text-align: right; color: var(--muted);">التاريخ والوقت</th><th style="padding: 10px; text-align: left; color: var(--muted);">المبلغ الذي تم دفعه</th></tr></thead>
+          <thead style="background: rgba(255,255,255,0.05);"><tr><th style="padding: 10px; text-align: right; color: var(--text);">التاريخ والوقت</th><th style="padding: 10px; text-align: left; color: var(--text);">المبلغ الذي تم دفعه</th></tr></thead>
           <tbody id="paymentTbody"></tbody>
         </table>
       </div>
@@ -658,7 +663,7 @@ window.addEventListener('DOMContentLoaded', () => {
 })();
 
 const FIREBASE_CONFIG = { apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ", authDomain: "dattta-6f497.firebaseapp.com", databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com", projectId: "dattta-6f497", storageBucket: "dattta-6f497.firebasestorage.app", messagingSenderId: "804914291938", appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb" };
-const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.10"; 
+const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.11"; 
 const $ = (id)=>document.getElementById(id); 
 const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
 const LOCAL_PACKAGES_KEY = "subs_packages_backup_v12";
@@ -857,7 +862,7 @@ window.render = () => {
               <td><button class="actionPill" onclick="window.openRowActions('${r.id}')">⚡ إجراء</button></td>
             `;
             tb.appendChild(tr);
-        } catch(rowErr) {}
+        } catch(rowErr) { console.error("Error rendering row:", rowErr); }
       });
 
       $("paginationControls").innerHTML = `
@@ -865,7 +870,7 @@ window.render = () => {
         <span class="page-info">صفحة ${window.currentPage} من ${totalPages} <span style="margin: 0 8px; color:var(--line);">|</span> الإجمالي: ${filteredRows.length} مشترك</span>
         <button class="page-btn" onclick="window.changePage(-1)" ${window.currentPage === 1 ? 'disabled' : ''}>▶ السابق</button>
       `;
-  } catch(e) {}
+  } catch(e) { console.error(e); }
 };
 
 window.markAttendance = async (id) => {
@@ -1023,7 +1028,8 @@ window.renderPackages = () => {
       <button class="btn soft" style="padding:6px 10px; font-size:12px; border-radius:10px;" onclick="window.editPackage('${p.id}')">✏️</button>
       <button class="btn danger" style="padding:6px 10px; font-size:12px; border-radius:10px;" onclick="window.deletePackage('${p.id}')">🗑️</button>
     </td></tr>`; 
-    if(sel) sel.innerHTML += `<option value="${p.id}">${p.name} (${p.price})</option>`; 
+    // التعديل المذهل: عرض (الاسم - الخدمة - السعر) لمنع التشابه
+    if(sel) sel.innerHTML += `<option value="${p.id}">${p.name} - ${p.serviceType} (${p.price} DZD)</option>`; 
   });
 };
 
@@ -1043,9 +1049,20 @@ window.cancelEditPackage = () => {
 window.savePackage = async () => { 
   const name = $("pkgName").value.trim(); const serviceType = $("pkgService").value.trim(); const type = $("pkgType").value; const val = parseInt($("pkgValue").value); const price = parseFloat($("pkgPrice").value) || 0; 
   if(!name || !serviceType || isNaN(val)) return showToast("بيانات ناقصة!", "err"); 
-  const pkg = { id: editingPkgId || Date.now().toString(), name, serviceType, type, value: val, price }; 
+  
+  const newId = editingPkgId || Date.now().toString();
+  const pkg = { id: newId, name, serviceType, type, value: val, price }; 
+  
   if(editingPkgId) packagesData = packagesData.map(x => x.id === editingPkgId ? pkg : x); else packagesData.push(pkg); 
   setSyncState("saving"); await firebasePushPackages(); window.renderPackages(); window.cancelEditPackage(); setSyncState("ok"); showToast("تم حفظ الباقة 📦"); 
+  
+  // الميزة السحرية: الاختيار التلقائي إذا كنا قادمين من نافذة العميل
+  const formModal = $("formModal");
+  if(formModal && formModal.getAttribute("aria-hidden") === "false") {
+      $("packageSelector").value = newId;
+      window.applyPackage();
+      closeModal('packagesModal');
+  }
 };
 
 window.deletePackage = async (id) => { if(!confirm("حذف الباقة؟")) return; packagesData = packagesData.filter(x => x.id !== id); setSyncState("saving"); await firebasePushPackages(); window.renderPackages(); setSyncState("ok"); showToast("تم الحذف"); };
