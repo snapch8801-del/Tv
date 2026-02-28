@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>لوحة تسيير الاشتراكات - v12.9.4</title>
+<title>لوحة تسيير الاشتراكات - v12.9.5</title>
 
 <meta name="theme-color" content="#070a12" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -132,7 +132,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 .id-card-wrap { border: 2px solid #e2e8f0; border-radius: 16px; padding: 25px; background: linear-gradient(135deg, #ffffff, #f1f5f9); position: relative; overflow: hidden; color: #0f172a; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
 .id-card-wrap::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, var(--accent), #4ade80); }
 
-/* تنسيقات القائمة الجانبية (Sidebar) الجديدة */
+/* تنسيقات القائمة الجانبية (Sidebar) */
 .side-menu {
   position: fixed; top: 0; right: -320px; width: 300px; height: 100vh;
   background: rgba(10,14,26,.98); border-left: 1px solid rgba(255,255,255,.1);
@@ -161,8 +161,8 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.4 PWA</span></h1>
-    <div class="sub">⚡ النسخة المطورة: قائمة جانبية احترافية لتسهيل الاستخدام وزر باقات مستقل.</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.5 PWA</span></h1>
+    <div class="sub">⚡ ترتيب ذكي للعمليات وعرض متكامل للإيميلات.</div>
   </div>
 
   <div class="card">
@@ -315,7 +315,6 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
     <div class="modalFooter"><button class="btn primary" type="button" style="width:100%; padding: 16px; font-size: 16px; font-weight:bold; border-radius:14px; box-shadow: 0 8px 25px rgba(124,92,255,0.2);" onclick="window.saveSubscription()">💾 حفظ بيانات المشترك</button></div>
   </div>
 </div>
-
 <div class="modal" id="scannerModal" aria-hidden="true">
   <div class="box" style="width: 400px">
     <div class="modalHeader">
@@ -454,19 +453,45 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 <div class="modal" id="extendModal" aria-hidden="true"><div class="box" style="width: 350px"><div class="modalHeader"><h2 id="extendTitle">تجديد الاشتراك</h2><button class="btn danger btn-close" type="button" onclick="closeModal('extendModal')">✕ إغلاق</button></div><div class="modalBody"><div class="field" style="margin-bottom:15px"><label id="lblExtendValue">المدة المضافة</label><input id="extendValue" type="number" min="1" value="1"></div><div class="field" style="margin-bottom:20px" id="grpExtendUnit"><label>الوحدة</label><select id="extendUnit"><option value="months">أشهر</option><option value="days">أيام</option></select></div><button class="btn primary" style="width:100%; text-align: center;" onclick="window.confirmExtend()">تأكيد التجديد</button></div></div></div>
 
 <div class="modal" id="rowActionsModal" aria-hidden="true">
-  <div class="box" role="dialog" aria-modal="true" style="width:min(740px, 100%)">
-    <div class="modalHeader"><div><h2>إجراءات</h2><div class="hint" id="rowActionsHint">—</div></div><button class="btn danger btn-close" type="button" onclick="closeModal('rowActionsModal')">✕ إغلاق</button></div>
-    <div class="modalBody">
-      <div class="actGrid">
-        <button class="actBtn" style="color: #fff; border-color: #3b82f6; background: linear-gradient(135deg, #3b82f6, #2563eb); box-shadow: 0 4px 15px rgba(59,130,246,0.3); text-align: center;" onclick="window.openMembershipCard()">🪪 بطاقة الانخراط (QR)</button>
-        <button class="actBtn" id="btnViewNotes" style="color: #a855f7; border-color: rgba(168,85,247,.5); background: rgba(168,85,247,.15); text-align: center;" onclick="window.openNotesAction()">📝 عرض الملاحظات</button>
-        <button class="actBtn" style="text-align: center;" onclick="window.actExtendAction()">🔁 تجديد الرصيد/المدة</button>
-        <button class="actBtn" style="text-align: center;" onclick="window.actEditAction()">✏️ تعديل</button>
-        <button class="actBtn" style="color: #60a5fa; border-color: rgba(96,165,250,.5); background: rgba(96,165,250,.15); text-align: center;" onclick="window.openReceiptAction()">📄 إصدار وصل</button>
-        <button class="actBtn" style="text-align: center;" onclick="window.actCopyEmailAction()">📋 نسخ Email</button>
-        <button class="actBtn" style="border-color: rgba(37,211,102,.5); background: rgba(37,211,102,.15); color: #4ade80; text-align: center;" onclick="window.actWhatsAppAction()">💬 مراسلة واتساب</button>
-        <button class="actBtn danger" style="text-align: center;" onclick="window.actDeleteAction()">🗑️ حذف المشترك</button>
+  <div class="box" role="dialog" aria-modal="true" style="width: 400px;">
+    <div class="modalHeader">
+      <div><h2 style="font-size: 16px;">⚡ إجراءات المشترك</h2><div class="hint" id="rowActionsHint" style="color: var(--accent); font-weight: bold; font-size: 14px;">—</div></div>
+      <button class="btn danger btn-close" type="button" onclick="closeModal('rowActionsModal')" style="padding: 6px 12px;">✕</button>
+    </div>
+    
+    <div class="modalBody" style="padding: 20px;">
+      
+      <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
+        <button class="btn primary" style="padding: 14px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(124,92,255,0.2);" onclick="window.actExtendAction()">
+          🔁 تجديد الاشتراك (رصيد / مدة)
+        </button>
+        
+        <button class="btn" style="padding: 14px; font-size: 15px; font-weight: bold; color: #fff; background: linear-gradient(135deg, #3b82f6, #2563eb); border-color: #2563eb; box-shadow: 0 4px 15px rgba(59,130,246,0.2);" onclick="window.openMembershipCard()">
+          🪪 عرض بطاقة الانخراط (QR)
+        </button>
       </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+        <button class="btn soft" style="color: #4ade80; border-color: rgba(37,211,102,.3); background: rgba(37,211,102,.1);" onclick="window.actWhatsAppAction()">
+          💬 مراسلة واتساب
+        </button>
+        <button class="btn soft" style="color: #60a5fa; border-color: rgba(96,165,250,.3); background: rgba(96,165,250,.1);" onclick="window.openReceiptAction()">
+          📄 إصدار فاتورة
+        </button>
+      </div>
+
+      <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; padding-top: 15px; border-top: 1px dashed rgba(255,255,255,0.1);">
+        <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px;" onclick="window.actEditAction()">✏️ تعديل البيانات</button>
+        <button class="btn soft" id="btnViewNotes" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #a855f7; border-color: rgba(168,85,247,.3);" onclick="window.openNotesAction()">📝 الملاحظات</button>
+        <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px;" onclick="window.actCopyEmailAction()">📋 نسخ Email</button>
+      </div>
+
+      <div style="padding-top: 15px; border-top: 1px solid rgba(239,68,68,0.2);">
+        <button class="btn danger" style="width: 100%; padding: 12px; border-radius: 12px; font-size: 13px;" onclick="window.actDeleteAction()">
+          🗑️ حذف المشترك نهائياً
+        </button>
+      </div>
+
     </div>
   </div>
 </div>
@@ -589,7 +614,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // 3. إعداد Firebase
 const FIREBASE_CONFIG = { apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ", authDomain: "dattta-6f497.firebaseapp.com", databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com", projectId: "dattta-6f497", storageBucket: "dattta-6f497.firebasestorage.app", messagingSenderId: "804914291938", appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb" };
-const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.4"; 
+const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.5"; 
 const $ = (id)=>document.getElementById(id); 
 const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
 
@@ -833,7 +858,7 @@ window.render = () => {
 
         tr.innerHTML = `
           <td style="text-align: center;"><input type="checkbox" class="rowChk" value="${r.id}" ${isChecked}></td>
-          <td><div style="font-weight:bold; color:var(--text); font-size:14px;">${r.name||"-"}${notesIcon}</div><div>${tagsHtml}</div></td>
+          <td><div style="font-weight:bold; color:var(--text); font-size:14px;">${r.name||"-"}${notesIcon}</div>${r.email ? `<div style="font-size:11px; color:var(--muted); margin-bottom:4px;">${r.email}</div>` : ''}<div>${tagsHtml}</div></td>
           <td dir="ltr" style="text-align:right; font-size:14px;">${r.phone?`${r.countryCode||''} ${r.phone}`:'-'}</td>
           <td><div style="margin-bottom:4px;">${serviceHtml}</div><div style="font-size:11px; color:var(--muted); font-weight:bold;">${r.subType === 'sessions' ? 'نظام حصص' : `المدة: ${r.months||0} شهر`}</div></td>
           <td><div style="font-weight:bold; font-size:14px;">${r.price||0} <span style="font-size:10px; color:var(--muted);">${r.currency||'DZD'}</span></div><div style="margin-top:4px;">${payBadge}</div></td>
