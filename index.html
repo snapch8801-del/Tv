@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>لوحة تسيير الاشتراكات - v12.9.9</title>
+<title>لوحة تسيير الاشتراكات - v12.9.10</title>
 
 <meta name="theme-color" content="#070a12" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -153,7 +153,6 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 .menu-section-title { font-size: 12px; color: var(--accent); font-weight: bold; margin: 25px 0 10px; padding-inline-start: 5px; }
 .side-menu .actBtn { margin-bottom: 8px; font-size: 13px; padding: 12px 14px; }
 
-/* الفاتورة المرنة - حل جذري لمشكلة اختفاء البيانات في الهاتف */
 .flex-row-receipt { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #cbd5e1; }
 .flex-row-receipt span.label { color: #64748b; }
 .flex-row-receipt strong.val, .flex-row-receipt span.val { color: #0f172a; text-align: left; }
@@ -167,8 +166,8 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.9 PWA</span></h1>
-    <div class="sub">⚡ النسخة الذهبية المستقرة: إصلاح توافق الهواتف وسجلات الفواتير.</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.10 PWA</span></h1>
+    <div class="sub">⚡ النسخة الشاملة: تم إصلاح حفظ الباقات، وإضافة التعديل، وزر اللصق.</div>
   </div>
 
   <div class="card">
@@ -183,7 +182,8 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
       </div>
       <div class="searchWrap">
         <input id="search" oninput="window.currentPage=1; window.render()" placeholder="بحث بالاسم، الإيميل، الوسام، الهاتف..." />
-        <button class="btn soft" title="مسح البحث" style="padding: 10px 12px; border-radius: 12px; color: var(--err);" onclick="clearSearch()">✕</button>
+        <button class="btn soft" title="لصق البحث" style="padding: 10px 12px; border-radius: 12px; font-size: 15px;" onclick="window.pasteSearch()">📋</button>
+        <button class="btn soft" title="مسح البحث" style="padding: 10px 12px; border-radius: 12px; color: var(--err);" onclick="window.clearSearch()">✕</button>
       </div>
     </div>
 
@@ -351,7 +351,10 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
         <div class="field"><label>النوع</label><select id="pkgType"><option value="time">زمني (أشهر)</option><option value="sessions">رصيد (حصص)</option></select></div>
         <div class="field"><label>القيمة (مدة أو حصص)</label><input id="pkgValue" type="number" min="1" placeholder="مثال: 12"></div>
         <div class="field"><label>السعر الافتراضي</label><input id="pkgPrice" type="number" min="0" placeholder="15000"></div>
-        <div class="field full-width"><button class="btn primary" style="width:100%; padding:12px; border-radius:12px; text-align: center;" onclick="window.savePackage()">➕ إضافة الباقة</button></div>
+        <div class="field full-width" style="display:flex; gap:10px;">
+          <button id="btnSavePackage" class="btn primary" style="flex:1; padding:12px; border-radius:12px; text-align: center;" onclick="window.savePackage()">➕ إضافة الباقة</button>
+          <button id="btnCancelPkgEdit" class="btn soft" style="display:none; padding:12px; border-radius:12px; text-align: center; color:var(--err);" onclick="window.cancelEditPackage()">✕ إلغاء التعديل</button>
+        </div>
       </div>
       <div style="max-height: 250px; overflow: auto; border: 1px solid var(--line); border-radius: 12px;">
         <table style="min-width: 100%; font-size: 13px;">
@@ -655,13 +658,14 @@ window.addEventListener('DOMContentLoaded', () => {
 })();
 
 const FIREBASE_CONFIG = { apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ", authDomain: "dattta-6f497.firebaseapp.com", databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com", projectId: "dattta-6f497", storageBucket: "dattta-6f497.firebasestorage.app", messagingSenderId: "804914291938", appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb" };
-const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.9"; 
+const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.10"; 
 const $ = (id)=>document.getElementById(id); 
 const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
+const LOCAL_PACKAGES_KEY = "subs_packages_backup_v12";
 
 let data = []; let packagesData = []; let editingId = null; let currentRowId = null; let currentFilter = "all"; 
 let selectedIds = new Set(); let extendMode = "single"; let currentUser = null; let currentRole = null;
-let lastDeletedData = null; let storeSettings = { name: "المؤسسة", logo: "" };
+let lastDeletedData = null; let storeSettings = { name: "المؤسسة", logo: "" }; let editingPkgId = null;
 window.currentPage = 1; window.itemsPerPage = 50; let bulkWaQueue = [];
 
 try {
@@ -681,8 +685,18 @@ function toDate(iso){
     return isNaN(d) ? new Date() : d;
 }
 
-function saveLocalBackup(){ localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(data)); }
-function loadLocalBackup(){ try { const j = JSON.parse(localStorage.getItem(LOCAL_BACKUP_KEY)); return Array.isArray(j) ? j : []; } catch { return []; } }
+function saveLocalBackup(){ 
+  localStorage.setItem(LOCAL_BACKUP_KEY, JSON.stringify(data)); 
+  localStorage.setItem(LOCAL_PACKAGES_KEY, JSON.stringify(packagesData));
+}
+
+function loadLocalBackup(){ 
+  try { const j = JSON.parse(localStorage.getItem(LOCAL_BACKUP_KEY)); data = Array.isArray(j) ? j : []; } catch { data = []; } 
+  try { const p = JSON.parse(localStorage.getItem(LOCAL_PACKAGES_KEY)); packagesData = Array.isArray(p) ? p : []; } catch { packagesData = []; }
+  window.renderPackages();
+  return data;
+}
+
 function setSyncState(state){ const chip = $("syncChip"); const val = $("syncVal"); chip.className = "statChip sync " + state; if(!navigator.onLine) val.textContent = "أوفلاين 📴"; else if(state==="saving") val.textContent = "جاري الحفظ..."; else if(state==="ok") { const d = new Date(); val.textContent = d.getHours()+":"+String(d.getMinutes()).padStart(2,"0") + " ✅"; } else if(state==="fail") { val.textContent = "خطأ ❌"; chip.style.borderColor="var(--err)"; chip.style.background="rgba(239,68,68,0.1)"; } }
 
 async function logAction(actionName, detailsStr) { if (!currentUser || typeof db === 'undefined') return; try { await db.ref("logs").push({ email: currentUser.email, action: actionName, details: detailsStr || "-", time: new Date().toISOString() }); } catch(e) {} }
@@ -733,14 +747,14 @@ window.confirmAddAdmin = async () => { const email = $("newAdminEmail").value.tr
 window.loadAdminsList = async () => { openModal("manageAdminsModal"); const tb = $("adminsTbody"); tb.innerHTML = "<tr><td colspan='3' style='text-align:center; padding:20px;'>جاري التحميل...</td></tr>"; try { const snap = await db.ref("admins").once("value"); const adminsObj = snap.val() || {}; tb.innerHTML = ""; for(let uid in adminsObj) { let uData = adminsObj[uid]; let isOwner = uData.role === "owner" || uData === true; let actionBtn = uid === currentUser.uid ? `<span style="color:var(--muted); font-size:12px;">حسابك</span>` : `<button class="btn danger" style="padding:6px 10px; font-size:12px; border-radius:10px;" onclick="window.revokeAdmin('${uid}')">سحب</button>`; tb.innerHTML += `<tr><td>${uData.email || "غير محدد"}</td><td>${isOwner?"مالك 👑":"أدمن 👤"}</td><td>${actionBtn}</td></tr>`; } } catch(err) {} };
 window.revokeAdmin = async (uid) => { if(confirm("تأكيد السحب؟")) { await db.ref("admins/" + uid).remove(); showToast("تم السحب ✅"); window.loadAdminsList(); } };
 
-window.loadDataOffline = () => { data = loadLocalBackup(); window.render(); };
+window.loadDataOffline = () => { data = loadLocalBackup(); window.render(); window.renderPackages(); };
 window.loadData = async () => { 
   if(!navigator.onLine) { window.loadDataOffline(); return; } 
   try { 
     setSyncState("saving"); 
     try { const settingsSnap = await db.ref("settings/storeInfo").once('value'); if(settingsSnap.exists()) { storeSettings = settingsSnap.val(); $("setStoreName").value = storeSettings.name || ""; if(storeSettings.logo) { $("logoPreview").src = storeSettings.logo; $("logoPreview").style.display = "block"; $("logoEmojiFallback").style.display = "none"; } } } catch(errSettings) {} 
-    try { const pkgSnap = await db.ref("packages").once('value'); packagesData = pkgSnap.val() ? Object.values(pkgSnap.val()) : []; window.renderPackages(); } catch(errPkg) {}
-    const snap = await db.ref("subscriptions").once('value'); data = snap.val() ? Object.values(snap.val()) : []; saveLocalBackup(); setSyncState("ok"); window.render(); 
+    try { const pkgSnap = await db.ref("packages").once('value'); packagesData = pkgSnap.exists() ? Object.values(pkgSnap.val()) : []; window.renderPackages(); } catch(errPkg) {}
+    const snap = await db.ref("subscriptions").once('value'); data = snap.exists() ? Object.values(snap.val()) : []; saveLocalBackup(); setSyncState("ok"); window.render(); 
   } catch(e) { setSyncState("fail"); window.loadDataOffline(); } 
 };
 async function firebasePush() { if(!navigator.onLine) return; try { setSyncState("saving"); await db.ref("subscriptions").set(data); saveLocalBackup(); setSyncState("ok"); } catch(e) { showToast("خطأ", "err"); } }
@@ -843,7 +857,7 @@ window.render = () => {
               <td><button class="actionPill" onclick="window.openRowActions('${r.id}')">⚡ إجراء</button></td>
             `;
             tb.appendChild(tr);
-        } catch(rowErr) { console.error("Error rendering row:", rowErr); }
+        } catch(rowErr) {}
       });
 
       $("paginationControls").innerHTML = `
@@ -851,7 +865,7 @@ window.render = () => {
         <span class="page-info">صفحة ${window.currentPage} من ${totalPages} <span style="margin: 0 8px; color:var(--line);">|</span> الإجمالي: ${filteredRows.length} مشترك</span>
         <button class="page-btn" onclick="window.changePage(-1)" ${window.currentPage === 1 ? 'disabled' : ''}>▶ السابق</button>
       `;
-  } catch(e) { console.error(e); }
+  } catch(e) {}
 };
 
 window.markAttendance = async (id) => {
@@ -885,7 +899,6 @@ window.openAttendanceLog = () => {
   } openModal("attendanceModal");
 };
 
-// ================= دوال سجل الدفعات الجديدة =================
 window.openPaymentModal = () => {
   const rec = data.find(x => x.id === currentRowId); if(!rec) return; closeModal("rowActionsModal");
   $("paymentClientName").textContent = `👤 ${rec.name} (${rec.serviceType})`;
@@ -928,7 +941,6 @@ window.confirmNewPayment = async () => {
   setSyncState("saving"); await firebasePush(); window.render();
   showToast(`تم تسديد ${amount} بنجاح ✅`); window.openPaymentModal(); 
 };
-// ==============================================================
 
 window.updateBulkUI = () => { const bar = $("bulkBar"); if(selectedIds.size > 0) { bar.style.display = "flex"; $("selCount").textContent = `${selectedIds.size} محدد`; } else { bar.style.display = "none"; $("selectAll").checked = false; } };
 $("tbody").addEventListener("change", (e) => { if(e.target.classList.contains("rowChk")) { if(e.target.checked) selectedIds.add(e.target.value); else selectedIds.delete(e.target.value); window.updateBulkUI(); } });
@@ -1000,15 +1012,42 @@ window.actDeleteAction = async () => { if(confirm("حذف المشترك نها�
 window.calcDebt = () => { const p = parseFloat($("price").value) || 0; let valRaw = $("paidAmount").value; let a = valRaw === "" ? p : (parseFloat(valRaw) || 0); let d = p - a; $("debtAmount").value = d > 0 ? d : 0; };
 window.handleQuickPlan = () => { if($("quickPlan").value) $("months").value = $("quickPlan").value; };
 
-async function firebasePushPackages() { if(!navigator.onLine) return; try { await db.ref("packages").set(packagesData); } catch(e) {} }
+async function firebasePushPackages() { if(!navigator.onLine) return; try { await db.ref("packages").set(packagesData); saveLocalBackup(); } catch(e) {} }
 
 window.renderPackages = () => {
   const tb = $("packagesTbody"); if(tb) tb.innerHTML = ""; const sel = $("packageSelector"); if(sel) sel.innerHTML = '<option value="">✍️ لا أريد باقة، سأكتب البيانات بنفسي</option>';
   if(packagesData.length === 0) { if(tb) tb.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:15px; color:var(--muted);">لا توجد باقات جاهزة.</td></tr>`; return; }
-  packagesData.forEach(p => { let typeTxt = p.type === 'sessions' ? `${p.value} حصص` : `${p.value} شهر`; if(tb) tb.innerHTML += `<tr><td style="font-weight:bold; color:var(--accent);">${p.name}</td><td>${p.serviceType}</td><td>${typeTxt}</td><td style="font-weight:bold;">${p.price}</td><td><button class="btn danger" style="padding:6px 10px; font-size:12px; border-radius:10px;" onclick="window.deletePackage('${p.id}')">حذف</button></td></tr>`; if(sel) sel.innerHTML += `<option value="${p.id}">${p.name} (${p.price})</option>`; });
+  packagesData.forEach(p => { 
+    let typeTxt = p.type === 'sessions' ? `${p.value} حصص` : `${p.value} شهر`; 
+    if(tb) tb.innerHTML += `<tr><td style="font-weight:bold; color:var(--accent);">${p.name}</td><td>${p.serviceType}</td><td>${typeTxt}</td><td style="font-weight:bold;">${p.price}</td><td style="display:flex; gap:4px;">
+      <button class="btn soft" style="padding:6px 10px; font-size:12px; border-radius:10px;" onclick="window.editPackage('${p.id}')">✏️</button>
+      <button class="btn danger" style="padding:6px 10px; font-size:12px; border-radius:10px;" onclick="window.deletePackage('${p.id}')">🗑️</button>
+    </td></tr>`; 
+    if(sel) sel.innerHTML += `<option value="${p.id}">${p.name} (${p.price})</option>`; 
+  });
 };
 
-window.savePackage = async () => { const name = $("pkgName").value.trim(); const serviceType = $("pkgService").value.trim(); const type = $("pkgType").value; const val = parseInt($("pkgValue").value); const price = parseFloat($("pkgPrice").value) || 0; if(!name || !serviceType || isNaN(val)) return showToast("بيانات ناقصة!", "err"); const pkg = { id: Date.now().toString(), name, serviceType, type, value: val, price }; packagesData.push(pkg); setSyncState("saving"); await firebasePushPackages(); window.renderPackages(); $("pkgName").value = ""; $("pkgService").value = ""; $("pkgValue").value = ""; $("pkgPrice").value = ""; setSyncState("ok"); showToast("تمت الإضافة 📦"); };
+window.editPackage = (id) => {
+  const p = packagesData.find(x => x.id === id); if(!p) return;
+  editingPkgId = id; $("pkgName").value = p.name; $("pkgService").value = p.serviceType; $("pkgType").value = p.type; $("pkgValue").value = p.value; $("pkgPrice").value = p.price;
+  $("btnSavePackage").innerHTML = "💾 حفظ التعديل"; $("btnSavePackage").style.background = "#f59e0b"; $("btnSavePackage").style.borderColor = "#d97706";
+  $("btnCancelPkgEdit").style.display = "block";
+};
+
+window.cancelEditPackage = () => {
+  editingPkgId = null; $("pkgName").value = ""; $("pkgService").value = ""; $("pkgValue").value = ""; $("pkgPrice").value = "";
+  $("btnSavePackage").innerHTML = "➕ إضافة الباقة"; $("btnSavePackage").style.background = ""; $("btnSavePackage").style.borderColor = "";
+  $("btnCancelPkgEdit").style.display = "none";
+};
+
+window.savePackage = async () => { 
+  const name = $("pkgName").value.trim(); const serviceType = $("pkgService").value.trim(); const type = $("pkgType").value; const val = parseInt($("pkgValue").value); const price = parseFloat($("pkgPrice").value) || 0; 
+  if(!name || !serviceType || isNaN(val)) return showToast("بيانات ناقصة!", "err"); 
+  const pkg = { id: editingPkgId || Date.now().toString(), name, serviceType, type, value: val, price }; 
+  if(editingPkgId) packagesData = packagesData.map(x => x.id === editingPkgId ? pkg : x); else packagesData.push(pkg); 
+  setSyncState("saving"); await firebasePushPackages(); window.renderPackages(); window.cancelEditPackage(); setSyncState("ok"); showToast("تم حفظ الباقة 📦"); 
+};
+
 window.deletePackage = async (id) => { if(!confirm("حذف الباقة؟")) return; packagesData = packagesData.filter(x => x.id !== id); setSyncState("saving"); await firebasePushPackages(); window.renderPackages(); setSyncState("ok"); showToast("تم الحذف"); };
 window.applyPackage = () => { const pid = $("packageSelector").value; if(!pid) return; const p = packagesData.find(x => x.id === pid); if(p) { $("subType").value = p.type || 'time'; window.toggleSubType(); $("serviceType").value = p.serviceType; if(p.type === 'sessions') { $("sessionsTotal").value = p.value; } else { $("months").value = p.value; } $("price").value = p.price; $("quickPlan").value = ""; window.calcDebt(); } };
 
@@ -1057,7 +1096,6 @@ window.openReceiptAction = () => {
   if(pStatus === 'partial') { $("recPaidAmountRow").style.display = "flex"; $("recPaidAmount").textContent = `${parseFloat(rec.paidAmount || 0).toLocaleString()} ${rec.currency || 'DZD'}`; } else { $("recPaidAmountRow").style.display = "none"; }
   if(pStatus === 'partial' || pStatus === 'unpaid') { $("recRemainingRow").style.display = "flex"; let total = parseFloat(rec.price) || 0; let paid = pStatus === 'unpaid' ? 0 : (parseFloat(rec.paidAmount) || 0); let rem = total - paid; $("recRemaining").textContent = `${rem.toLocaleString()} ${rec.currency || 'DZD'}`; } else { $("recRemainingRow").style.display = "none"; }
   
-  // سجل الدفعات داخل الفاتورة محول بالكامل إلى DIVs لمنع مشكلة الجداول
   const pList = $("receiptPaymentLogList"); pList.innerHTML = "";
   if(rec.paymentLog && rec.paymentLog.length > 0) {
       $("receiptPaymentLogSection").style.display = "block";
