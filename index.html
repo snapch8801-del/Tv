@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>لوحة تسيير الاشتراكات - v12.9.6.</title>
+<title>لوحة تسيير الاشتراكات - v12.9.7</title>
 
 <meta name="theme-color" content="#070a12" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -38,12 +38,12 @@ input, textarea, table, select { -webkit-user-select: auto; user-select: auto; }
 .card{ background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); backdrop-filter: blur(10px); overflow:hidden; }
 
 .topbar{ padding:14px; border-bottom:1px solid var(--line); display:flex; flex-direction:column; gap:12px; }
-.topbar-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; width: 100%; }
+.topbar-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; width: 100%; justify-content: flex-start; }
 .searchWrap{ display: flex; gap: 6px; align-items: center; width: 100%; }
 .searchWrap input { flex:1; width:100%; padding:10px 12px; border-radius:14px; border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); outline:none; transition: all 0.2s; font-size: 14px;}
 .searchWrap input:focus { border-color: rgba(124,92,255,.6); box-shadow: 0 0 0 4px rgba(124,92,255,.14); }
 
-.btn{ border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); padding:10px 12px; border-radius:14px; font-weight:900; cursor:pointer; transition: all .15s ease; font-size:13px; }
+.btn{ border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); padding:10px 12px; border-radius:14px; font-weight:900; cursor:pointer; transition: all .15s ease; font-size:13px; white-space: nowrap; }
 .btn:hover{ background: rgba(255,255,255,.06); }
 .btn:active{ transform: scale(.98); }
 .btn.primary{ border-color: rgba(124,92,255,.55); background: linear-gradient(135deg, rgba(124,92,255,.55), rgba(124,92,255,.15)); }
@@ -104,6 +104,22 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 .actBtn{ border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: var(--text); padding: 14px; border-radius: 18px; font-weight: 900; cursor:pointer; text-align: right; width: 100%; }
 .actBtn:disabled { opacity: 0.4; cursor: not-allowed; }
 
+/* تنسيق زر الإجراء الجديد - لحل مشكلة الهاتف */
+.actionPill {
+  padding: 10px 18px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent), #5a3bc2);
+  color: white;
+  font-weight: 900;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  box-shadow: 0 4px 15px rgba(124,92,255,0.3);
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+.actionPill:active { transform: scale(0.95); }
+
 .toast{ position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%) translateY(20px); padding: 12px 14px; border-radius: 16px; background: rgba(10,14,26,.92); border: 1px solid rgba(255,255,255,.12); color: var(--text); display: flex; align-items: center; gap: 10px; opacity: 0; pointer-events: none; transition: all .2s ease; z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-weight:bold; }
 .toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto;}
 
@@ -151,6 +167,11 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 .side-menu-header h2 { margin: 0; font-size: 18px; color: var(--text); }
 .menu-section-title { font-size: 12px; color: var(--accent); font-weight: bold; margin: 25px 0 10px; padding-inline-start: 5px; }
 .side-menu .actBtn { margin-bottom: 8px; font-size: 13px; padding: 12px 14px; }
+
+/* تنسيقات الفاتورة المرنة - لحل مشكلة اختفاء البيانات في الجوال */
+.flex-row-receipt { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #cbd5e1; }
+.flex-row-receipt span.label { color: #64748b; }
+.flex-row-receipt strong.val, .flex-row-receipt span.val { color: #0f172a; text-align: left; }
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -161,8 +182,8 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.6 PWA</span></h1>
-    <div class="sub">⚡ النسخة المتقدمة: نظام سجل الدخول والحضور الدقيق مع الوقت والتاريخ.</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.7 PWA</span></h1>
+    <div class="sub">⚡ إصلاح الفاتورة وتنسيقات الهاتف بالكامل.</div>
   </div>
 
   <div class="card">
@@ -375,19 +396,29 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
         <h1 id="receiptStoreName" style="margin: 0; font-size: 24px; color: #4f46e5; font-weight: 900;">المؤسسة</h1>
         <div style="color: #64748b; font-size: 13px; margin-top: 5px;">فاتورة اشتراك إلكترونية</div>
       </div>
-      <table class="receipt-table" style="width: 100%; border-collapse: collapse; font-size: 15px;">
-        <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b; width:40%;">اسم العميل:</td><td style="padding: 12px 0; text-align: left; font-weight: bold; color: #0f172a;" id="recName"></td></tr>
-        <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">رقم الهاتف:</td><td style="padding: 12px 0; text-align: left; direction: ltr; color: #0f172a;" id="recPhone"></td></tr>
-        <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">نوع الخدمة:</td><td style="padding: 12px 0; text-align: left; font-weight: bold; color: #8b5cf6;" id="recService"></td></tr>
-        <tr id="recRowMonths" style="display:none; border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">مدة الاشتراك:</td><td style="padding: 12px 0; text-align: left; color: #0f172a;" id="recMonths"></td></tr>
-        <tr id="recRowSessions" style="display:none; border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">رصيد الحصص:</td><td style="padding: 12px 0; text-align: left; color: #0f172a; font-weight:bold;" id="recSessions"></td></tr>
-        <tr id="recRowStart" style="display:none; border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">تاريخ البداية:</td><td style="padding: 12px 0; text-align: left; color: #0f172a;" id="recStart"></td></tr>
-        <tr id="recRowEnd" style="display:none; border-bottom: 1px solid #cbd5e1;"><td style="padding: 12px 0; color: #64748b;">تاريخ الانتهاء:</td><td style="padding: 12px 0; text-align: left; color: #0f172a;" id="recEnd"></td></tr>
-        <tr><td style="padding: 20px 0 10px 0; color: #0f172a; font-size: 18px; font-weight: 900;">السعر الإجمالي:</td><td style="padding: 20px 0 10px 0; text-align: left; font-size: 20px; font-weight: 900; color: #10b981;" id="recPrice"></td></tr>
-        <tr style="border-bottom: 1px dashed #cbd5e1;"><td style="padding: 10px 0; color: #64748b;">حالة الدفع:</td><td style="padding: 10px 0; text-align: left; font-weight:bold;" id="recPaymentStatus"></td></tr>
-        <tr id="recPaidAmountRow" style="display:none; border-bottom: 1px dashed #cbd5e1;"><td style="padding: 10px 0; color: #64748b;">المبلغ المدفوع:</td><td style="padding: 10px 0; text-align: left; font-weight:bold; color: #3b82f6;" id="recPaidAmount"></td></tr>
-        <tr id="recRemainingRow" style="display:none; background:#fef2f2; border-bottom: 1px dashed #cbd5e1;"><td style="padding: 12px 5px; color: #ef4444; font-weight:bold; border-radius:0 8px 8px 0;">❗ المبلغ المتبقي (دين):</td><td style="padding: 12px 5px; text-align: left; color: #ef4444; font-weight: 900; border-radius:8px 0 0 0;" id="recRemaining"></td></tr>
-      </table>
+      
+      <div style="font-size: 15px;">
+        <div class="flex-row-receipt"><span class="label">اسم العميل:</span><strong class="val" id="recName"></strong></div>
+        <div class="flex-row-receipt"><span class="label">رقم الهاتف:</span><span class="val" style="direction: ltr;" id="recPhone"></span></div>
+        <div class="flex-row-receipt"><span class="label">نوع الخدمة:</span><strong class="val" style="color: #8b5cf6;" id="recService"></strong></div>
+        
+        <div id="recRowMonths" class="flex-row-receipt" style="display:none;"><span class="label">مدة الاشتراك:</span><span class="val" id="recMonths"></span></div>
+        <div id="recRowSessions" class="flex-row-receipt" style="display:none;"><span class="label">رصيد الحصص:</span><strong class="val" id="recSessions"></strong></div>
+        <div id="recRowStart" class="flex-row-receipt" style="display:none;"><span class="label">تاريخ البداية:</span><span class="val" id="recStart"></span></div>
+        <div id="recRowEnd" class="flex-row-receipt" style="display:none; border-bottom: 1px solid #cbd5e1;"><span class="label">تاريخ الانتهاء:</span><span class="val" id="recEnd"></span></div>
+
+        <div style="display: flex; justify-content: space-between; align-items: center; padding: 20px 0 10px 0;">
+          <span style="color: #0f172a; font-size: 18px; font-weight: 900;">السعر الإجمالي:</span>
+          <strong style="color: #10b981; font-size: 20px;" id="recPrice"></strong>
+        </div>
+
+        <div class="flex-row-receipt" style="padding: 10px 0;"><span class="label">حالة الدفع:</span><strong class="val" id="recPaymentStatus"></strong></div>
+        <div id="recPaidAmountRow" class="flex-row-receipt" style="display:none; padding: 10px 0;"><span class="label">المبلغ المدفوع:</span><strong class="val" style="color: #3b82f6;" id="recPaidAmount"></strong></div>
+        <div id="recRemainingRow" style="display:none; justify-content: space-between; background:#fef2f2; border-bottom: 1px dashed #cbd5e1; padding: 12px 5px; border-radius: 8px;">
+          <span style="color: #ef4444; font-weight:bold;">❗ المبلغ المتبقي (دين):</span><strong style="color: #ef4444; font-size: 16px;" id="recRemaining"></strong>
+        </div>
+      </div>
+
       <div style="text-align: center; margin-top: 35px; font-size: 12px; color: #94a3b8; line-height: 1.6;">نشكركم على ثقتكم بنا 🤍<br><span style="font-size: 10px;">تم الإصدار بتاريخ <span id="recToday"></span></span></div>
     </div>
     <div class="modalFooter no-print" style="background: #f8fafc; border-top: 1px solid #e2e8f0; border-radius: 0 0 12px 12px; display:flex; gap:10px;">
@@ -396,7 +427,6 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
     </div>
   </div>
 </div>
-
 <div class="modal" id="idCardModal" aria-hidden="true">
   <div class="box" style="width: 420px; background: #ffffff; color: #000000; border: none; border-radius: 16px;">
     <div class="modalHeader no-print" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0;">
@@ -460,7 +490,6 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
         <button class="btn primary" style="padding: 14px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(124,92,255,0.2);" onclick="window.actExtendAction()">
           🔁 تجديد الاشتراك (رصيد / مدة)
         </button>
-        
         <button class="btn" style="padding: 14px; font-size: 15px; font-weight: bold; color: #fff; background: linear-gradient(135deg, #3b82f6, #2563eb); border-color: #2563eb; box-shadow: 0 4px 15px rgba(59,130,246,0.2);" onclick="window.openMembershipCard()">
           🪪 عرض بطاقة الانخراط (QR)
         </button>
@@ -476,7 +505,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
       </div>
 
       <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; padding-top: 15px; border-top: 1px dashed rgba(255,255,255,0.1);">
-        <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px;" onclick="window.actEditAction()">✏️ تعديل البيانات</button>
+        <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px;" onclick="window.actEditAction()">✏️ تعديل</button>
         <button class="btn soft" id="btnViewNotes" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #a855f7; border-color: rgba(168,85,247,.3);" onclick="window.openNotesAction()">📝 الملاحظات</button>
         <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px;" onclick="window.actCopyEmailAction()">📋 نسخ Email</button>
         <button class="btn soft" id="btnViewAttendance" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #10b981; border-color: rgba(16,185,129,.3);" onclick="window.openAttendanceLog()">📅 سجل الحضور</button>
@@ -610,7 +639,7 @@ window.addEventListener('DOMContentLoaded', () => {
 
 // 3. إعداد Firebase
 const FIREBASE_CONFIG = { apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ", authDomain: "dattta-6f497.firebaseapp.com", databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com", projectId: "dattta-6f497", storageBucket: "dattta-6f497.firebasestorage.app", messagingSenderId: "804914291938", appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb" };
-const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.6"; 
+const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.7"; 
 const $ = (id)=>document.getElementById(id); 
 const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
 
@@ -844,7 +873,6 @@ window.render = () => {
 
         const serviceHtml = `<span class="service-badge">${r.serviceType || "غير محدد"}</span>`;
         
-        // زر الحضور في الجدول متاح الآن للنوعين!
         let dateOrSessionHtml = "";
         if(r.subType === 'sessions') {
           dateOrSessionHtml = `<div style="font-weight:bold; font-size:14px; color:var(--text);">${r.sessionsLeft||0} / ${r.sessionsTotal||0} حصة</div>
@@ -854,9 +882,14 @@ window.render = () => {
           <div style="margin-top:4px;"><button class="btn soft" style="padding:4px 8px; font-size:10px; border-color:#22c55e; color:#22c55e;" onclick="window.markAttendance('${r.id}')">✔️ تسجيل دخول</button></div>`;
         }
 
+        // تم إضافة الإيميل هنا تحت الاسم مباشرة
         tr.innerHTML = `
           <td style="text-align: center;"><input type="checkbox" class="rowChk" value="${r.id}" ${isChecked}></td>
-          <td><div style="font-weight:bold; color:var(--text); font-size:14px;">${r.name||"-"}${notesIcon}</div>${r.email ? `<div style="font-size:11px; color:var(--muted); margin-bottom:4px;">${r.email}</div>` : ''}<div>${tagsHtml}</div></td>
+          <td>
+             <div style="font-weight:bold; color:var(--text); font-size:14px;">${r.name||"-"}${notesIcon}</div>
+             <div style="font-size:11px; color:var(--muted); margin-bottom:2px; direction: ltr; text-align: right;">${r.email||""}</div>
+             <div>${tagsHtml}</div>
+          </td>
           <td dir="ltr" style="text-align:right; font-size:14px;">${r.phone?`${r.countryCode||''} ${r.phone}`:'-'}</td>
           <td><div style="margin-bottom:4px;">${serviceHtml}</div><div style="font-size:11px; color:var(--muted); font-weight:bold;">${r.subType === 'sessions' ? 'نظام حصص' : `المدة: ${r.months||0} شهر`}</div></td>
           <td><div style="font-weight:bold; font-size:14px;">${r.price||0} <span style="font-size:10px; color:var(--muted);">${r.currency||'DZD'}</span></div><div style="margin-top:4px;">${payBadge}</div></td>
@@ -875,11 +908,9 @@ window.render = () => {
   } catch(e) { console.error(e); }
 };
 
-// دالة تسجيل الحضور الجديدة المطورة
 window.markAttendance = async (id) => {
   let rec = data.find(x => x.id === id);
   if(rec) {
-    // التحقق من صلاحية الاشتراك قبل الدخول
     if (rec.subType === 'sessions' && rec.sessionsLeft <= 0) {
       return showToast("الرصيد منتهي، لا يمكن الخصم!", "err");
     }
@@ -889,10 +920,8 @@ window.markAttendance = async (id) => {
       if(st.key === 'expired') return showToast("الاشتراك الزمني منتهي، لا يمكن الدخول!", "err");
     }
 
-    // الخصم إذا كان نظام حصص
     if(rec.subType === 'sessions') rec.sessionsLeft--;
 
-    // تسجيل الوقت والتاريخ الدقيق في السجل الجديد
     if(!rec.attendanceLog) rec.attendanceLog = [];
     rec.attendanceLog.push({ time: new Date().toISOString() });
 
@@ -918,12 +947,11 @@ window.openAttendanceLog = () => {
   if(!rec.attendanceLog || rec.attendanceLog.length === 0) {
     tb.innerHTML = `<tr><td colspan="3" style="text-align:center; padding:20px; color:var(--muted);">لا يوجد سجل حضور لهذا المشترك بعد.</td></tr>`;
   } else {
-    // عكس المصفوفة لعرض الأحدث في الأعلى
     const sortedLogs = [...rec.attendanceLog].reverse();
     sortedLogs.forEach((log, index) => {
       const d = new Date(log.time);
-      const dateStr = d.toLocaleDateString('en-GB'); // شكل: DD/MM/YYYY
-      const timeStr = d.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'}); // شكل: HH:MM
+      const dateStr = d.toLocaleDateString('en-GB'); 
+      const timeStr = d.toLocaleTimeString('en-GB', {hour: '2-digit', minute:'2-digit'}); 
       tb.innerHTML += `
         <tr style="border-bottom: 1px solid rgba(255,255,255,0.05);">
           <td style="padding: 10px; color: var(--muted);">${sortedLogs.length - index}</td>
@@ -1009,13 +1037,11 @@ window.openRowActions = (id) => {
   const rec = data.find(x => x.id === id); 
   $("rowActionsHint").textContent = rec.name; 
   
-  // تفعيل/تعطيل زر الملاحظات
   const hasNotes = rec.notes && rec.notes.trim() !== "";
   const btnNotes = $("btnViewNotes");
   if(hasNotes) { btnNotes.disabled = false; btnNotes.style.opacity = "1"; btnNotes.onclick = window.openNotesAction; } 
   else { btnNotes.disabled = true; btnNotes.style.opacity = "0.4"; btnNotes.onclick = null; }
   
-  // تحديث عداد سجل الحضور
   const logCount = rec.attendanceLog ? rec.attendanceLog.length : 0;
   $("btnViewAttendance").textContent = `📅 سجل الحضور (${logCount})`;
 
@@ -1185,7 +1211,6 @@ window.saveSubscription = async () => {
   if(subType === 'time') { rec.start = start; rec.months = months; rec.end = endISO; }
   else { rec.sessionsTotal = sessionsTot; rec.sessionsLeft = sessionsLft; }
   
-  // الحفاظ على سجل الحضور القديم إن وجد
   if(editingId) {
     const oldRec = data.find(x => x.id === editingId);
     if(oldRec && oldRec.attendanceLog) rec.attendanceLog = oldRec.attendanceLog;
@@ -1193,6 +1218,42 @@ window.saveSubscription = async () => {
 
   if(editingId) data = data.map(x => x.id === editingId ? rec : x); else data.unshift(rec);
   await firebasePush(); window.render(); closeModal("formModal"); showToast("تم الحفظ ✨");
+};
+
+window.openReceiptAction = () => {
+  const rec = data.find(x => x.id === currentRowId); if(!rec) return; closeModal("rowActionsModal"); 
+  const sName = (storeSettings.name || "متجر_الاشتراكات").replace(/[^a-zA-Z0-9\u0600-\u06FF\s]/g, '').trim().replace(/\s+/g, '_'); const cName = (rec.name || "عميل").replace(/[^a-zA-Z0-9\u0600-\u06FF\s]/g, '').trim().replace(/\s+/g, '_'); const d = new Date(); const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  document.title = `فاتورة_${sName}_${cName}_${dateStr}`;
+  
+  $("receiptStoreName").textContent = storeSettings.name || "المؤسسة";
+  if(storeSettings.logo) { $("receiptLogoImg").src = storeSettings.logo; $("receiptLogoImg").style.display = "block"; $("receiptLogoEmoji").style.display = "none"; } else { $("receiptLogoImg").style.display = "none"; $("receiptLogoEmoji").style.display = "block"; }
+  
+  $("recName").textContent = rec.name || "-"; 
+  $("recPhone").textContent = rec.phone ? `${rec.countryCode||''}${rec.phone}` : "-"; 
+  $("recService").textContent = rec.serviceType || "غير محدد"; 
+  
+  if(rec.subType === 'sessions') {
+    $("recRowSessions").style.display = "flex"; $("recSessions").textContent = `${rec.sessionsTotal} حصة`;
+    $("recRowMonths").style.display = "none"; $("recRowStart").style.display = "none"; $("recRowEnd").style.display = "none";
+  } else {
+    $("recRowMonths").style.display = "flex"; $("recMonths").textContent = `${rec.months || 0} شهر`;
+    $("recRowStart").style.display = "flex"; $("recStart").textContent = rec.start || "-";
+    $("recRowEnd").style.display = "flex"; $("recEnd").textContent = rec.end || "-";
+    $("recRowSessions").style.display = "none";
+  }
+
+  $("recPrice").textContent = `${parseFloat(rec.price || 0).toLocaleString()} ${rec.currency || 'DZD'}`;
+  
+  let pStatus = rec.paymentStatus || 'paid'; let pText = pStatus === 'paid' ? '🟢 مدفوع بالكامل' : (pStatus === 'unpaid' ? '🔴 غير مدفوع' : '🟡 دفع جزئي'); 
+  $("recPaymentStatus").textContent = pText;
+  
+  if(pStatus === 'partial') { $("recPaidAmountRow").style.display = "flex"; $("recPaidAmount").textContent = `${parseFloat(rec.paidAmount || 0).toLocaleString()} ${rec.currency || 'DZD'}`; } else { $("recPaidAmountRow").style.display = "none"; }
+  
+  if(pStatus === 'partial' || pStatus === 'unpaid') { $("recRemainingRow").style.display = "flex"; let total = parseFloat(rec.price) || 0; let paid = pStatus === 'unpaid' ? 0 : (parseFloat(rec.paidAmount) || 0); let rem = total - paid; $("recRemaining").textContent = `${rem.toLocaleString()} ${rec.currency || 'DZD'}`; } else { $("recRemainingRow").style.display = "none"; }
+  
+  $("recToday").textContent = `${d.toLocaleDateString('en-GB')} - ${d.toLocaleTimeString('en-GB')}`; 
+  logAction("إصدار وصل", `للعميل: ${rec.name}`); 
+  openModal("receiptModal"); 
 };
 
 window.printReceiptAction = () => { 
@@ -1213,31 +1274,6 @@ window.printIdCardAction = () => {
     document.body.classList.remove("print-mode-idcard");
     $("idCardModal").classList.remove("print-active");
   }, 500); 
-};
-
-window.openReceiptAction = () => {
-  const rec = data.find(x => x.id === currentRowId); if(!rec) return; closeModal("rowActionsModal"); 
-  const sName = (storeSettings.name || "متجر_الاشتراكات").replace(/[^a-zA-Z0-9\u0600-\u06FF\s]/g, '').trim().replace(/\s+/g, '_'); const cName = (rec.name || "عميل").replace(/[^a-zA-Z0-9\u0600-\u06FF\s]/g, '').trim().replace(/\s+/g, '_'); const d = new Date(); const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-  document.title = `فاتورة_${sName}_${cName}_${dateStr}`;
-  $("receiptStoreName").textContent = storeSettings.name || "المؤسسة";
-  if(storeSettings.logo) { $("receiptLogoImg").src = storeSettings.logo; $("receiptLogoImg").style.display = "block"; $("receiptLogoEmoji").style.display = "none"; } else { $("receiptLogoImg").style.display = "none"; $("receiptLogoEmoji").style.display = "block"; }
-  $("recName").textContent = rec.name || "-"; $("recPhone").textContent = rec.phone ? `${rec.countryCode||''}${rec.phone}` : "-"; $("recService").textContent = rec.serviceType || "غير محدد"; 
-  
-  if(rec.subType === 'sessions') {
-    $("recRowSessions").style.display = "table-row"; $("recSessions").textContent = `${rec.sessionsTotal} حصة`;
-    $("recRowMonths").style.display = "none"; $("recRowStart").style.display = "none"; $("recRowEnd").style.display = "none";
-  } else {
-    $("recRowMonths").style.display = "table-row"; $("recMonths").textContent = `${rec.months || 0} شهر`;
-    $("recRowStart").style.display = "table-row"; $("recStart").textContent = rec.start || "-";
-    $("recRowEnd").style.display = "table-row"; $("recEnd").textContent = rec.end || "-";
-    $("recRowSessions").style.display = "none";
-  }
-
-  $("recPrice").textContent = `${parseFloat(rec.price || 0).toLocaleString()} ${rec.currency || 'DZD'}`;
-  let pStatus = rec.paymentStatus || 'paid'; let pText = pStatus === 'paid' ? '🟢 مدفوع بالكامل' : (pStatus === 'unpaid' ? '🔴 غير مدفوع' : '🟡 دفع جزئي'); $("recPaymentStatus").textContent = pText;
-  if(pStatus === 'partial') { $("recPaidAmountRow").style.display = "table-row"; $("recPaidAmount").textContent = `${parseFloat(rec.paidAmount || 0).toLocaleString()} ${rec.currency || 'DZD'}`; } else { $("recPaidAmountRow").style.display = "none"; }
-  if(pStatus === 'partial' || pStatus === 'unpaid') { $("recRemainingRow").style.display = "table-row"; let total = parseFloat(rec.price) || 0; let paid = pStatus === 'unpaid' ? 0 : (parseFloat(rec.paidAmount) || 0); let rem = total - paid; $("recRemaining").textContent = `${rem.toLocaleString()} ${rec.currency || 'DZD'}`; } else { $("recRemainingRow").style.display = "none"; }
-  $("recToday").textContent = `${d.toLocaleDateString('en-GB')} - ${d.toLocaleTimeString('en-GB')}`; logAction("إصدار وصل", `للعميل: ${rec.name}`); openModal("receiptModal"); 
 };
 
 window.sendWhatsAppReceipt = () => {
