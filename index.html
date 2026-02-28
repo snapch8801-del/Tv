@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>لوحة تسيير الاشتراكات - v12.6</title>
+<title>لوحة تسيير الاشتراكات - v12.6.1</title>
 
 <meta name="theme-color" content="#070a12" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -143,8 +143,8 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.6 PWA</span></h1>
-    <div class="sub">⚡ الميزات الجديدة: نظام الاشتراكات بالحصص 🎟️ + الأوسمة والتصنيفات 🏷️</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.6.1</span></h1>
+    <div class="sub">⚡ الميزات: نظام الاشتراكات بالحصص 🎟️ + الأوسمة 🏷️ (تم إصلاح زر الإضافة)</div>
   </div>
 
   <div class="card">
@@ -284,6 +284,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
           <div class="field"><label>المدة (أشهر) <span style="color:var(--err)">*</span></label><input id="months" type="number" min="1" step="1"></div>
           <div class="field"><label>تاريخ البداية <span style="color:var(--err)">*</span></label><input id="start" type="date"></div>
           <div class="field"><label>تنبيه قبل (أيام)</label><input id="alertDays" type="number" min="1" step="1" value="7"></div>
+          <div class="field"><label>اختيار سريع للمدة</label><select id="quickPlan" onchange="window.handleQuickPlan()"><option value="">— اختر —</option><option value="1">1 شهر</option><option value="3">3 أشهر</option><option value="6">6 أشهر</option><option value="12">12 شهر</option></select></div>
         </div>
 
         <div id="sessionsFieldsGrp" style="display:none;">
@@ -463,7 +464,7 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 })();
 
 const FIREBASE_CONFIG = { apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ", authDomain: "dattta-6f497.firebaseapp.com", databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com", projectId: "dattta-6f497", storageBucket: "dattta-6f497.firebasestorage.app", messagingSenderId: "804914291938", appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb" };
-const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.6"; const $ = (id)=>document.getElementById(id); const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
+const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.6.1"; const $ = (id)=>document.getElementById(id); const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
 
 let data = []; let packagesData = []; let editingId = null; let currentRowId = null; let currentFilter = "all"; 
 let selectedIds = new Set(); let extendMode = "single"; let currentUser = null; let currentRole = null;
@@ -577,7 +578,6 @@ window.render = () => {
     const hasNotes = r.notes && r.notes.trim() !== "";
     const notesIcon = hasNotes ? `<span title="ملاحظات سرية" style="font-size:12px; margin-inline-start:6px; cursor:help;">📝</span>` : "";
     
-    // تصميم الأوسمة
     let tagsHtml = "";
     if(r.tags && r.tags.trim() !== "") {
       const tagsArray = r.tags.split(',').map(t => t.trim()).filter(t => t !== "");
@@ -586,7 +586,6 @@ window.render = () => {
 
     const serviceHtml = `<span class="service-badge">${r.serviceType || "غير محدد"}</span>`;
     
-    // التواريخ أو الرصيد
     let dateOrSessionHtml = "";
     if(r.subType === 'sessions') {
       dateOrSessionHtml = `<div style="font-weight:bold; font-size:14px; color:var(--text);">${r.sessionsLeft||0} / ${r.sessionsTotal||0} حصة</div>
@@ -615,7 +614,6 @@ window.render = () => {
   `;
 };
 
-// تسجيل الحضور السريع
 window.markAttendance = async (id) => {
   let rec = data.find(x => x.id === id);
   if(rec && rec.subType === 'sessions' && rec.sessionsLeft > 0) {
@@ -783,7 +781,7 @@ window.actEditAction = () => {
   $("months").value = rec.months||""; $("sessionsTotal").value = rec.sessionsTotal||""; $("sessionsLeft").value = rec.sessionsLeft||"";
   $("price").value = rec.price||""; $("currency").value = rec.currency||"DZD"; 
   $("start").value = rec.start; $("alertDays").value = rec.alertDays||"7"; 
-  $("notes").value = rec.notes || ""; $("packageSelector").value = "";
+  $("notes").value = rec.notes || ""; $("packageSelector").value = ""; $("quickPlan").value = "";
   if(rec.paymentStatus === 'unpaid') $("paidAmount").value = 0; else if(rec.paymentStatus === 'partial') $("paidAmount").value = rec.paidAmount || 0; else $("paidAmount").value = ""; 
   window.calcDebt(); openModal("formModal"); 
 };
@@ -803,7 +801,7 @@ window.saveSubscription = async () => {
   
   let endISO = "";
   if(subType === 'time') { const endD = new Date(start); endD.setMonth(endD.getMonth() + months); endISO = endD.toISOString().split('T')[0]; }
-  if(subType === 'sessions' && isNaN(sessionsLft)) sessionsLft = sessionsTot; // في الإضافة الجديدة
+  if(subType === 'sessions' && isNaN(sessionsLft)) sessionsLft = sessionsTot; 
   
   const alertEl = $("alertDays");
   const rec = { 
