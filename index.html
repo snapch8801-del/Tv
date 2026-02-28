@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>لوحة تسيير الاشتراكات - v12.9.11</title>
+<title>لوحة تسيير الاشتراكات - v12.9.12</title>
 
 <meta name="theme-color" content="#070a12" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -166,8 +166,8 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.11 PWA</span></h1>
-    <div class="sub">⚡ النسخة السريعة: إضافة باقات مباشرة من نافذة العميل وحل مشكلة التشابه.</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.12 PWA</span></h1>
+    <div class="sub">⚡ النسخة المتطورة: إضافة المراسلة عبر ميسنجر و SMS بشكل ذكي والروابط.</div>
   </div>
 
   <div class="card">
@@ -253,7 +253,6 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
     <div class="modalHeader"><div><h2 id="formTitle">إضافة اشتراك</h2><div class="hint">املأ البيانات الأساسية ثم اضغط حفظ</div></div><button class="btn danger btn-close" type="button" onclick="closeModal('formModal')">✕ إغلاق</button></div>
     <div class="modalBody">
       <div class="formGrid">
-        
         <div class="field full-width" style="background:rgba(124,92,255,0.08); padding:12px 14px; border-radius:14px; border:1px dashed rgba(124,92,255,0.3); margin-bottom:5px;">
           <label style="color:#c4b5fd; margin-bottom:8px;">📦 اختصار: اختر باقة جاهزة (اختياري)</label>
           <div style="display:flex; gap:8px;">
@@ -298,11 +297,13 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
         <div class="field full-width"><label>الدين المتبقي (آلي)</label><input id="debtAmount" type="text" readonly style="background: rgba(239,68,68,0.1); color: #ff8a8a; font-weight: bold; border-color: rgba(239,68,68,0.3); pointer-events: none;"></div>
         <div class="full-width" style="margin-top: 10px;">
           <button type="button" id="btnToggleAdvanced" class="btn soft" style="width: 100%; border-style: dashed; color: var(--muted); padding: 12px;" onclick="window.toggleAdvancedFields()">
-            🔽 إظهار الخيارات الإضافية (الإيميل، الملاحظات، الأوسمة...)
+            🔽 إظهار الخيارات الإضافية (الإيميل، الملاحظات، الأوسمة، الميسنجر...)
           </button>
         </div>
         <div id="advancedFields" class="full-width" style="display: none; background: rgba(0,0,0,0.2); padding: 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05); margin-top: 10px;">
           <div class="formGrid">
+            <div class="field full-width"><label>🔗 رابط المحادثة (ميسنجر / ماركت بلايس)</label><input id="messengerLink" type="url" dir="ltr" placeholder="https://m.me/..." title="انسخ رابط حساب الزبون أو رابط محادثة الماركت بلايس والصقه هنا"></div>
+            
             <div class="field full-width"><label>الإيميل (اختياري)</label><input id="email" placeholder="مثال: name@example.com" inputmode="email"></div>
             <div class="field full-width"><label>الأوسمة / التصنيفات (مفصولة بفاصلة)</label><input id="tags" placeholder="مثال: سنة 4 متوسط, فوج الأحد, VIP..."></div>
             <div class="field"><label>تنبيه قبل (أيام)</label><input id="alertDays" type="number" min="1" step="1" value="7"></div>
@@ -490,7 +491,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
       <div style="font-size:12px; color:var(--accent); margin-bottom:8px; font-weight:bold;">سجل الدفعات السابقة:</div>
       <div style="max-height: 200px; overflow: auto; background: rgba(0,0,0,0.3); border-radius: 12px; border: 1px solid rgba(255,255,255,0.1);">
         <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
-          <thead style="background: rgba(255,255,255,0.05);"><tr><th style="padding: 10px; text-align: right; color: var(--text);">التاريخ والوقت</th><th style="padding: 10px; text-align: left; color: var(--text);">المبلغ الذي تم دفعه</th></tr></thead>
+          <thead style="background: rgba(255,255,255,0.05);"><tr><th style="padding: 10px; text-align: right; color: var(--muted);">التاريخ والوقت</th><th style="padding: 10px; text-align: left; color: var(--muted);">المبلغ الذي تم دفعه</th></tr></thead>
           <tbody id="paymentTbody"></tbody>
         </table>
       </div>
@@ -521,6 +522,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
     </div>
     
     <div class="modalBody" style="padding: 20px;">
+      
       <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px;">
         <button class="btn primary" style="padding: 14px; font-size: 15px; font-weight: bold; box-shadow: 0 4px 15px rgba(124,92,255,0.2);" onclick="window.actExtendAction()">
           🔁 تجديد الاشتراك (رصيد / مدة)
@@ -530,9 +532,18 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
         </button>
       </div>
 
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
         <button class="btn soft" style="color: #4ade80; border-color: rgba(37,211,102,.3); background: rgba(37,211,102,.1);" onclick="window.actWhatsAppAction()">
-          💬 مراسلة واتساب
+          💬 واتساب
+        </button>
+        <button class="btn soft" id="btnMessengerAction" style="color: #0ea5e9; border-color: rgba(14,165,233,.3); background: rgba(14,165,233,.1);" onclick="window.actMessengerAction()">
+          💬 ميسنجر
+        </button>
+      </div>
+      
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px;">
+        <button class="btn soft" style="color: #f43f5e; border-color: rgba(244,63,94,.3); background: rgba(244,63,94,.1);" onclick="window.actSMSAction()">
+          📱 رسالة SMS
         </button>
         <button class="btn soft" style="color: #60a5fa; border-color: rgba(96,165,250,.3); background: rgba(96,165,250,.1);" onclick="window.openReceiptAction()">
           📄 إصدار فاتورة
@@ -542,7 +553,6 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
       <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-bottom: 20px; padding-top: 15px; border-top: 1px dashed rgba(255,255,255,0.1);">
         <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px;" onclick="window.actEditAction()">✏️ تعديل</button>
         <button class="btn soft" id="btnViewNotes" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #a855f7; border-color: rgba(168,85,247,.3);" onclick="window.openNotesAction()">📝 الملاحظات</button>
-        <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px;" onclick="window.actCopyEmailAction()">📋 نسخ Email</button>
         <button class="btn soft" id="btnViewAttendance" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #10b981; border-color: rgba(16,185,129,.3);" onclick="window.openAttendanceLog()">📅 سجل الحضور</button>
         <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #fbbf24; border-color: rgba(251,191,36,.3);" onclick="window.openPaymentModal()">💸 الدفعات والديون</button>
       </div>
@@ -552,6 +562,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
           🗑️ حذف المشترك نهائياً
         </button>
       </div>
+
     </div>
   </div>
 </div>
@@ -663,7 +674,7 @@ window.addEventListener('DOMContentLoaded', () => {
 })();
 
 const FIREBASE_CONFIG = { apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ", authDomain: "dattta-6f497.firebaseapp.com", databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com", projectId: "dattta-6f497", storageBucket: "dattta-6f497.firebasestorage.app", messagingSenderId: "804914291938", appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb" };
-const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.11"; 
+const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.12"; 
 const $ = (id)=>document.getElementById(id); 
 const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
 const LOCAL_PACKAGES_KEY = "subs_packages_backup_v12";
@@ -862,7 +873,7 @@ window.render = () => {
               <td><button class="actionPill" onclick="window.openRowActions('${r.id}')">⚡ إجراء</button></td>
             `;
             tb.appendChild(tr);
-        } catch(rowErr) { console.error("Error rendering row:", rowErr); }
+        } catch(rowErr) {}
       });
 
       $("paginationControls").innerHTML = `
@@ -870,7 +881,7 @@ window.render = () => {
         <span class="page-info">صفحة ${window.currentPage} من ${totalPages} <span style="margin: 0 8px; color:var(--line);">|</span> الإجمالي: ${filteredRows.length} مشترك</span>
         <button class="page-btn" onclick="window.changePage(-1)" ${window.currentPage === 1 ? 'disabled' : ''}>▶ السابق</button>
       `;
-  } catch(e) { console.error(e); }
+  } catch(e) {}
 };
 
 window.markAttendance = async (id) => {
@@ -989,9 +1000,19 @@ window.sendNextBulkWhatsApp = () => {
 
 window.openRowActions = (id) => { 
   currentRowId = id; const rec = data.find(x => x.id === id); $("rowActionsHint").textContent = rec.name; 
+  
+  // تفعيل وإلغاء تفعيل زر الملاحظات
   const hasNotes = rec.notes && rec.notes.trim() !== ""; const btnNotes = $("btnViewNotes");
   if(hasNotes) { btnNotes.disabled = false; btnNotes.style.opacity = "1"; btnNotes.onclick = window.openNotesAction; } 
   else { btnNotes.disabled = true; btnNotes.style.opacity = "0.4"; btnNotes.onclick = null; }
+  
+  // تفعيل وإلغاء تفعيل زر الميسنجر
+  const btnMsg = $("btnMessengerAction");
+  if(btnMsg) {
+      if(rec.messengerLink && rec.messengerLink.trim() !== "") { btnMsg.disabled = false; btnMsg.style.opacity = "1"; }
+      else { btnMsg.disabled = true; btnMsg.style.opacity = "0.4"; }
+  }
+
   const logCount = rec.attendanceLog ? rec.attendanceLog.length : 0; $("btnViewAttendance").textContent = `📅 سجل الحضور (${logCount})`;
   openModal("rowActionsModal"); 
 };
@@ -1012,6 +1033,28 @@ window.openNotesAction = () => { const rec = data.find(x => x.id === currentRowI
 window.actExtendAction = () => { extendMode = "single"; const rec = data.find(x => x.id === currentRowId); $("extendTitle").textContent = `تجديد لـ ${rec.name}`; $("lblExtendValue").textContent = rec.subType === 'sessions' ? "الحصص المضافة" : "المدة المضافة"; if(rec.subType === 'sessions') $("grpExtendUnit").style.display = "none"; else $("grpExtendUnit").style.display = "block"; $("extendValue").value = 1; $("extendUnit").value = "months"; closeModal("rowActionsModal"); openModal("extendModal"); };
 window.actCopyEmailAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.email) { closeModal("rowActionsModal"); return showToast("لا يوجد بريد.", "err"); } navigator.clipboard.writeText(rec.email); closeModal("rowActionsModal"); showToast("تم نسخ الإيميل 📋"); };
 window.actWhatsAppAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.phone) { closeModal("rowActionsModal"); return showToast("لا يوجد هاتف.", "err"); } let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, ''); let endTxt = rec.subType === 'sessions' ? `رصيدك المتبقي: ${rec.sessionsLeft} حصة` : `ينتهي بتاريخ: ${rec.end}`; window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`مرحباً ${rec.name}، نود تذكيرك بخصوص اشتراكك الذي ${endTxt}.`)}`, '_blank'); closeModal("rowActionsModal"); };
+
+// وظيفة الميسنجر الجديدة
+window.actMessengerAction = () => { 
+  const rec = data.find(x => x.id === currentRowId); 
+  if(!rec || !rec.messengerLink) { closeModal("rowActionsModal"); return showToast("لا يوجد رابط ميسنجر مسجل لهذا العميل.", "err"); } 
+  logAction("مراسلة ميسنجر", `إلى: ${rec.name}`);
+  window.open(rec.messengerLink, '_blank'); 
+  closeModal("rowActionsModal"); 
+};
+
+// وظيفة الـ SMS الجديدة
+window.actSMSAction = () => { 
+  const rec = data.find(x => x.id === currentRowId); 
+  if(!rec || !rec.phone) { closeModal("rowActionsModal"); return showToast("لا يوجد هاتف مسجل لهذا العميل.", "err"); } 
+  let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, ''); 
+  let endTxt = rec.subType === 'sessions' ? `رصيدك المتبقي: ${rec.sessionsLeft} حصة` : `ينتهي بتاريخ: ${rec.end}`; 
+  let msg = `مرحباً ${rec.name}، نود تذكيرك بخصوص اشتراكك الذي ${endTxt}.`;
+  logAction("إرسال SMS", `إلى: ${rec.name}`);
+  window.open(`sms:${cleanPhone}?body=${encodeURIComponent(msg)}`, '_self'); 
+  closeModal("rowActionsModal"); 
+};
+
 window.actDeleteAction = async () => { if(confirm("حذف المشترك نهائياً؟")) { const recToDelete = data.find(x => x.id === currentRowId); logAction("حذف اشتراك", `الاسم: ${recToDelete.name}`); lastDeletedData = data.filter(x => x.id === currentRowId); data = data.filter(x => x.id !== currentRowId); await firebasePush(); window.render(); closeModal("rowActionsModal"); showToast("تم الحذف 🗑️"); } };
 
 window.calcDebt = () => { const p = parseFloat($("price").value) || 0; let valRaw = $("paidAmount").value; let a = valRaw === "" ? p : (parseFloat(valRaw) || 0); let d = p - a; $("debtAmount").value = d > 0 ? d : 0; };
@@ -1028,7 +1071,6 @@ window.renderPackages = () => {
       <button class="btn soft" style="padding:6px 10px; font-size:12px; border-radius:10px;" onclick="window.editPackage('${p.id}')">✏️</button>
       <button class="btn danger" style="padding:6px 10px; font-size:12px; border-radius:10px;" onclick="window.deletePackage('${p.id}')">🗑️</button>
     </td></tr>`; 
-    // التعديل المذهل: عرض (الاسم - الخدمة - السعر) لمنع التشابه
     if(sel) sel.innerHTML += `<option value="${p.id}">${p.name} - ${p.serviceType} (${p.price} DZD)</option>`; 
   });
 };
@@ -1049,40 +1091,30 @@ window.cancelEditPackage = () => {
 window.savePackage = async () => { 
   const name = $("pkgName").value.trim(); const serviceType = $("pkgService").value.trim(); const type = $("pkgType").value; const val = parseInt($("pkgValue").value); const price = parseFloat($("pkgPrice").value) || 0; 
   if(!name || !serviceType || isNaN(val)) return showToast("بيانات ناقصة!", "err"); 
-  
-  const newId = editingPkgId || Date.now().toString();
-  const pkg = { id: newId, name, serviceType, type, value: val, price }; 
-  
+  const newId = editingPkgId || Date.now().toString(); const pkg = { id: newId, name, serviceType, type, value: val, price }; 
   if(editingPkgId) packagesData = packagesData.map(x => x.id === editingPkgId ? pkg : x); else packagesData.push(pkg); 
   setSyncState("saving"); await firebasePushPackages(); window.renderPackages(); window.cancelEditPackage(); setSyncState("ok"); showToast("تم حفظ الباقة 📦"); 
-  
-  // الميزة السحرية: الاختيار التلقائي إذا كنا قادمين من نافذة العميل
-  const formModal = $("formModal");
-  if(formModal && formModal.getAttribute("aria-hidden") === "false") {
-      $("packageSelector").value = newId;
-      window.applyPackage();
-      closeModal('packagesModal');
-  }
+  const formModal = $("formModal"); if(formModal && formModal.getAttribute("aria-hidden") === "false") { $("packageSelector").value = newId; window.applyPackage(); closeModal('packagesModal'); }
 };
 
 window.deletePackage = async (id) => { if(!confirm("حذف الباقة؟")) return; packagesData = packagesData.filter(x => x.id !== id); setSyncState("saving"); await firebasePushPackages(); window.renderPackages(); setSyncState("ok"); showToast("تم الحذف"); };
 window.applyPackage = () => { const pid = $("packageSelector").value; if(!pid) return; const p = packagesData.find(x => x.id === pid); if(p) { $("subType").value = p.type || 'time'; window.toggleSubType(); $("serviceType").value = p.serviceType; if(p.type === 'sessions') { $("sessionsTotal").value = p.value; } else { $("months").value = p.value; } $("price").value = p.price; $("quickPlan").value = ""; window.calcDebt(); } };
 
-window.toggleAdvancedFields = (forceShow = false) => { const adv = $("advancedFields"); const btn = $("btnToggleAdvanced"); if(!adv || !btn) return; if (adv.style.display === "none" || forceShow === true) { adv.style.display = "block"; btn.innerHTML = "🔼 إخفاء الخيارات الإضافية"; btn.style.background = "rgba(124,92,255,0.1)"; btn.style.borderColor = "rgba(124,92,255,0.3)"; btn.style.color = "var(--text)"; } else { adv.style.display = "none"; btn.innerHTML = "🔽 إظهار الخيارات الإضافية (الإيميل، الملاحظات، الأوسمة...)"; btn.style.background = "rgba(255,255,255,0.04)"; btn.style.borderColor = "rgba(255,255,255,0.14)"; btn.style.color = "var(--muted)"; } };
+window.toggleAdvancedFields = (forceShow = false) => { const adv = $("advancedFields"); const btn = $("btnToggleAdvanced"); if(!adv || !btn) return; if (adv.style.display === "none" || forceShow === true) { adv.style.display = "block"; btn.innerHTML = "🔼 إخفاء الخيارات الإضافية"; btn.style.background = "rgba(124,92,255,0.1)"; btn.style.borderColor = "rgba(124,92,255,0.3)"; btn.style.color = "var(--text)"; } else { adv.style.display = "none"; btn.innerHTML = "🔽 إظهار الخيارات الإضافية (الإيميل، الملاحظات، الأوسمة، الميسنجر...)"; btn.style.background = "rgba(255,255,255,0.04)"; btn.style.borderColor = "rgba(255,255,255,0.14)"; btn.style.color = "var(--muted)"; } };
 
-window.openAddSub = () => { editingId=null; $("formTitle").textContent="إضافة اشتراك"; $("name").value=""; $("email").value=""; $("phone").value=""; $("tags").value=""; $("countryCode").value="+213"; $("serviceType").value=""; $("quickPlan").value=""; $("months").value=""; $("sessionsTotal").value=""; $("sessionsLeft").value=""; $("price").value=""; $("start").value=todayISO(); $("paidAmount").value = ""; $("notes").value = ""; $("packageSelector").value = ""; $("subType").value = "time"; window.toggleSubType(); $("advancedFields").style.display = "block"; window.toggleAdvancedFields(false); window.calcDebt(); openModal("formModal"); };
+window.openAddSub = () => { editingId=null; $("formTitle").textContent="إضافة اشتراك"; $("name").value=""; $("email").value=""; $("phone").value=""; $("tags").value=""; $("messengerLink").value=""; $("countryCode").value="+213"; $("serviceType").value=""; $("quickPlan").value=""; $("months").value=""; $("sessionsTotal").value=""; $("sessionsLeft").value=""; $("price").value=""; $("start").value=todayISO(); $("paidAmount").value = ""; $("notes").value = ""; $("packageSelector").value = ""; $("subType").value = "time"; window.toggleSubType(); $("advancedFields").style.display = "block"; window.toggleAdvancedFields(false); window.calcDebt(); openModal("formModal"); };
 
-window.actEditAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec) return; closeModal("rowActionsModal"); editingId = rec.id; $("formTitle").textContent = "تعديل اشتراك"; $("subType").value = rec.subType || "time"; window.toggleSubType(); $("name").value = rec.name||""; $("email").value = rec.email||""; $("phone").value = rec.phone||""; $("countryCode").value = rec.countryCode||"+213"; $("tags").value = rec.tags||""; $("serviceType").value = rec.serviceType||""; $("months").value = rec.months||""; $("sessionsTotal").value = rec.sessionsTotal||""; $("sessionsLeft").value = rec.sessionsLeft||""; $("price").value = rec.price||""; $("currency").value = rec.currency||"DZD"; $("start").value = rec.start; $("alertDays").value = rec.alertDays||"7"; $("notes").value = rec.notes || ""; $("packageSelector").value = ""; $("quickPlan").value = ""; if(rec.paymentStatus === 'unpaid') $("paidAmount").value = 0; else if(rec.paymentStatus === 'partial') $("paidAmount").value = rec.paidAmount || 0; else $("paidAmount").value = ""; const hasAdvancedData = (rec.email && rec.email !== "") || (rec.tags && rec.tags !== "") || (rec.notes && rec.notes.trim() !== "") || (rec.currency && rec.currency !== "DZD"); window.toggleAdvancedFields(hasAdvancedData); window.calcDebt(); openModal("formModal"); };
+window.actEditAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec) return; closeModal("rowActionsModal"); editingId = rec.id; $("formTitle").textContent = "تعديل اشتراك"; $("subType").value = rec.subType || "time"; window.toggleSubType(); $("name").value = rec.name||""; $("email").value = rec.email||""; $("phone").value = rec.phone||""; $("messengerLink").value = rec.messengerLink||""; $("countryCode").value = rec.countryCode||"+213"; $("tags").value = rec.tags||""; $("serviceType").value = rec.serviceType||""; $("months").value = rec.months||""; $("sessionsTotal").value = rec.sessionsTotal||""; $("sessionsLeft").value = rec.sessionsLeft||""; $("price").value = rec.price||""; $("currency").value = rec.currency||"DZD"; $("start").value = rec.start; $("alertDays").value = rec.alertDays||"7"; $("notes").value = rec.notes || ""; $("packageSelector").value = ""; $("quickPlan").value = ""; if(rec.paymentStatus === 'unpaid') $("paidAmount").value = 0; else if(rec.paymentStatus === 'partial') $("paidAmount").value = rec.paidAmount || 0; else $("paidAmount").value = ""; const hasAdvancedData = (rec.email && rec.email !== "") || (rec.tags && rec.tags !== "") || (rec.messengerLink && rec.messengerLink !== "") || (rec.notes && rec.notes.trim() !== "") || (rec.currency && rec.currency !== "DZD"); window.toggleAdvancedFields(hasAdvancedData); window.calcDebt(); openModal("formModal"); };
 
 window.saveSubscription = async () => {
-  const subType = $("subType").value; const start = $("start").value; const emailVal = $("email") ? $("email").value.trim() : ""; const serviceVal = $("serviceType").value.trim(); const nameVal = $("name").value.trim(); let months = parseInt($("months").value); let sessionsTot = parseInt($("sessionsTotal").value); let sessionsLft = parseInt($("sessionsLeft").value);
+  const subType = $("subType").value; const start = $("start").value; const emailVal = $("email") ? $("email").value.trim() : ""; const messengerLinkVal = $("messengerLink") ? $("messengerLink").value.trim() : ""; const serviceVal = $("serviceType").value.trim(); const nameVal = $("name").value.trim(); let months = parseInt($("months").value); let sessionsTot = parseInt($("sessionsTotal").value); let sessionsLft = parseInt($("sessionsLeft").value);
   if(!nameVal || !serviceVal) return showToast("أدخل الاسم والخدمة", "err"); if(subType === 'time' && (!start || isNaN(months))) return showToast("أدخل تاريخ البداية والمدة", "err"); if(subType === 'sessions' && isNaN(sessionsTot)) return showToast("أدخل إجمالي الحصص", "err");
   const priceInput = $("price").value; const priceFloat = parseFloat(priceInput) || 0; const paidInput = $("paidAmount").value; const paidFloat = paidInput === "" ? priceFloat : (parseFloat(paidInput) || 0);
   let pStatus = 'paid'; if(paidFloat === 0 && priceFloat > 0) pStatus = 'unpaid'; else if(paidFloat < priceFloat) pStatus = 'partial';
   const actionName = editingId ? "تعديل اشتراك" : "إضافة اشتراك"; logAction(actionName, `الاسم: ${nameVal} - الخدمة: ${serviceVal}`); 
   let endISO = ""; if(subType === 'time') { const endD = new Date(start); endD.setMonth(endD.getMonth() + months); endISO = endD.toISOString().split('T')[0]; } if(subType === 'sessions' && isNaN(sessionsLft)) sessionsLft = sessionsTot; 
   const alertEl = $("alertDays");
-  const rec = { id: editingId || Date.now().toString(), subType, name: nameVal, email: emailVal, tags: $("tags").value, phone: $("phone").value, countryCode: $("countryCode").value, serviceType: serviceVal, alertDays: (alertEl && alertEl.value)?alertEl.value:7, price: priceInput, currency: $("currency").value, paymentStatus: pStatus, paidAmount: paidFloat, notes: $("notes").value };
+  const rec = { id: editingId || Date.now().toString(), subType, name: nameVal, email: emailVal, messengerLink: messengerLinkVal, tags: $("tags").value, phone: $("phone").value, countryCode: $("countryCode").value, serviceType: serviceVal, alertDays: (alertEl && alertEl.value)?alertEl.value:7, price: priceInput, currency: $("currency").value, paymentStatus: pStatus, paidAmount: paidFloat, notes: $("notes").value };
   if(subType === 'time') { rec.start = start; rec.months = months; rec.end = endISO; } else { rec.sessionsTotal = sessionsTot; rec.sessionsLeft = sessionsLft; }
   
   if(editingId) {
@@ -1131,17 +1163,6 @@ window.openReceiptAction = () => {
 window.printReceiptAction = () => { document.body.classList.add("print-mode-receipt"); $("receiptModal").classList.add("print-active"); window.print(); setTimeout(()=>{ document.body.classList.remove("print-mode-receipt"); $("receiptModal").classList.remove("print-active"); }, 500); };
 window.printIdCardAction = () => { document.body.classList.add("print-mode-idcard"); $("idCardModal").classList.add("print-active"); window.print(); setTimeout(()=>{ document.body.classList.remove("print-mode-idcard"); $("idCardModal").classList.remove("print-active"); }, 500); };
 
-window.sendWhatsAppReceipt = () => {
-  const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.phone) return showToast("لا يملك هاتف", "warn");
-  let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, ''); let sName = storeSettings.name || "المؤسسة"; let pText = rec.paymentStatus === 'unpaid' ? '🔴 غير مدفوع' : (rec.paymentStatus === 'partial' ? '🟡 دفع جزئي' : '🟢 خالص');
-  let msg = `🧾 *فاتورة إلكترونية* 🧾\n\n🏢 المؤسسة: *${sName}*\n👤 المشترك: ${rec.name||'-'}\n📦 الخدمة: ${rec.serviceType||'غير محدد'}\n`;
-  if(rec.subType === 'sessions') { msg += `🎟️ الرصيد: ${rec.sessionsTotal||0} حصص\n`; } else { msg += `⏳ المدة: ${rec.months||0} شهر\n📅 البداية: ${rec.start||'-'}\n🏁 الانتهاء: ${rec.end||'-'}\n`; }
-  msg += `\n💰 *السعر الإجمالي:* ${parseFloat(rec.price||0).toLocaleString()} ${rec.currency||'DZD'}\n💳 *حالة الدفع:* ${pText}\n`;
-  if(rec.paymentStatus === 'partial') { msg += `💸 *المبلغ المدفوع:* ${parseFloat(rec.paidAmount||0).toLocaleString()} ${rec.currency||'DZD'}\n`; }
-  if(rec.paymentStatus === 'partial' || rec.paymentStatus === 'unpaid'){ let total = parseFloat(rec.price)||0; let paid = rec.paymentStatus === 'unpaid' ? 0 : parseFloat(rec.paidAmount)||0; msg += `❗ *المتبقي (دين):* ${(total - paid).toLocaleString()} ${rec.currency||'DZD'}\n`; }
-  msg += `\n🤍 نشكركم على ثقتكم بنا!`; window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
-};
-
 window.openTotalsReport = () => { 
   const alertEl = $("alertDays"); const alertD = (alertEl && alertEl.value) ? parseInt(alertEl.value) : 7; const activeData = data.filter(r => getStatus(r, alertD).key !== "expired"); const totalsByCurrency = {}; const debtsByCurrency = {}; const serviceCounts = {};
   activeData.forEach(r => { const curr = r.currency || "DZD"; const price = parseFloat(r.price) || 0; if(r.paymentStatus === 'unpaid') { debtsByCurrency[curr] = (debtsByCurrency[curr] || 0) + price; } else if(r.paymentStatus === 'partial') { const paid = parseFloat(r.paidAmount) || 0; totalsByCurrency[curr] = (totalsByCurrency[curr] || 0) + paid; debtsByCurrency[curr] = (debtsByCurrency[curr] || 0) + (price - paid); } else { totalsByCurrency[curr] = (totalsByCurrency[curr] || 0) + price; } const srv = r.serviceType || "غير محدد"; serviceCounts[srv] = (serviceCounts[srv] || 0) + 1; });
@@ -1153,10 +1174,10 @@ window.openTotalsReport = () => {
 
 window.exportCSV = () => { 
   if(data.length === 0) return showToast("لا توجد بيانات لتصديرها", "warn"); 
-  let csv = "\uFEFFالاسم,الأوسمة,الإيميل,الهاتف,النوع,الخدمة,المدة/الحصص,السعر,حالة الدفع,تاريخ البداية,تاريخ الانتهاء,الرصيد المتبقي,عدد مرات الدخول\n"; 
+  let csv = "\uFEFFالاسم,الأوسمة,الإيميل,الهاتف,رابط ميسنجر,النوع,الخدمة,المدة/الحصص,السعر,حالة الدفع,تاريخ البداية,تاريخ الانتهاء,الرصيد المتبقي,عدد مرات الدخول\n"; 
   data.forEach(r => { 
     let phone = r.phone ? `${r.countryCode||''}${r.phone}` : ''; let payStat = r.paymentStatus === 'unpaid' ? 'غير مدفوع' : (r.paymentStatus === 'partial' ? 'جزئي' : 'خالص'); let typeTxt = r.subType === 'sessions' ? 'حصص' : 'زمني'; let valTxt = r.subType === 'sessions' ? `${r.sessionsTotal} حصة` : `${r.months} شهر`; let safeTags = (r.tags||'').replace(/"/g, '""'); let attendanceCount = r.attendanceLog ? r.attendanceLog.length : 0;
-    csv += `"${r.name||''}","${safeTags}","${r.email||''}","${phone}","${typeTxt}","${r.serviceType||''}","${valTxt}","${r.price||0} ${r.currency||'DZD'}","${payStat}","${r.start||''}","${r.end||''}","${r.sessionsLeft||''}","${attendanceCount}"\n`; 
+    csv += `"${r.name||''}","${safeTags}","${r.email||''}","${phone}","${r.messengerLink||''}","${typeTxt}","${r.serviceType||''}","${valTxt}","${r.price||0} ${r.currency||'DZD'}","${payStat}","${r.start||''}","${r.end||''}","${r.sessionsLeft||''}","${attendanceCount}"\n`; 
   }); 
   const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = `Subscriptions_Excel_${todayISO()}.csv`; a.click(); closeSideMenu(); showToast("تم التصدير بنجاح 📥"); 
 };
