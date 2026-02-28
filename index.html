@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>لوحة تسيير الاشتراكات - v12.9.13</title>
+<title>لوحة تسيير الاشتراكات - v12.9.14</title>
 
 <meta name="theme-color" content="#070a12" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -156,6 +156,18 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 .flex-row-receipt { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #cbd5e1; }
 .flex-row-receipt span.label { color: #64748b; }
 .flex-row-receipt strong.val, .flex-row-receipt span.val { color: #0f172a; text-align: left; }
+
+/* الإضافة الذهبية 1: تصميم البطاقات المتجاوبة للهواتف */
+@media (max-width: 768px) {
+  thead { display: none; }
+  table, tbody, tr, td { display: block; width: 100%; }
+  tr { margin-bottom: 15px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 16px; padding: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+  td { display: flex; justify-content: space-between; align-items: center; padding: 10px 5px !important; border-bottom: 1px dashed rgba(255,255,255,0.05) !important; text-align: left !important; }
+  td:last-child { border-bottom: none !important; justify-content: center; margin-top: 5px; padding-bottom: 0 !important;}
+  td::before { content: attr(data-label); font-weight: 900; color: var(--muted); font-size: 12px; }
+  td > div { text-align: left; }
+  .tableWrap { overflow: hidden; }
+}
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -166,8 +178,8 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.13 PWA</span></h1>
-    <div class="sub">⚡ النسخة العالمية: التحويل الذكي لروابط (ميسنجر، انستغرام، ويب).</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.14 PWA</span></h1>
+    <div class="sub">⚡ نسخة الأداء والسلاسة: بطاقات الهاتف، البحث السريع، وضغط الصور التلقائي.</div>
   </div>
 
   <div class="card">
@@ -181,7 +193,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
         <div class="statChip sync" id="syncChip"><span class="ico">☁️</span> <span class="v" id="syncVal">—</span></div>
       </div>
       <div class="searchWrap">
-        <input id="search" oninput="window.currentPage=1; window.render()" placeholder="بحث بالاسم، الإيميل، الوسام، الهاتف..." />
+        <input id="search" oninput="window.debounceSearch()" placeholder="بحث بالاسم، الإيميل، الوسام، الهاتف..." />
         <button class="btn soft" title="لصق البحث" style="padding: 10px 12px; border-radius: 12px; font-size: 15px;" onclick="window.pasteSearch()">📋</button>
         <button class="btn soft" title="مسح البحث" style="padding: 10px 12px; border-radius: 12px; color: var(--err);" onclick="window.clearSearch()">✕</button>
       </div>
@@ -652,13 +664,14 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 window.openSideMenu = () => { $("sideMenu").classList.add("open"); $("menuBackdrop").classList.add("open"); };
 window.closeSideMenu = () => { $("sideMenu").classList.remove("open"); $("menuBackdrop").classList.remove("open"); };
 
+// الإضافة الذهبية 4: استراتيجية "المحلي أولاً" لسلاسة الفتح
 window.addEventListener('DOMContentLoaded', () => {
+    // عرض البيانات المحلية فوراً قبل أي اتصال بالإنترنت
+    data = loadLocalBackup();
     window.render();
+    
     setTimeout(() => {
         if(data.length === 0 && !currentUser) {
-            showToast("وضع عدم الاتصال: متصفحك يمنع الاتصال بقاعدة البيانات", "warn");
-            data = loadLocalBackup();
-            window.render();
             $("syncVal").textContent = "أوفلاين 📴";
         }
     }, 3000);
@@ -675,7 +688,7 @@ window.addEventListener('DOMContentLoaded', () => {
 })();
 
 const FIREBASE_CONFIG = { apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ", authDomain: "dattta-6f497.firebaseapp.com", databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com", projectId: "dattta-6f497", storageBucket: "dattta-6f497.firebasestorage.app", messagingSenderId: "804914291938", appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb" };
-const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.13"; 
+const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.9.14"; 
 const $ = (id)=>document.getElementById(id); 
 const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
 const LOCAL_PACKAGES_KEY = "subs_packages_backup_v12";
@@ -758,13 +771,39 @@ if(typeof auth !== 'undefined') {
 }
 
 window.updateAuthUI = () => { if(currentUser) { $("authLoginSection").style.display = "none"; $("authLoggedInSection").style.display = "block"; const iconEl = $("authStatusIcon"); const textEl = $("authStateText"); if (currentRole === "owner") { iconEl.innerHTML = "👑"; iconEl.style.background = "linear-gradient(135deg, rgba(245,158,11,0.2), rgba(245,158,11,0.05))"; iconEl.style.borderColor = "rgba(245,158,11,0.4)"; textEl.innerHTML = `<span style="color:var(--warn); font-size:22px; font-weight:900;">المالك</span><br/><span style="color:var(--text); font-size:15px; margin-top:8px; display:inline-block; direction:ltr;">${currentUser.email}</span>`; } else { iconEl.innerHTML = "👤"; iconEl.style.background = "linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.05))"; iconEl.style.borderColor = "rgba(34,197,94,0.3)"; textEl.innerHTML = `<span style="color:var(--text); font-size:20px; font-weight:900;">أدمن</span><br/><span style="color:var(--text); font-size:15px; margin-top:8px; display:inline-block; direction:ltr;">${currentUser.email}</span>`; } $("ownerDashboard").style.display = currentRole === "owner" ? "block" : "none"; } else { $("authLoginSection").style.display = "block"; $("authLoggedInSection").style.display = "none"; } };
-window.handleLogoUpload = (e) => { const file = e.target.files[0]; if(file){ const reader = new FileReader(); reader.onload = (ev) => { $("logoPreview").src = ev.target.result; $("logoPreview").style.display = "block"; $("logoEmojiFallback").style.display = "none"; }; reader.readAsDataURL(file); } };
+
+// الإضافة الذهبية 1: ضغط الشعار تلقائياً لتقليل استهلاك الإنترنت
+window.handleLogoUpload = (e) => { 
+  const file = e.target.files[0]; 
+  if(file){ 
+    const reader = new FileReader(); 
+    reader.onload = (ev) => { 
+      const img = new Image();
+      img.onload = () => {
+          const canvas = document.createElement("canvas");
+          const MAX_WIDTH = 300; 
+          const scaleSize = MAX_WIDTH / img.width;
+          canvas.width = MAX_WIDTH;
+          canvas.height = img.height * scaleSize;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          
+          const compressedDataUrl = canvas.toDataURL("image/jpeg", 0.7); 
+          $("logoPreview").src = compressedDataUrl; 
+          $("logoPreview").style.display = "block"; 
+          $("logoEmojiFallback").style.display = "none"; 
+      };
+      img.src = ev.target.result;
+    }; 
+    reader.readAsDataURL(file); 
+  } 
+};
+
 window.saveStoreSettings = async () => { const name = $("setStoreName").value.trim() || "المؤسسة"; const logo = $("logoPreview").src || ""; storeSettings = { name, logo }; try { setSyncState("saving"); await db.ref("settings/storeInfo").set(storeSettings); setSyncState("ok"); closeModal("storeSettingsModal"); showToast("تم حفظ الإعدادات ✨"); } catch(e) { showToast("ليس لديك صلاحية", "err"); } };
 window.confirmAddAdmin = async () => { const email = $("newAdminEmail").value.trim(); const pass = $("newAdminPass").value; const role = $("newAdminRole").value; if(!email || pass.length < 6) return showToast("بيانات غير صالحة", "err"); try { setSyncState("saving"); const secondaryApp = firebase.initializeApp(FIREBASE_CONFIG, "SecondaryApp"); const userCredential = await secondaryApp.auth().createUserWithEmailAndPassword(email, pass); await db.ref("admins/" + userCredential.user.uid).set({ role: role, email: email }); await secondaryApp.auth().signOut(); await secondaryApp.delete(); closeModal("addAdminModal"); $("newAdminEmail").value = ""; $("newAdminPass").value = ""; showToast(`✅ تم الإنشاء!`); setSyncState("ok"); } catch (error) { setSyncState("fail"); } };
 window.loadAdminsList = async () => { openModal("manageAdminsModal"); const tb = $("adminsTbody"); tb.innerHTML = "<tr><td colspan='3' style='text-align:center; padding:20px;'>جاري التحميل...</td></tr>"; try { const snap = await db.ref("admins").once("value"); const adminsObj = snap.val() || {}; tb.innerHTML = ""; for(let uid in adminsObj) { let uData = adminsObj[uid]; let isOwner = uData.role === "owner" || uData === true; let actionBtn = uid === currentUser.uid ? `<span style="color:var(--muted); font-size:12px;">حسابك</span>` : `<button class="btn danger" style="padding:6px 10px; font-size:12px; border-radius:10px;" onclick="window.revokeAdmin('${uid}')">سحب</button>`; tb.innerHTML += `<tr><td>${uData.email || "غير محدد"}</td><td>${isOwner?"مالك 👑":"أدمن 👤"}</td><td>${actionBtn}</td></tr>`; } } catch(err) {} };
 window.revokeAdmin = async (uid) => { if(confirm("تأكيد السحب؟")) { await db.ref("admins/" + uid).remove(); showToast("تم السحب ✅"); window.loadAdminsList(); } };
 
-window.loadDataOffline = () => { data = loadLocalBackup(); window.render(); window.renderPackages(); };
 window.loadData = async () => { 
   if(!navigator.onLine) { window.loadDataOffline(); return; } 
   try { 
@@ -859,19 +898,39 @@ window.render = () => {
               <div style="margin-top:4px;"><button class="btn soft" style="padding:4px 8px; font-size:10px; border-color:#22c55e; color:#22c55e;" onclick="window.markAttendance('${r.id}')">✔️ تسجيل دخول</button></div>`;
             }
 
+            // الإضافة الذهبية 3: إضافة خصائص data-label لتفعيل بطاقات الهاتف
             tr.innerHTML = `
-              <td style="text-align: center;"><input type="checkbox" class="rowChk" value="${r.id}" ${isChecked}></td>
-              <td>
-                 <div style="font-weight:bold; color:var(--text); font-size:14px;">${r.name||"-"}${notesIcon}</div>
-                 ${r.email ? `<div style="font-size:11px; color:var(--muted); margin-bottom:4px;">${r.email}</div>` : ''}
-                 <div>${tagsHtml}</div>
+              <td data-label="تحديد" style="text-align: center;"><input type="checkbox" class="rowChk" value="${r.id}" ${isChecked}></td>
+              <td data-label="العميل">
+                 <div style="text-align:right;">
+                   <div style="font-weight:bold; color:var(--text); font-size:14px;">${r.name||"-"}${notesIcon}</div>
+                   ${r.email ? `<div style="font-size:11px; color:var(--muted); margin-bottom:4px; direction: ltr; text-align: right;">${r.email}</div>` : ''}
+                   <div>${tagsHtml}</div>
+                 </div>
               </td>
-              <td dir="ltr" style="text-align:right; font-size:14px;">${r.phone?`${r.countryCode||''} ${r.phone}`:'-'}</td>
-              <td><div style="margin-bottom:4px;">${serviceHtml}</div><div style="font-size:11px; color:var(--muted); font-weight:bold;">${r.subType === 'sessions' ? 'نظام حصص' : `المدة: ${r.months||0} شهر`}</div></td>
-              <td><div style="font-weight:bold; font-size:14px;">${r.price||0} <span style="font-size:10px; color:var(--muted);">${r.currency||'DZD'}</span></div><div style="margin-top:4px;">${payBadge}</div></td>
-              <td style="font-size:12px; color:var(--muted); line-height:1.6;">${dateOrSessionHtml}</td>
-              <td><div style="margin-bottom:4px;"><span class="badge ${st.cls}">${st.label}</span></div><div style="font-size:11px; font-weight:bold; color:${st.key === 'expired' ? 'var(--err)' : 'var(--text)'};">${st.text}</div></td>
-              <td><button class="actionPill" onclick="window.openRowActions('${r.id}')">⚡ إجراء</button></td>
+              <td data-label="الهاتف" dir="ltr" style="text-align:right; font-size:14px;">${r.phone?`${r.countryCode||''} ${r.phone}`:'-'}</td>
+              <td data-label="الاشتراك">
+                 <div style="text-align:right;">
+                   <div style="margin-bottom:4px;">${serviceHtml}</div>
+                   <div style="font-size:11px; color:var(--muted); font-weight:bold;">${r.subType === 'sessions' ? 'نظام حصص' : `المدة: ${r.months||0} شهر`}</div>
+                 </div>
+              </td>
+              <td data-label="المالية">
+                 <div style="text-align:right;">
+                   <div style="font-weight:bold; font-size:14px;">${r.price||0} <span style="font-size:10px; color:var(--muted);">${r.currency||'DZD'}</span></div>
+                   <div style="margin-top:4px;">${payBadge}</div>
+                 </div>
+              </td>
+              <td data-label="التواريخ">
+                 <div style="text-align:right; font-size:12px; color:var(--muted); line-height:1.6;">${dateOrSessionHtml}</div>
+              </td>
+              <td data-label="الحالة">
+                 <div style="text-align:right;">
+                   <div style="margin-bottom:4px;"><span class="badge ${st.cls}">${st.label}</span></div>
+                   <div style="font-size:11px; font-weight:bold; color:${st.key === 'expired' ? 'var(--err)' : 'var(--text)'};">${st.text}</div>
+                 </div>
+              </td>
+              <td data-label=""><button class="actionPill" onclick="window.openRowActions('${r.id}')">⚡ إجراء</button></td>
             `;
             tb.appendChild(tr);
         } catch(rowErr) {}
@@ -1033,30 +1092,15 @@ window.actExtendAction = () => { extendMode = "single"; const rec = data.find(x 
 window.actCopyEmailAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.email) { closeModal("rowActionsModal"); return showToast("لا يوجد بريد.", "err"); } navigator.clipboard.writeText(rec.email); closeModal("rowActionsModal"); showToast("تم نسخ الإيميل 📋"); };
 window.actWhatsAppAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.phone) { closeModal("rowActionsModal"); return showToast("لا يوجد هاتف.", "err"); } let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, ''); let endTxt = rec.subType === 'sessions' ? `رصيدك المتبقي: ${rec.sessionsLeft} حصة` : `ينتهي بتاريخ: ${rec.end}`; window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`مرحباً ${rec.name}، نود تذكيرك بخصوص اشتراكك الذي ${endTxt}.`)}`, '_blank'); closeModal("rowActionsModal"); };
 
-// دالة الميسنجر الذكية الجديدة
 window.actMessengerAction = () => { 
   const rec = data.find(x => x.id === currentRowId); 
-  if(!rec || !rec.messengerLink) { 
-      closeModal("rowActionsModal"); 
-      return showToast("لا يوجد رابط تواصل مسجل لهذا العميل.", "err"); 
-  } 
-  
+  if(!rec || !rec.messengerLink) { closeModal("rowActionsModal"); return showToast("لا يوجد رابط تواصل مسجل لهذا العميل.", "err"); } 
   let link = rec.messengerLink.trim();
-  
-  if (link.includes("facebook.com/messages/t/")) {
-      let id = link.split("facebook.com/messages/t/")[1].split("/")[0].split("?")[0];
-      link = "https://m.me/" + id;
-  } else if (link.includes("facebook.com/profile.php?id=")) {
-      let id = link.split("id=")[1].split("&")[0];
-      link = "https://m.me/" + id;
-  } else if (link.includes("facebook.com/") && !link.includes("m.me")) {
-      let id = link.split("facebook.com/")[1].split("/")[0].split("?")[0];
-      link = "https://m.me/" + id;
-  }
-
+  if (link.includes("facebook.com/messages/t/")) { let id = link.split("facebook.com/messages/t/")[1].split("/")[0].split("?")[0]; link = "https://m.me/" + id; } 
+  else if (link.includes("facebook.com/profile.php?id=")) { let id = link.split("id=")[1].split("&")[0]; link = "https://m.me/" + id; } 
+  else if (link.includes("facebook.com/") && !link.includes("m.me")) { let id = link.split("facebook.com/")[1].split("/")[0].split("?")[0]; link = "https://m.me/" + id; }
   logAction("مراسلة العميل", `إلى: ${rec.name}`);
-  window.open(link, '_blank'); 
-  closeModal("rowActionsModal"); 
+  window.open(link, '_blank'); closeModal("rowActionsModal"); 
 };
 
 window.actSMSAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.phone) { closeModal("rowActionsModal"); return showToast("لا يوجد هاتف مسجل لهذا العميل.", "err"); } let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, ''); let endTxt = rec.subType === 'sessions' ? `رصيدك المتبقي: ${rec.sessionsLeft} حصة` : `ينتهي بتاريخ: ${rec.end}`; let msg = `مرحباً ${rec.name}، نود تذكيرك بخصوص اشتراكك الذي ${endTxt}.`; logAction("إرسال SMS", `إلى: ${rec.name}`); window.open(`sms:${cleanPhone}?body=${encodeURIComponent(msg)}`, '_self'); closeModal("rowActionsModal"); };
@@ -1198,6 +1242,17 @@ window.shareApp = () => { closeSideMenu(); if (navigator.share) { navigator.shar
 
 window.loginUser = () => { auth.signInWithEmailAndPassword($("authEmailAuth").value, $("authPass").value).catch(e => showToast("بيانات الدخول خاطئة", "err")); };
 window.logoutUser = () => { auth.signOut(); };
+
+// الإضافة الذهبية 2: البحث الهادئ (Debounce) لعدم تشنج الهاتف
+let searchTimeout;
+window.debounceSearch = () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        window.currentPage = 1;
+        window.render();
+    }, 400); // ينتظر 400 جزء من الثانية بعد التوقف عن الكتابة
+};
+
 window.clearSearch = () => { $("search").value = ""; window.currentPage = 1; window.render(); };
 window.pasteSearch = async () => { try { const text = await navigator.clipboard.readText(); $("search").value = text; window.currentPage = 1; window.render(); } catch(e) { showToast("فشل اللصق، يرجى منح صلاحية الحافظة", "warn"); } };
 window.setFilter = (btn, filterType) => { document.querySelectorAll(".filterBtn").forEach(x=>x.classList.remove("active")); btn.classList.add("active"); currentFilter = filterType; window.currentPage = 1; window.render(); };
