@@ -2,8 +2,15 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>لوحة تسيير الاشتراكات - v12.1</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>لوحة تسيير الاشتراكات - v12.2</title>
+
+<meta name="theme-color" content="#070a12" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="الاشتراكات" />
+<link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%237c5cff'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='60'>🧾</text></svg>" />
+<link id="manifest-link" rel="manifest" href="" />
 
 <style>
 :root{
@@ -17,7 +24,12 @@ body{
   margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial; color: var(--text);
   background: radial-gradient(1200px 650px at 85% -10%, rgba(124,92,255,.25), transparent 60%), linear-gradient(180deg, var(--bg0), var(--bg1));
   padding: 18px;
+  /* منع التحديد العشوائي للنصوص في وضع التطبيق */
+  -webkit-user-select: none; user-select: none;
 }
+/* السماح بتحديد النصوص داخل الحقول والجداول */
+input, textarea, table { -webkit-user-select: auto; user-select: auto; }
+
 .container{max-width:1200px;margin:0 auto}
 
 .header{margin-bottom:14px}
@@ -117,43 +129,11 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 }
 
 /* تنسيقات تقسيم الصفحات Pagination */
-.pagination { 
-  display: flex; 
-  justify-content: center; 
-  align-items: center; 
-  gap: 12px; 
-  padding: 16px; 
-  border-top: 1px solid var(--line); 
-  background: rgba(0,0,0,0.1); 
-}
-.page-btn { 
-  padding: 8px 16px; 
-  border-radius: 12px; 
-  border: 1px solid var(--line); 
-  background: rgba(255,255,255,.05); 
-  color: var(--text); 
-  cursor: pointer; 
-  transition: all 0.2s; 
-  font-size: 13px; 
-  font-weight: bold;
-}
-.page-btn:hover:not(:disabled) { 
-  background: var(--accent); 
-  border-color: var(--accent); 
-}
-.page-btn:disabled { 
-  opacity: 0.4; 
-  cursor: not-allowed; 
-  background: transparent;
-}
-.page-info { 
-  font-size: 13px; 
-  color: var(--muted); 
-  font-weight: bold;
-  background: rgba(0,0,0,0.2);
-  padding: 8px 14px;
-  border-radius: 10px;
-}
+.pagination { display: flex; justify-content: center; align-items: center; gap: 12px; padding: 16px; border-top: 1px solid var(--line); background: rgba(0,0,0,0.1); }
+.page-btn { padding: 8px 16px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,.05); color: var(--text); cursor: pointer; transition: all 0.2s; font-size: 13px; font-weight: bold; }
+.page-btn:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); }
+.page-btn:disabled { opacity: 0.4; cursor: not-allowed; background: transparent; }
+.page-info { font-size: 13px; color: var(--muted); font-weight: bold; background: rgba(0,0,0,0.2); padding: 8px 14px; border-radius: 10px; }
 </style>
 
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -164,13 +144,14 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.1</span></h1>
-    <div class="sub">⚡ النسخة الصافية (تتضمن ميزة تقسيم الصفحات لتسريع الأداء)</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.2 PWA</span></h1>
+    <div class="sub">⚡ نسخة تطبيق الهاتف (مع تقسيم الصفحات والأداء السريع)</div>
   </div>
 
   <div class="card">
     <div class="topbar">
       <div class="topbar-actions">
+        <button class="btn" id="installPwaBtn" type="button" onclick="window.installApp()" style="display:none; border-color:rgba(16,185,129,0.5); background:linear-gradient(135deg, rgba(16,185,129,0.2), rgba(16,185,129,0.05)); color:#10b981;">📱 تثبيت التطبيق</button>
         <button class="btn primary" type="button" onclick="openAddSub()">➕ إضافة</button>
         <button class="btn soft" type="button" onclick="openTotalsReport()">💰 المجموع</button>
         <button class="btn soft" type="button" onclick="openModal('authModal')" style="border-color:var(--accent); color:var(--accent);">👤 الإدارة</button>
@@ -362,25 +343,65 @@ tr.expiring-row td:nth-child(2){ box-shadow: inset 4px 0 0 rgba(245,158,11,.85);
 
 <script>
 'use strict';
+// ==========================================
+// 1. توليد ملفات تطبيق الهاتف (PWA) برمجياً
+// ==========================================
+(function initPWA() {
+  try {
+    const pwaManifest = {
+      name: "لوحة تسيير الاشتراكات", short_name: "الاشتراكات",
+      start_url: window.location.pathname || "/", display: "standalone",
+      background_color: "#070a12", theme_color: "#070a12",
+      icons: [
+        { src: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%237c5cff'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='60'>🧾</text></svg>", sizes: "192x192", type: "image/svg+xml" },
+        { src: "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%237c5cff'/><text x='50%' y='50%' dominant-baseline='central' text-anchor='middle' font-size='60'>🧾</text></svg>", sizes: "512x512", type: "image/svg+xml" }
+      ]
+    };
+    const manifestBlob = new Blob([JSON.stringify(pwaManifest)], {type: 'application/json'});
+    document.getElementById('manifest-link').href = URL.createObjectURL(manifestBlob);
+
+    const swCode = `self.addEventListener('install', (e) => self.skipWaiting()); self.addEventListener('activate', (e) => self.clients.claim()); self.addEventListener('fetch', (e) => {});`;
+    const swBlob = new Blob([swCode], {type: 'text/javascript'});
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register(URL.createObjectURL(swBlob)).catch(()=>console.log("إعدادات الـ SW مقيدة في هذه البيئة، لكن التطبيق سيعمل."));
+    }
+
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault(); deferredPrompt = e;
+      const btn = document.getElementById('installPwaBtn');
+      if(btn) btn.style.display = 'inline-flex';
+    });
+    
+    window.installApp = async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') { document.getElementById('installPwaBtn').style.display = 'none'; }
+      deferredPrompt = null;
+    };
+  } catch (e) { console.log("PWA Setup Error:", e); }
+})();
+
+// ==========================================
+// 2. الكود الأساسي للوحة
+// ==========================================
 const FIREBASE_CONFIG = { apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ", authDomain: "dattta-6f497.firebaseapp.com", databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com", projectId: "dattta-6f497", storageBucket: "dattta-6f497.firebasestorage.app", messagingSenderId: "804914291938", appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb" };
 
-const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.1";
+const BASE_APP_TITLE = "لوحة تسيير الاشتراكات - v12.2";
 const $ = (id)=>document.getElementById(id);
 const LOCAL_BACKUP_KEY = "subs_local_backup_v12";
 
-// المتغيرات
 let data = []; let editingId = null; let currentRowId = null; let currentFilter = "all"; 
 let selectedIds = new Set(); let extendMode = "single";
 let currentUser = null; let currentRole = null;
 let lastDeletedData = null; 
 let storeSettings = { name: "متجر الاشتراكات", logo: "" };
-window.currentPage = 1;
-window.itemsPerPage = 50;
+window.currentPage = 1; window.itemsPerPage = 50;
 
 if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
 const auth = firebase.auth(); const db = firebase.database();
 
-// الدوال الأساسية
 window.openModal = (id) => { $(id).setAttribute("aria-hidden","false"); };
 window.closeModal = (id) => { $(id).setAttribute("aria-hidden","true"); if(id === 'receiptModal') document.title = BASE_APP_TITLE; };
 window.showToast = (m, type="ok") => { const t=$("toast"); t.textContent=m; t.style.borderColor = type==="err"?"#ef4444":"#22c55e"; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"), 3000); };
@@ -392,7 +413,6 @@ function setSyncState(state){ const chip = $("syncChip"); const val = $("syncVal
 
 async function logAction(actionName, detailsStr) { if (!currentUser) return; try { await db.ref("logs").push({ email: currentUser.email, action: actionName, details: detailsStr || "-", time: new Date().toISOString() }); } catch(e) { } }
 
-// السجل
 let selectedLogIds = new Set();
 window.updateLogBulkUI = () => { if(selectedLogIds.size > 0) { $("deleteSelectedLogsBtn").style.display = "block"; $("deleteSelectedLogsBtn").textContent = `🗑️ حذف (${selectedLogIds.size})`; } else { $("deleteSelectedLogsBtn").style.display = "none"; $("selectAllLogs").checked = false; } };
 window.toggleAllLogs = (e) => { const isChkd = e.target.checked; document.querySelectorAll(".logChk").forEach(chk => { chk.checked = isChkd; if(isChkd) selectedLogIds.add(chk.value); else selectedLogIds.delete(chk.value); }); window.updateLogBulkUI(); };
@@ -400,7 +420,6 @@ $("auditTbody").addEventListener("change", (e) => { if(e.target.classList.contai
 window.deleteSelectedLogs = async () => { if(!confirm(`تأكيد حذف ${selectedLogIds.size} من السجلات نهائياً؟`)) return; setSyncState("saving"); for(let id of selectedLogIds) { await db.ref("logs/" + id).remove(); } selectedLogIds.clear(); window.updateLogBulkUI(); setSyncState("ok"); showToast("تم حذف السجلات"); window.openAuditLog(); };
 window.openAuditLog = async () => { selectedLogIds.clear(); window.updateLogBulkUI(); const tb = $("auditTbody"); tb.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:20px;'>جاري تحميل السجل... ⏳</td></tr>"; openModal("auditLogModal"); try { const snap = await db.ref("logs").orderByChild("time").limitToLast(100).once("value"); const logsObj = snap.val() || {}; tb.innerHTML = ""; const logsArray = Object.entries(logsObj).map(([key, val]) => ({id: key, ...val})).sort((a,b) => new Date(b.time) - new Date(a.time)); if(logsArray.length === 0) { tb.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:20px; color:var(--muted);'>لا توجد نشاطات</td></tr>"; return; } logsArray.forEach(l => { const d = new Date(l.time); const timeStr = d.toLocaleDateString('en-GB') + " - " + d.toLocaleTimeString('en-GB'); let actionColor = "var(--text)"; if(l.action.includes("حذف")) actionColor = "#ef4444"; else if(l.action.includes("إضافة")) actionColor = "#22c55e"; else if(l.action.includes("تعديل") || l.action.includes("تجديد") || l.action.includes("وصل")) actionColor = "#f59e0b"; const isChecked = selectedLogIds.has(l.id) ? "checked" : ""; tb.innerHTML += `<tr><td style="text-align: center;"><input type="checkbox" class="logChk" value="${l.id}" ${isChecked}></td><td style="direction:ltr; text-align:right; color:var(--muted);">${timeStr}</td><td>${l.email}</td><td style="color:${actionColor}; font-weight:bold;">${l.action}</td><td>${l.details}</td></tr>`; }); } catch(err) { tb.innerHTML = "<tr><td colspan='5' style='text-align:center; padding:20px; color:var(--err)'>حدث خطأ في جلب السجل</td></tr>"; } };
 
-// الدخول والإعدادات
 auth.onAuthStateChanged(async (u)=>{ currentUser = u; if(u){ try { const roleSnap = await db.ref("admins/" + u.uid).once("value"); let roleData = roleSnap.val(); if(roleData === true) { try { roleData = { role: "owner", email: u.email }; await db.ref("admins/" + u.uid).set(roleData); } catch(writeErr) { roleData = { role: "owner", email: u.email }; } } currentRole = (roleData && roleData.role) ? roleData.role : "admin"; } catch(e) { currentRole = "admin"; } $("closeAuthBtn").style.display = "block"; closeModal("authModal"); await window.loadData(); } else { currentRole = null; data = []; window.render(); $("closeAuthBtn").style.display = "none"; openModal("authModal"); } window.updateAuthUI(); });
 window.updateAuthUI = () => { if(currentUser) { $("authLoginSection").style.display = "none"; $("authLoggedInSection").style.display = "block"; const iconEl = $("authStatusIcon"); const textEl = $("authStateText"); if (currentRole === "owner") { iconEl.innerHTML = "👑"; iconEl.style.background = "linear-gradient(135deg, rgba(245,158,11,0.2), rgba(245,158,11,0.05))"; iconEl.style.borderColor = "rgba(245,158,11,0.4)"; textEl.innerHTML = `<span style="color:var(--warn); font-size:22px; font-weight:900;">المالك</span><br/><span style="color:var(--text); font-size:15px; margin-top:8px; display:inline-block; direction:ltr;">${currentUser.email}</span>`; } else { iconEl.innerHTML = "👤"; iconEl.style.background = "linear-gradient(135deg, rgba(34,197,94,0.2), rgba(34,197,94,0.05))"; iconEl.style.borderColor = "rgba(34,197,94,0.3)"; textEl.innerHTML = `<span style="color:var(--text); font-size:20px; font-weight:900;">أدمن</span><br/><span style="color:var(--text); font-size:15px; margin-top:8px; display:inline-block; direction:ltr;">${currentUser.email}</span>`; } $("ownerDashboard").style.display = currentRole === "owner" ? "block" : "none"; } else { $("authLoginSection").style.display = "block"; $("authLoggedInSection").style.display = "none"; } };
 window.handleLogoUpload = (e) => { const file = e.target.files[0]; if(file){ const reader = new FileReader(); reader.onload = (ev) => { $("logoPreview").src = ev.target.result; $("logoPreview").style.display = "block"; $("logoEmojiFallback").style.display = "none"; }; reader.readAsDataURL(file); } };
@@ -409,7 +428,6 @@ window.confirmAddAdmin = async () => { const email = $("newAdminEmail").value.tr
 window.loadAdminsList = async () => { openModal("manageAdminsModal"); const tb = $("adminsTbody"); tb.innerHTML = "<tr><td colspan='3' style='text-align:center; padding:20px;'>جاري التحميل...</td></tr>"; try { const snap = await db.ref("admins").once("value"); const adminsObj = snap.val() || {}; tb.innerHTML = ""; for(let uid in adminsObj) { let uData = adminsObj[uid]; let isOwner = uData.role === "owner" || uData === true; let actionBtn = uid === currentUser.uid ? `<span style="color:var(--muted); font-size:12px;">حسابك</span>` : `<button class="btn danger" style="padding:6px 10px; font-size:12px; border-radius:10px;" onclick="revokeAdmin('${uid}')">سحب صلاحية</button>`; tb.innerHTML += `<tr><td>${uData.email || "غير محدد"}</td><td>${isOwner?"مالك 👑":"أدمن 👤"}</td><td>${actionBtn}</td></tr>`; } } catch(err) { tb.innerHTML = "<tr><td colspan='3' style='text-align:center; padding:20px; color:var(--err)'>ليس لديك صلاحية</td></tr>"; } };
 window.revokeAdmin = async (uid) => { if(confirm("تأكيد سحب الصلاحية؟")) { await db.ref("admins/" + uid).remove(); showToast("تم سحب الصلاحية بنجاح ✅"); window.loadAdminsList(); } };
 
-// تحميل البيانات والرسم والتقسيم
 window.loadData = async () => { 
   if(!navigator.onLine) { data = loadLocalBackup(); window.render(); return; } 
   try { 
@@ -421,17 +439,13 @@ window.loadData = async () => {
 async function firebasePush() { if(!navigator.onLine) return; try { setSyncState("saving"); await db.ref("subscriptions").set(data); saveLocalBackup(); setSyncState("ok"); } catch(e) { showToast("خطأ", "err"); } }
 function getStatus(endISO, alertDays) { const left = Math.round((toDate(endISO) - toDate(todayISO()))/(1000*60*60*24)); if(left < 0) return {key:"expired", label:"منتهي", cls:"err", left}; if(left <= alertDays) return {key:"expiring", label:"قريب ينتهي", cls:"warn", left}; return {key:"active", label:"فعّال", cls:"ok", left}; }
 
-window.changePage = (step) => {
-  window.currentPage += step;
-  window.render();
-};
+window.changePage = (step) => { window.currentPage += step; window.render(); };
 
 window.render = () => {
   const searchInput = $("search"); const q = searchInput ? (searchInput.value || "").trim().toLowerCase() : "";
   const tb = $("tbody"); tb.innerHTML = ""; if($("selectAll")) $("selectAll").checked = false;
   const alertEl = $("alertDays"); const alertD = (alertEl && alertEl.value) ? parseInt(alertEl.value) : 7;
   
-  // 1. فلترة البيانات أولاً (البحث والتصنيفات)
   let filteredRows = data.filter(r => { 
     if(!r) return false;
     const n = (r.name || "").toString().toLowerCase(); const p = (r.phone || "").toString().toLowerCase();
@@ -441,7 +455,6 @@ window.render = () => {
     if(currentFilter !== "all" && currentFilter !== st.key) return false; return match; 
   });
   
-  // 2. حساب التقسيم
   const totalPages = Math.ceil(filteredRows.length / window.itemsPerPage) || 1;
   if (window.currentPage > totalPages) window.currentPage = totalPages;
   if (window.currentPage < 1) window.currentPage = 1;
@@ -449,14 +462,12 @@ window.render = () => {
   const startIdx = (window.currentPage - 1) * window.itemsPerPage;
   const paginatedRows = filteredRows.slice(startIdx, startIdx + window.itemsPerPage);
 
-  // حالة عدم وجود بيانات
   if(filteredRows.length === 0) { 
     tb.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:40px; color:var(--muted); font-size:15px;">لا توجد بيانات مطابقة لعرضها 📭</td></tr>`; 
     $("paginationControls").innerHTML = "";
     return; 
   }
 
-  // 3. رسم الجدول للصفحة الحالية فقط
   paginatedRows.forEach(r => {
     const st = getStatus(r.end, alertD); const isChecked = selectedIds.has(r.id) ? "checked" : ""; const tr = document.createElement("tr");
     if(st.key === "expired") tr.className = "expired-row"; else if(st.key === "expiring") tr.className = "expiring-row";
@@ -479,7 +490,6 @@ window.render = () => {
     tb.appendChild(tr);
   });
 
-  // 4. رسم أزرار التنقل بين الصفحات
   $("paginationControls").innerHTML = `
     <button class="page-btn" onclick="window.changePage(1)" ${window.currentPage === totalPages ? 'disabled' : ''}>التالي ◀</button>
     <span class="page-info">صفحة ${window.currentPage} من ${totalPages} <span style="margin: 0 8px; color:var(--line);">|</span> الإجمالي: ${filteredRows.length} مشترك</span>
@@ -487,7 +497,6 @@ window.render = () => {
   `;
 };
 
-// التحديد الجماعي
 window.updateBulkUI = () => { const bar = $("bulkBar"); if(selectedIds.size > 0) { bar.style.display = "flex"; $("selCount").textContent = `${selectedIds.size} محدد`; } else { bar.style.display = "none"; $("selectAll").checked = false; } };
 $("tbody").addEventListener("change", (e) => { if(e.target.classList.contains("rowChk")) { if(e.target.checked) selectedIds.add(e.target.value); else selectedIds.delete(e.target.value); window.updateBulkUI(); } });
 window.toggleSelectAll = (el) => { const isChkd = el.checked; document.querySelectorAll(".rowChk").forEach(chk => { chk.checked = isChkd; if(isChkd) selectedIds.add(chk.value); else selectedIds.delete(chk.value); }); window.updateBulkUI(); };
@@ -496,14 +505,12 @@ window.bulkDeleteAction = async () => { if(!confirm(`تأكيد حذف ${selecte
 window.bulkExtendAction = () => { extendMode = "bulk"; $("extendTitle").textContent = `تجديد ${selectedIds.size} مشترك`; $("extendValue").value = 1; $("extendUnit").value = "months"; openModal("extendModal"); };
 window.confirmExtend = async () => { const val = parseInt($("extendValue").value); const unit = $("extendUnit").value; if(isNaN(val) || val < 1) return showToast("غير صالح", "err"); if(extendMode === "bulk") { logAction("تجديد جماعي", `عدد ${selectedIds.size} اشتراكات بمقدار ${val} ${unit}`); } else { const recToExtend = data.find(x => x.id === currentRowId); logAction("تجديد اشتراك", `الاسم: ${recToExtend.name}، المدة المضافة: ${val} ${unit}`); } const processRecord = (rec) => { const endD = new Date(rec.end); if(unit === "months") { endD.setMonth(endD.getMonth() + val); rec.months = (parseInt(rec.months)||0) + val; } else { endD.setDate(endD.getDate() + val); } rec.end = endD.toISOString().split('T')[0]; return rec; }; if(extendMode === "bulk") { data = data.map(x => selectedIds.has(x.id) ? processRecord(x) : x); selectedIds.clear(); window.updateBulkUI(); } else { data = data.map(x => x.id === currentRowId ? processRecord(x) : x); } await firebasePush(); window.render(); closeModal("extendModal"); showToast("تم التجديد 🔁"); };
 
-// العمليات الفردية
 window.openRowActions = (id) => { currentRowId = id; const rec = data.find(x => x.id === id); $("rowActionsHint").textContent = rec.name; openModal("rowActionsModal"); };
 window.actExtendAction = () => { extendMode = "single"; const rec = data.find(x => x.id === currentRowId); $("extendTitle").textContent = `تجديد لـ ${rec.name}`; $("extendValue").value = 1; $("extendUnit").value = "months"; closeModal("rowActionsModal"); openModal("extendModal"); };
 window.actCopyEmailAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.email) { closeModal("rowActionsModal"); return showToast("لا يوجد بريد مسجل.", "err"); } navigator.clipboard.writeText(rec.email); closeModal("rowActionsModal"); showToast("تم نسخ الإيميل 📋"); };
 window.actWhatsAppAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.phone) { closeModal("rowActionsModal"); return showToast("لا يوجد رقم هاتف.", "err"); } let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, ''); window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(`مرحباً ${rec.name}، نود تذكيرك بانتهاء اشتراكك بتاريخ ${rec.end}.`)}`, '_blank'); closeModal("rowActionsModal"); };
 window.actDeleteAction = async () => { if(confirm("حذف؟")) { const recToDelete = data.find(x => x.id === currentRowId); logAction("حذف اشتراك", `الاسم: ${recToDelete.name}`); lastDeletedData = data.filter(x => x.id === currentRowId); data = data.filter(x => x.id !== currentRowId); await firebasePush(); window.render(); closeModal("rowActionsModal"); showToast("تم الحذف، التراجع ممكن من الأدوات 🗑️"); } };
 
-// المحاسبة والإضافة
 window.calcDebt = () => { const p = parseFloat($("price").value) || 0; let valRaw = $("paidAmount").value; let a = valRaw === "" ? p : (parseFloat(valRaw) || 0); let d = p - a; $("debtAmount").value = d > 0 ? d : 0; };
 window.handleQuickPlan = () => { if($("quickPlan").value) $("months").value = $("quickPlan").value; };
 window.openAddSub = () => { editingId=null; $("formTitle").textContent="إضافة اشتراك"; $("name").value=""; $("email").value=""; $("phone").value=""; $("countryCode").value="+213"; $("serviceType").value=""; $("quickPlan").value=""; $("months").value=""; $("price").value=""; $("start").value=todayISO(); $("paidAmount").value = ""; window.calcDebt(); openModal("formModal"); };
@@ -520,7 +527,6 @@ window.saveSubscription = async () => {
   await firebasePush(); window.render(); closeModal("formModal"); showToast("تم الحفظ ✨");
 };
 
-// الفاتورة الرقمية 
 window.openReceiptAction = () => {
   const rec = data.find(x => x.id === currentRowId); if(!rec) return; closeModal("rowActionsModal"); 
   const sName = (storeSettings.name || "متجر_الاشتراكات").replace(/[^a-zA-Z0-9\u0600-\u06FF\s]/g, '').trim().replace(/\s+/g, '_'); const cName = (rec.name || "عميل").replace(/[^a-zA-Z0-9\u0600-\u06FF\s]/g, '').trim().replace(/\s+/g, '_'); const d = new Date(); const dateStr = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -543,7 +549,6 @@ window.sendWhatsAppReceipt = () => {
   msg += `\n🤍 نشكركم على ثقتكم بنا!`; window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
 };
 
-// الإحصائيات والأدوات
 window.openTotalsReport = () => { 
   const alertEl = $("alertDays"); const alertD = (alertEl && alertEl.value) ? parseInt(alertEl.value) : 7; const activeData = data.filter(r => getStatus(r.end, alertD).key !== "expired"); 
   const totalsByCurrency = {}; const debtsByCurrency = {}; const serviceCounts = {};
