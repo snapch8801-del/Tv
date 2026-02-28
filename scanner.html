@@ -1,0 +1,313 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>نقطة الدخول - الخدمة الذاتية</title>
+
+<meta name="theme-color" content="#000000" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+<script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+<style>
+    :root {
+        --bg: #05070a;
+        --text: #ffffff;
+        --success: #10b981;
+        --error: #ef4444;
+        --warning: #f59e0b;
+    }
+    
+    * { box-sizing: border-box; }
+    
+    body {
+        margin: 0; padding: 0; font-family: system-ui, -apple-system, sans-serif;
+        background: var(--bg); color: var(--text); overflow: hidden;
+        display: flex; flex-direction: column; height: 100vh;
+    }
+
+    /* شاشة تسجيل الدخول الأولية للمدير */
+    #authScreen {
+        position: absolute; inset: 0; background: var(--bg); z-index: 100;
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+    }
+    .auth-box {
+        background: rgba(255,255,255,0.05); padding: 40px; border-radius: 20px;
+        border: 1px solid rgba(255,255,255,0.1); width: 90%; max-width: 400px; text-align: center;
+    }
+    .auth-box input {
+        width: 100%; padding: 15px; margin-bottom: 20px; border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.2); background: rgba(0,0,0,0.5);
+        color: white; font-size: 16px; outline: none; text-align: left; direction: ltr;
+    }
+    .auth-box button {
+        width: 100%; padding: 15px; border-radius: 12px; font-weight: bold; font-size: 16px;
+        background: linear-gradient(135deg, #7c5cff, #5a3bc2); color: white; border: none; cursor: pointer;
+    }
+
+    /* الواجهة الرئيسية للكاميرا */
+    #kioskScreen { display: none; flex-direction: column; height: 100vh; position: relative; }
+    
+    .header {
+        text-align: center; padding: 20px; background: rgba(0,0,0,0.5); border-bottom: 1px solid rgba(255,255,255,0.1);
+        backdrop-filter: blur(10px); z-index: 10;
+    }
+    .header h1 { margin: 0; font-size: 24px; font-weight: 900; letter-spacing: 1px; color: #eaf0ff;}
+    .header p { margin: 5px 0 0 0; font-size: 14px; color: rgba(234,240,255,0.5); }
+
+    /* منطقة الكاميرا */
+    .camera-container {
+        flex: 1; display: flex; align-items: center; justify-content: center;
+        padding: 20px; position: relative;
+    }
+    #reader {
+        width: 100%; max-width: 500px; border-radius: 24px; overflow: hidden;
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.1);
+    }
+
+    /* شاشة النتيجة (تظهر وتختفي كالسحر) */
+    #resultOverlay {
+        position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 50;
+        display: none; flex-direction: column; align-items: center; justify-content: center;
+        text-align: center; padding: 20px; backdrop-filter: blur(15px);
+        transition: all 0.3s ease;
+    }
+    .result-icon { font-size: 80px; margin-bottom: 20px; animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+    .result-title { font-size: 32px; font-weight: 900; margin: 0 0 10px 0; }
+    .result-desc { font-size: 18px; color: rgba(255,255,255,0.7); max-width: 80%; line-height: 1.6;}
+    .result-badge { display: inline-block; padding: 8px 20px; border-radius: 99px; font-size: 16px; font-weight: bold; margin-top: 20px; }
+
+    @keyframes popIn {
+        0% { transform: scale(0); opacity: 0; }
+        100% { transform: scale(1); opacity: 1; }
+    }
+
+    /* ألوان الحالات */
+    .theme-success .result-title { color: var(--success); }
+    .theme-success .result-icon { filter: drop-shadow(0 0 20px rgba(16,185,129,0.5)); }
+    .theme-success .result-badge { background: rgba(16,185,129,0.2); color: var(--success); border: 1px solid rgba(16,185,129,0.4); }
+
+    .theme-error .result-title { color: var(--error); }
+    .theme-error .result-icon { filter: drop-shadow(0 0 20px rgba(239,68,68,0.5)); }
+    .theme-error .result-badge { background: rgba(239,68,68,0.2); color: var(--error); border: 1px solid rgba(239,68,68,0.4); }
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+</head>
+
+<body>
+
+<div id="authScreen">
+    <div class="auth-box">
+        <h2 style="margin-top:0;">🔒 تفعيل نقطة الدخول</h2>
+        <p style="color:var(--muted); font-size:13px; margin-bottom:25px;">قم بتسجيل الدخول بحساب المدير لتشغيل الكاميرا الآلية.</p>
+        <input id="email" type="email" placeholder="البريد الإلكتروني">
+        <input id="password" type="password" placeholder="كلمة المرور">
+        <button onclick="login()">تشغيل النظام 🚀</button>
+        <div id="loginError" style="color:var(--error); margin-top:15px; font-size:13px; display:none;">بيانات خاطئة!</div>
+    </div>
+</div>
+
+<div id="kioskScreen">
+    <div class="header">
+        <h1>نقطة تسجيل الدخول الآلي</h1>
+        <p>يرجى تمرير بطاقة الانخراط (QR Code) أمام الكاميرا</p>
+    </div>
+    <div class="camera-container">
+        <div id="reader"></div>
+    </div>
+</div>
+
+<div id="resultOverlay">
+    <div class="result-icon" id="resIcon">✅</div>
+    <h1 class="result-title" id="resTitle">مرحباً!</h1>
+    <div class="result-desc" id="resDesc">تم تسجيل دخولك بنجاح.</div>
+    <div class="result-badge" id="resBadge">متبقي 5 حصص</div>
+</div>
+
+<script>
+// ==========================================
+// ⚙️ الإعدادات والربط بقاعدة البيانات ⚙️
+// ==========================================
+const FIREBASE_CONFIG = { apiKey: "AIzaSyAQPzqeazhj4rjyY1dbcGZ9YEAv8ZhLQbQ", authDomain: "dattta-6f497.firebaseapp.com", databaseURL: "https://dattta-6f497-default-rtdb.firebaseio.com", projectId: "dattta-6f497", storageBucket: "dattta-6f497.firebasestorage.app", messagingSenderId: "804914291938", appId: "1:804914291938:web:7a7d3fe8a5ebb28a306abb" };
+if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+const auth = firebase.auth();
+const db = firebase.database();
+
+let data = []; 
+let isProcessing = false; // لمنع المسح المزدوج
+let html5QrcodeScanner;
+
+// دالة لمعرفة حالة الاشتراك (نفس المستعملة في اللوحة الإدارية)
+function todayISO(){ const d=new Date(); d.setHours(0,0,0,0); return d.toISOString().slice(0,10); }
+function toDate(iso){ if(!iso) return new Date(); const d = new Date(iso+"T00:00:00"); d.setHours(0,0,0,0); return isNaN(d) ? new Date() : d; }
+
+function getStatus(r) {
+    if (r.subType === 'sessions') {
+        let left = parseInt(r.sessionsLeft) || 0;
+        if (left <= 0) return { key: "expired", label: "رصيد منتهي", text: "0 حصة" };
+        return { key: "active", label: "رصيد ساري", text: `متبقي ${left} حصة` };
+    } else {
+        if (!r.end) return { key:"expired", label:"غير محدد", text:`-` };
+        const left = Math.round((toDate(r.end) - toDate(todayISO()))/(1000*60*60*24));
+        if(left < 0) return { key:"expired", label:"مدة منتهية", text:`منذ ${Math.abs(left)} يوم` };
+        return { key:"active", label:"ساري المفعول", text:`متبقي ${left} يوم` };
+    }
+}
+
+// ==========================================
+// 🔐 نظام تسجيل الدخول للكشك
+// ==========================================
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        document.getElementById('authScreen').style.display = 'none';
+        document.getElementById('kioskScreen').style.display = 'flex';
+        startSyncAndCamera();
+    } else {
+        document.getElementById('authScreen').style.display = 'flex';
+        document.getElementById('kioskScreen').style.display = 'none';
+    }
+});
+
+function login() {
+    // السحر هنا: trim() تقوم بمسح أي مسافة يضيفها كيبورد الهاتف بالخطأ
+    const e = document.getElementById('email').value.trim(); 
+    const p = document.getElementById('password').value;
+    
+    const errorDiv = document.getElementById('loginError');
+    errorDiv.style.color = '#eaf0ff';
+    errorDiv.textContent = '⏳ جاري التحقق من البيانات...';
+    errorDiv.style.display = 'block';
+
+    auth.signInWithEmailAndPassword(e, p).catch((error) => {
+        errorDiv.style.color = 'var(--error)';
+        
+        // ترجمة الخطأ لتعرف المشكلة بالضبط!
+        let msg = "بيانات خاطئة!";
+        if(error.code === 'auth/invalid-email') msg = "صيغة الإيميل خاطئة.";
+        else if(error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') msg = "الإيميل أو كلمة المرور غير صحيحة.";
+        else if(error.code === 'auth/network-request-failed') msg = "لا يوجد اتصال بالإنترنت.";
+        else msg = "حدث خطأ: " + error.code;
+        
+        errorDiv.textContent = msg;
+    });
+}
+
+
+// ==========================================
+// 🔄 مزامنة البيانات لحظياً
+// ==========================================
+function startSyncAndCamera() {
+    // اللوحة تتنصت على التحديثات دائماً لتكون بياناتها دقيقة
+    db.ref("subscriptions").on('value', (snap) => {
+        data = snap.exists() ? Object.values(snap.val()) : [];
+    });
+
+    // تشغيل الكاميرا
+    html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
+    html5QrcodeScanner.render(handleScan, (err) => {});
+}
+
+// إصدار صوت تنبيه (Beep) عند المسح
+function playBeep(isSuccess) {
+    try {
+        const ctx = new (window.AudioContext || window.webkitAudioContext)();
+        const osc = ctx.createOscillator();
+        osc.type = isSuccess ? 'sine' : 'sawtooth';
+        osc.frequency.setValueAtTime(isSuccess ? 800 : 250, ctx.currentTime);
+        osc.connect(ctx.destination);
+        osc.start(); osc.stop(ctx.currentTime + 0.3);
+    } catch(e) {}
+}
+
+// ==========================================
+// 📷 معالجة قراءة الـ QR Code
+// ==========================================
+async function handleScan(decodedText) {
+    if (isProcessing) return; // إذا كان النظام مشغولاً بعرض نتيجة، لا تقرأ كوداً آخر
+    isProcessing = true;
+
+    const overlay = document.getElementById('resultOverlay');
+    const resIcon = document.getElementById('resIcon');
+    const resTitle = document.getElementById('resTitle');
+    const resDesc = document.getElementById('resDesc');
+    const resBadge = document.getElementById('resBadge');
+
+    // التأكد من صيغة الكود
+    if(!decodedText.startsWith("ID:")) {
+        showScreen("error", "❌", "رمز غير صالح", "يرجى مسح بطاقة انخراط نظامية صادرة من المركز.", "خطأ في القراءة");
+        return;
+    }
+
+    const scId = decodedText.split("ID:")[1];
+    
+    // البحث عن العميل في البيانات المحلية (التي يتم تحديثها لحظياً)
+    let userIndex = data.findIndex(x => x.id === scId);
+    let user = data[userIndex];
+
+    if(!user) {
+        showScreen("error", "🛑", "غير مسجل", "هذه البطاقة غير موجودة في قاعدة البيانات.", "عميل غير معروف");
+        return;
+    }
+
+    // فحص حالة الاشتراك
+    const st = getStatus(user);
+
+    if (st.key === 'expired') {
+        showScreen("error", "⚠️", "عفواً، لا يمكن الدخول", `اشتراكك في (${user.serviceType}) منتهي!`, st.text);
+        // تسجيل محاولة دخول فاشلة للمدير
+        db.ref("logs").push({ email: auth.currentUser.email, action: "محاولة دخول مرفوضة ❌", details: `العميل: ${user.name} (اشتراك منتهي)`, time: new Date().toISOString() });
+        return;
+    }
+
+    // ✅ حالة النجاح: خصم الحصة وتسجيل الحضور
+    if(user.subType === 'sessions') {
+        user.sessionsLeft = parseInt(user.sessionsLeft) - 1;
+    }
+    
+    if(!user.attendanceLog) user.attendanceLog = [];
+    user.attendanceLog.push({ time: new Date().toISOString() });
+
+    // حفظ التحديث في قاعدة البيانات
+    data[userIndex] = user;
+    try {
+        await db.ref("subscriptions").set(data);
+        let logDetails = user.subType === 'sessions' ? `الرصيد المتبقي: ${user.sessionsLeft}` : `اشتراك زمني`;
+        db.ref("logs").push({ email: auth.currentUser.email, action: "دخول آلي (بوابة) ✔️", details: `العميل: ${user.name}، ${logDetails}`, time: new Date().toISOString() });
+        
+        let newStatusTxt = user.subType === 'sessions' ? `متبقي ${user.sessionsLeft} حصة` : st.text;
+        showScreen("success", "✅", `مرحباً ${user.name.split(' ')[0]}!`, `تم تسجيل دخولك بنجاح في قسم ${user.serviceType}.`, newStatusTxt);
+    } catch(e) {
+        showScreen("error", "📡", "خطأ في الاتصال", "حدث خطأ أثناء حفظ البيانات، يرجى المحاولة.", "مشكلة تقنية");
+    }
+}
+
+// دالة عرض الشاشة المنبثقة وإخفائها تلقائياً
+function showScreen(theme, icon, title, desc, badge) {
+    playBeep(theme === 'success');
+    
+    const overlay = document.getElementById('resultOverlay');
+    overlay.className = ''; // مسح الكلاسات القديمة
+    overlay.classList.add('theme-' + theme);
+    
+    document.getElementById('resIcon').textContent = icon;
+    document.getElementById('resTitle').textContent = title;
+    document.getElementById('resDesc').textContent = desc;
+    document.getElementById('resBadge').textContent = badge;
+    
+    overlay.style.display = 'flex';
+
+    // إخفاء الشاشة بعد 3 ثوانٍ وتجهيز الكاميرا للشخص التالي
+    setTimeout(() => {
+        overlay.style.display = 'none';
+        isProcessing = false; // السماح بمسح كود جديد
+    }, 3500);
+}
+
+</script>
+</body>
+</html>
