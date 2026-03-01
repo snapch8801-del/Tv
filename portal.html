@@ -32,8 +32,8 @@ window.onload = () => {
     }
 
     try {
-        // فك التشفير الآمن
-        const jsonStr = decodeURIComponent(escape(window.atob(pData)));
+        // 🔥 تم إصلاح طريقة فك التشفير هنا لتعمل بكفاءة مع الحروف العربية 🔥
+        const jsonStr = decodeURIComponent(window.atob(pData));
         const d = JSON.parse(jsonStr);
         
         let detailsHtml = d.ty === 'sessions' 
@@ -66,6 +66,7 @@ window.onload = () => {
             </div>
         `;
     } catch(e) {
+        console.error(e);
         app.innerHTML = `<div class="err-screen">❌<br><br>حدث خطأ في قراءة بيانات الرابط.</div>`;
     }
 };
