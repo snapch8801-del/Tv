@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>لوحة تسيير الاشتراكات - v12.9.18</title>
+<title>لوحة تسيير الاشتراكات - v12.9.18.</title>
 
 <meta name="theme-color" content="#070a12" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -563,6 +563,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
       </div>
 
       <div style="padding-top: 15px; border-top: 1px solid rgba(239,68,68,0.2);">
+      <button type="button" class="btn soft" style="font-size:12px; padding:12px; color:#c084fc; width:100%; border-color:#c084fc; background: rgba(192,132,252,0.1); margin-bottom: 10px; font-weight:bold;" onclick="window.generatePortalLink()">🌐 استخراج رابط بوابة العميل</button>
         <button class="btn danger" style="width: 100%; padding: 12px; border-radius: 12px; font-size: 13px;" onclick="window.actDeleteAction()">
           🗑️ حذف المشترك نهائياً
         </button>
@@ -1074,7 +1075,37 @@ window.actMessengerAction = () => {
 };
 
 window.actSMSAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.phone) { closeModal("rowActionsModal"); return showToast("لا يوجد هاتف مسجل لهذا العميل.", "err"); } let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, ''); let endTxt = rec.subType === 'sessions' ? `رصيدك المتبقي: ${rec.sessionsLeft} حصة` : `ينتهي بتاريخ: ${rec.end}`; let msg = `مرحباً ${rec.name}، نود تذكيرك بخصوص اشتراكك الذي ${endTxt}.`; logAction("إرسال SMS", `إلى: ${rec.name}`); window.open(`sms:${cleanPhone}?body=${encodeURIComponent(msg)}`, '_self'); closeModal("rowActionsModal"); };
+window.generatePortalLink = () => {
+    const rec = data.find(x => x.id === currentRowId);
+    if(!rec) return;
 
+    let debt = (parseFloat(rec.price)||0) - (parseFloat(rec.paidAmount)||0);
+    if(debt < 0) debt = 0;
+
+    const payload = {
+        n: rec.name || "عميل", srv: rec.serviceType || "غير محدد", ty: rec.subType || "time",
+        sl: rec.sessionsLeft || 0, st: rec.sessionsTotal || 0, sd: rec.start || "-", ed: rec.end || "-",
+        db: debt, cr: rec.currency || "DZD", sn: "المؤسسة"
+    };
+
+    try {
+        const jsonStr = JSON.stringify(payload);
+        const encodedStr = encodeURIComponent(jsonStr); 
+        const base64 = window.btoa(encodedStr);
+        
+        // توجيه الرابط إلى ملف portal.html الذي أنشأته
+        let currentUrl = window.location.href.split('?')[0];
+        if(currentUrl.endsWith('/')) currentUrl = currentUrl.slice(0, -1);
+        if(currentUrl.endsWith('.html')) currentUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
+        
+        const link = currentUrl + "/portal.html?p=" + base64;
+
+        closeModal("rowActionsModal");
+        window.prompt("رابط بوابة العميل جاهز! انسخه من المربع وأرسله له:", link);
+    } catch(err) {
+        showToast("حدث خطأ أثناء التشفير", "err");
+    }
+};
 window.actDeleteAction = async () => { if(confirm("حذف المشترك نهائياً؟")) { const recToDelete = data.find(x => x.id === currentRowId); logAction("حذف اشتراك", `الاسم: ${recToDelete.name}`); lastDeletedData = data.filter(x => x.id === currentRowId); data = data.filter(x => x.id !== currentRowId); await firebasePush(); window.render(); closeModal("rowActionsModal"); showToast("تم الحذف 🗑️"); } };
 
 window.calcDebt = () => { const p = parseFloat($("price").value) || 0; let valRaw = $("paidAmount").value; let a = valRaw === "" ? p : (parseFloat(valRaw) || 0); let d = p - a; $("debtAmount").value = d > 0 ? d : 0; };
