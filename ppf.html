@@ -44,11 +44,11 @@
     right: 0;
     top: 0;
     bottom: 0;
-    z-index: 100;
-    transition: transform 0.3s ease;
+    z-index: 1000; /* رفعناها لتغطي كل شيء دائماً */
+    transition: right 0.3s ease; /* نعتمد على الإزاحة الدقيقة بالبكسل */
   }
   .sidebar.hidden {
-    transform: translateX(100%);
+    right: -260px; /* ندفعها خارج الشاشة بمقدار عرضها بالكامل */
   }
 
   .logo {
@@ -560,6 +560,74 @@
     z-index: 500;
     display: none;
     animation: fadeUp 0.3s ease;
+  }
+  /* =========================================
+     📱 توافقية شاشات الهواتف (Responsive Design)
+     ========================================= */
+  @media (max-width: 768px) {
+    /* 1. إخفاء القائمة الجانبية افتراضياً في الموبايل */
+    .sidebar {
+      right: -260px; /* مخفية تماماً خارج الشاشة من اليمين */
+      box-shadow: -5px 0 25px rgba(0,0,0,0.5);
+    }
+    
+    /* عند الضغط على الزر، تظهر القائمة */
+    .sidebar.hidden {
+      right: 0; /* تلتصق باليمين وتظهر للمستخدم */
+    }
+
+    /* 2. مساحة العمل تأخذ كامل الشاشة في الموبايل */
+    .main {
+      margin-right: 0 !important;
+    }
+
+    /* 3. ترتيب الشريط العلوي ليناسب الشاشة الصغيرة */
+    .topbar {
+      height: auto;
+      padding: 16px;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 16px;
+    }
+    .topbar-actions {
+      width: 100%;
+      flex-direction: column;
+      align-items: stretch;
+    }
+    .search-box {
+      width: 100%;
+    }
+    .btn {
+      justify-content: center;
+    }
+
+    /* 4. الإحصائيات: عرض بطاقة واحدة أو اثنتين في كل سطر */
+    .stats-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    @media (max-width: 480px) {
+      .stats-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* 5. الجداول: السماح بالتمرير الأفقي (Scroll) كي لا ينكسر التصميم */
+    .section {
+      overflow-x: auto;
+    }
+    table {
+      min-width: 600px; /* إجبار الجدول على الاحتفاظ بحجمه ليتم تمريره */
+    }
+
+    /* 6. تصغير نافذة إضافة مستخدم (Modal) */
+    .modal {
+      width: 90%;
+      padding: 24px;
+    }
+    .form-row {
+      grid-template-columns: 1fr; /* جعل الحقول تحت بعضها */
+      gap: 0;
+    }
   }
 </style>
 </head>
