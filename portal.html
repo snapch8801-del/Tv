@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 <title>بوابة المشترك الرقمية</title>
 <style>
-    body { margin:0; font-family: system-ui, -apple-system, sans-serif; background: #070a12; color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
-    .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 35px 25px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); width: 100%; max-width: 400px; }
-    .icon { font-size: 50px; margin-bottom: 10px; }
+    body { margin:0; font-family: system-ui, -apple-system, sans-serif; background: radial-gradient(circle at 50% -20%, #7c5cff30, transparent 60%), #070a12; color: #fff; display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+    .card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 35px 25px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.5); backdrop-filter: blur(20px); width: 100%; max-width: 400px; }
+    .icon { font-size: 50px; margin-bottom: 10px; filter: drop-shadow(0 10px 15px rgba(124,92,255,0.3)); }
     .sn { color: #eaf0ff; margin: 0 0 5px 0; font-size: 22px; font-weight: 900; }
     .sub { color: rgba(234,240,255,0.5); font-size: 13px; margin-bottom: 30px; letter-spacing: 1px; }
     .name { color: white; font-size: 28px; margin: 0 0 10px 0; font-weight: 900; }
@@ -33,12 +33,12 @@ window.onload = () => {
 
     try {
         // فك التشفير الآمن تماماً
-        const jsonStr = decodeURIComponent(window.atob(pData));
+        const jsonStr = decodeURIComponent(escape(window.atob(pData)));
         const d = JSON.parse(jsonStr);
         
         let detailsHtml = d.ty === 'sessions' 
-            ? `<div style="font-size: 16px; font-weight: bold;">متبقي <span style="color: #10b981; font-size: 26px; margin: 0 4px;">${d.sl}</span> من ${d.st} حصة</div>`
-            : `<div style="font-size: 15px; font-weight: bold; line-height: 1.8;">البداية: <span style="color:#eaf0ff;">${d.sd}</span><br>الانتهاء: <span style="color:#ef4444;">${d.ed}</span></div>`;
+            ? `<div style="font-size: 16px; font-weight: bold;">متبقي <span style="color: #10b981; font-size: 26px; font-weight: 900; margin: 0 4px;">${d.sl}</span> من ${d.st} حصة</div>`
+            : `<div style="font-size: 15px; font-weight: bold; line-height: 1.8;">البداية: <span style="color:#eaf0ff;">${d.sd}</span><br>الانتهاء: <span style="color:#ef4444; font-size:18px;">${d.ed}</span></div>`;
 
         let financeBoxColor = d.db > 0 ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)';
         let financeBorder = d.db > 0 ? 'rgba(239,68,68,0.2)' : 'rgba(16,185,129,0.2)';
