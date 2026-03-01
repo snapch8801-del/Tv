@@ -60,14 +60,23 @@
     /* منطقة الكاميرا */
     .camera-container {
         flex: 1; display: flex; align-items: center; justify-content: center;
-        padding: 20px; position: relative;
+        padding: 20px; position: relative; flex-direction: column;
     }
     #reader {
         width: 100%; max-width: 500px; border-radius: 24px; overflow: hidden;
-        box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.1);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.1); background: #000;
     }
+    #reader video { border-radius: 24px; object-fit: cover; }
 
-    /* شاشة النتيجة (تظهر وتختفي كالسحر) */
+    /* زر قلب الكاميرا */
+    .flip-btn {
+        margin-top: 20px; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.3);
+        color: white; padding: 12px 24px; border-radius: 99px; cursor: pointer;
+        font-weight: bold; font-family: inherit; font-size: 15px; transition: all 0.2s;
+    }
+    .flip-btn:active { transform: scale(0.95); background: rgba(255,255,255,0.2); }
+
+    /* شاشة النتيجة */
     #resultOverlay {
         position: absolute; inset: 0; background: rgba(0,0,0,0.95); z-index: 50;
         display: none; flex-direction: column; align-items: center; justify-content: center;
@@ -84,7 +93,6 @@
         100% { transform: scale(1); opacity: 1; }
     }
 
-    /* ألوان الحالات */
     .theme-success .result-title { color: var(--success); }
     .theme-success .result-icon { filter: drop-shadow(0 0 20px rgba(16,185,129,0.5)); }
     .theme-success .result-badge { background: rgba(16,185,129,0.2); color: var(--success); border: 1px solid rgba(16,185,129,0.4); }
@@ -119,6 +127,7 @@
     </div>
     <div class="camera-container">
         <div id="reader"></div>
+        <button class="flip-btn" onclick="flipCamera()">🔄 قلب الكاميرا</button>
     </div>
 </div>
 
@@ -139,10 +148,10 @@ const auth = firebase.auth();
 const db = firebase.database();
 
 let data = []; 
-let isProcessing = false; // لمنع المسح المزدوج
-let html5QrcodeScanner;
+let isProcessing = false; 
+let html5QrCode;
+let currentFacingMode = "user"; // "user" للكاميرا الأمامية، "environment" للكاميرا الخلفية
 
-// دالة لمعرفة حالة الاشتراك (نفس المستعملة في اللوحة الإدارية)
 function todayISO(){ const d=new Date(); d.setHours(0,0,0,0); return d.toISOString().slice(0,10); }
 function toDate(iso){ if(!iso) return new Date(); const d = new Date(iso+"T00:00:00"); d.setHours(0,0,0,0); return isNaN(d) ? new Date() : d; }
 
@@ -174,10 +183,8 @@ auth.onAuthStateChanged((user) => {
 });
 
 function login() {
-    // السحر هنا: trim() تقوم بمسح أي مسافة يضيفها كيبورد الهاتف بالخطأ
     const e = document.getElementById('email').value.trim(); 
     const p = document.getElementById('password').value;
-    
     const errorDiv = document.getElementById('loginError');
     errorDiv.style.color = '#eaf0ff';
     errorDiv.textContent = '⏳ جاري التحقق من البيانات...';
@@ -185,31 +192,50 @@ function login() {
 
     auth.signInWithEmailAndPassword(e, p).catch((error) => {
         errorDiv.style.color = 'var(--error)';
-        
-        // ترجمة الخطأ لتعرف المشكلة بالضبط!
         let msg = "بيانات خاطئة!";
         if(error.code === 'auth/invalid-email') msg = "صيغة الإيميل خاطئة.";
         else if(error.code === 'auth/user-not-found' || error.code === 'auth/wrong-password') msg = "الإيميل أو كلمة المرور غير صحيحة.";
         else if(error.code === 'auth/network-request-failed') msg = "لا يوجد اتصال بالإنترنت.";
         else msg = "حدث خطأ: " + error.code;
-        
         errorDiv.textContent = msg;
     });
 }
 
-
 // ==========================================
-// 🔄 مزامنة البيانات لحظياً
+// 📷 تشغيل وقلب الكاميرا
 // ==========================================
 function startSyncAndCamera() {
-    // اللوحة تتنصت على التحديثات دائماً لتكون بياناتها دقيقة
     db.ref("subscriptions").on('value', (snap) => {
         data = snap.exists() ? Object.values(snap.val()) : [];
     });
 
-    // تشغيل الكاميرا
-    html5QrcodeScanner = new Html5QrcodeScanner("reader", { fps: 10, qrbox: {width: 250, height: 250} }, false);
-    html5QrcodeScanner.render(handleScan, (err) => {});
+    html5QrCode = new Html5Qrcode("reader");
+    startCamera();
+}
+
+function startCamera() {
+    html5QrCode.start(
+        { facingMode: currentFacingMode },
+        { fps: 10, qrbox: { width: 250, height: 250 } },
+        handleScan,
+        (err) => { /* تجاهل أخطاء القراءة المستمرة */ }
+    ).catch(err => {
+        // إذا فشل فتح الكاميرا الأمامية (مثلاً في حاسوب عادي)، جرب الخلفية تلقائياً
+        if(currentFacingMode === "user") {
+            currentFacingMode = "environment";
+            startCamera();
+        }
+    });
+}
+
+function flipCamera() {
+    if(html5QrCode && html5QrCode.isScanning) {
+        // إيقاف الكاميرا الحالية ثم تبديلها
+        html5QrCode.stop().then(() => {
+            currentFacingMode = currentFacingMode === "user" ? "environment" : "user";
+            startCamera();
+        }).catch(err => console.log(err));
+    }
 }
 
 // إصدار صوت تنبيه (Beep) عند المسح
@@ -228,24 +254,15 @@ function playBeep(isSuccess) {
 // 📷 معالجة قراءة الـ QR Code
 // ==========================================
 async function handleScan(decodedText) {
-    if (isProcessing) return; // إذا كان النظام مشغولاً بعرض نتيجة، لا تقرأ كوداً آخر
+    if (isProcessing) return; 
     isProcessing = true;
 
-    const overlay = document.getElementById('resultOverlay');
-    const resIcon = document.getElementById('resIcon');
-    const resTitle = document.getElementById('resTitle');
-    const resDesc = document.getElementById('resDesc');
-    const resBadge = document.getElementById('resBadge');
-
-    // التأكد من صيغة الكود
     if(!decodedText.startsWith("ID:")) {
         showScreen("error", "❌", "رمز غير صالح", "يرجى مسح بطاقة انخراط نظامية صادرة من المركز.", "خطأ في القراءة");
         return;
     }
 
     const scId = decodedText.split("ID:")[1];
-    
-    // البحث عن العميل في البيانات المحلية (التي يتم تحديثها لحظياً)
     let userIndex = data.findIndex(x => x.id === scId);
     let user = data[userIndex];
 
@@ -254,17 +271,14 @@ async function handleScan(decodedText) {
         return;
     }
 
-    // فحص حالة الاشتراك
     const st = getStatus(user);
 
     if (st.key === 'expired') {
         showScreen("error", "⚠️", "عفواً، لا يمكن الدخول", `اشتراكك في (${user.serviceType}) منتهي!`, st.text);
-        // تسجيل محاولة دخول فاشلة للمدير
         db.ref("logs").push({ email: auth.currentUser.email, action: "محاولة دخول مرفوضة ❌", details: `العميل: ${user.name} (اشتراك منتهي)`, time: new Date().toISOString() });
         return;
     }
 
-    // ✅ حالة النجاح: خصم الحصة وتسجيل الحضور
     if(user.subType === 'sessions') {
         user.sessionsLeft = parseInt(user.sessionsLeft) - 1;
     }
@@ -272,7 +286,6 @@ async function handleScan(decodedText) {
     if(!user.attendanceLog) user.attendanceLog = [];
     user.attendanceLog.push({ time: new Date().toISOString() });
 
-    // حفظ التحديث في قاعدة البيانات
     data[userIndex] = user;
     try {
         await db.ref("subscriptions").set(data);
@@ -291,7 +304,7 @@ function showScreen(theme, icon, title, desc, badge) {
     playBeep(theme === 'success');
     
     const overlay = document.getElementById('resultOverlay');
-    overlay.className = ''; // مسح الكلاسات القديمة
+    overlay.className = ''; 
     overlay.classList.add('theme-' + theme);
     
     document.getElementById('resIcon').textContent = icon;
@@ -301,10 +314,9 @@ function showScreen(theme, icon, title, desc, badge) {
     
     overlay.style.display = 'flex';
 
-    // إخفاء الشاشة بعد 3 ثوانٍ وتجهيز الكاميرا للشخص التالي
     setTimeout(() => {
         overlay.style.display = 'none';
-        isProcessing = false; // السماح بمسح كود جديد
+        isProcessing = false; 
     }, 3500);
 }
 
