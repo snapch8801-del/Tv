@@ -9,14 +9,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 
-<script>
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(function(registrations) {
-        for(let registration of registrations) { registration.unregister(); }
-    });
-}
-</script>
-
 <style>
 :root{
   --bg0:#070a12; --bg1:#0b1020; --card: rgba(255,255,255,.06); --line: rgba(255,255,255,.10);
@@ -144,7 +136,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 <body>
 <div class="container">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.18 PWA</span></h1>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.18</span></h1>
     <div class="sub">⚡ النسخة النقية والمضمونة 100%: جداول كلاسيكية سريعة ومستقرة بدون أي انهيار.</div>
   </div>
 
@@ -235,7 +227,6 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
             <button class="btn primary" type="button" style="padding:0 16px; border-radius:12px; font-size:16px;" onclick="openModal('packagesModal')" title="إنشاء باقة جديدة الآن">➕</button>
           </div>
         </div>
-
         <div class="field full-width"><label>الاسم <span style="color:var(--err)">*</span></label><input id="name" placeholder="مثال: أحمد محمد"></div>
         <div class="field full-width"><label>الهاتف (مع الرمز)</label><div style="display: flex; gap: 8px;"><select id="countryCode" style="width: 110px; direction: ltr;"><option value="+213">🇩🇿 +213</option><option value="+212">🇲🇦 +212</option><option value="+216">🇹🇳 +216</option><option value="">بدون رمز</option></select><input id="phone" type="tel" dir="ltr" placeholder="555000000" style="flex:1;"></div></div>
         <div class="field full-width" style="margin-top: 5px;">
@@ -276,7 +267,6 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
         <div id="advancedFields" class="full-width" style="display: none; background: rgba(0,0,0,0.2); padding: 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05); margin-top: 10px;">
           <div class="formGrid">
             <div class="field full-width"><label>🔗 رابط المحادثة (ميسنجر / انستغرام / ويب)</label><input id="messengerLink" type="url" dir="ltr" placeholder="https://..." title="انسخ رابط حساب الزبون أو رابط المحادثة والصقه هنا"></div>
-            
             <div class="field full-width"><label>الإيميل (اختياري)</label><input id="email" placeholder="مثال: name@example.com" inputmode="email"></div>
             <div class="field full-width"><label>الأوسمة / التصنيفات (مفصولة بفاصلة)</label><input id="tags" placeholder="مثال: سنة 4 متوسط, فوج الأحد, VIP..."></div>
             <div class="field"><label>تنبيه قبل (أيام)</label><input id="alertDays" type="number" min="1" step="1" value="7"></div>
@@ -857,7 +847,6 @@ window.render = () => {
               <div style="margin-top:4px;"><button class="btn soft" style="padding:4px 8px; font-size:10px; border-color:#22c55e; color:#22c55e;" onclick="window.markAttendance('${r.id}')">✔️ تسجيل دخول</button></div>`;
             }
 
-            // الجدول الكلاسيكي القوي والخالي من أخطاء الموبايل
             tr.innerHTML = `
               <td style="text-align: center;"><input type="checkbox" class="rowChk" value="${r.id}" ${isChecked}></td>
               <td>
@@ -1045,9 +1034,9 @@ window.actMessengerAction = () => {
 
 window.actSMSAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.phone) { closeModal("rowActionsModal"); return showToast("لا يوجد هاتف مسجل لهذا العميل.", "err"); } let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, ''); let endTxt = rec.subType === 'sessions' ? `رصيدك المتبقي: ${rec.sessionsLeft} حصة` : `ينتهي بتاريخ: ${rec.end}`; let msg = `مرحباً ${rec.name}، نود تذكيرك بخصوص اشتراكك الذي ${endTxt}.`; logAction("إرسال SMS", `إلى: ${rec.name}`); window.open(`sms:${cleanPhone}?body=${encodeURIComponent(msg)}`, '_self'); closeModal("rowActionsModal"); };
 
-// ==========================================
-// 🛡️ دالة التشفير والنسخ الآمنة 100%
-// ==========================================
+// ==============================================================
+// 🛡️ دالة استخراج الرابط المتوافقة 100%
+// ==============================================================
 window.generatePortalLink = () => {
     const rec = data.find(x => x.id === currentRowId);
     if(!rec) return;
@@ -1062,33 +1051,17 @@ window.generatePortalLink = () => {
     };
 
     try {
-        // تشفير عالمي موحد للغة العربية
         const jsonStr = JSON.stringify(payload);
+        
+        // التشفير السليم والمطابق لملف البوابة portal.html
         const base64 = window.btoa(unescape(encodeURIComponent(jsonStr)));
-        
+        const safeBase64 = encodeURIComponent(base64);
+
         let currentUrl = window.location.href.split('?')[0];
         if(currentUrl.endsWith('/')) currentUrl = currentUrl.slice(0, -1);
         if(currentUrl.endsWith('.html')) currentUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
         
-        const link = currentUrl + "/portal.html?p=" + base64;
-
-        closeModal("rowActionsModal");
-        window.prompt("رابط بوابة العميل جاهز! انسخه من المربع وأرسله له:", link);
-    } catch(err) {
-        showToast("حدث خطأ أثناء التشفير", "err");
-    }
-};
-
-    try {
-        const jsonStr = JSON.stringify(payload);
-        const encodedStr = encodeURIComponent(jsonStr); 
-        const base64 = window.btoa(encodedStr);
-        
-        let currentUrl = window.location.href.split('?')[0];
-        if(currentUrl.endsWith('/')) currentUrl = currentUrl.slice(0, -1);
-        if(currentUrl.endsWith('.html')) currentUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
-        
-        const link = currentUrl + "/portal.html?p=" + base64;
+        const link = currentUrl + "/portal.html?p=" + safeBase64;
 
         closeModal("rowActionsModal");
         window.prompt("رابط بوابة العميل جاهز! انسخه من المربع وأرسله له:", link);
