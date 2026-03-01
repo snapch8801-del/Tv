@@ -1209,7 +1209,7 @@ window.addEventListener('appinstalled', (evt) => {
 });
 
 // ==============================================================
-// 🛡️ دالة استخراج الرابط والبوابة (مع نافذة QR Code والتحميل)
+// 🛡️ دالة استخراج الرابط والبوابة (مع نافذة QR Code HD للتحميل)
 // ==============================================================
 window.generatePortalLink = () => {
     const rec = data.find(x => x.id === currentRowId);
@@ -1247,10 +1247,13 @@ window.generatePortalLink = () => {
         box.style.cssText = "background:#0a0e1a; border:1px solid #c084fc; border-radius:24px; padding:30px 20px; width:100%; max-width:360px; text-align:center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);";
         
         box.innerHTML = `
+            <style>
+                #tempQrBox canvas, #tempQrBox img { width: 100% !important; height: auto !important; }
+            </style>
             <h3 style="color:#c084fc; margin:0 0 5px 0; font-size:20px;">🌐 بوابة المشترك</h3>
             <p style="color:#94a3b8; font-size:13px; margin-bottom:20px;">حمل الكود أو ارسل الرابط للعميل</p>
             
-            <div id="tempQrBox" style="background:#fff; padding:15px; border-radius:16px; display:inline-block; margin-bottom:20px;"></div>
+            <div id="tempQrBox" style="background:#fff; padding:15px; border-radius:16px; width: 200px; margin: 0 auto 20px auto; aspect-ratio: 1/1;"></div>
             
             <input type="text" value="${link}" readonly style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:12px; margin-bottom:20px; text-align:left; direction:ltr; outline:none;" id="tempLinkInput">
             
@@ -1266,13 +1269,14 @@ window.generatePortalLink = () => {
         overlay.appendChild(box);
         document.body.appendChild(overlay);
 
+        // 🔥 توليد الصورة بجودة HD مع كثافة مخففة لسهولة المسح
         new QRCode(document.getElementById("tempQrBox"), {
             text: link,
-            width: 180,
-            height: 180,
+            width: 512,
+            height: 512,
             colorDark: "#0f172a",
             colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.M
+            correctLevel: QRCode.CorrectLevel.L
         });
 
         document.getElementById("btnDownloadQR").onclick = () => {
@@ -1280,7 +1284,7 @@ window.generatePortalLink = () => {
             const canvas = qrBox.querySelector("canvas");
             if(canvas) {
                 const a = document.createElement("a");
-                a.href = canvas.toDataURL("image/png");
+                a.href = canvas.toDataURL("image/png", 1.0);
                 a.download = `QR_Portal_${safeClientName}.png`;
                 a.click();
                 window.showToast("تم تحميل الصورة بنجاح! 📥");
