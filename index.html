@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>لوحة تسيير الاشتراكات - v12.9.24</title>
+<title>لوحة تسيير الاشتراكات - v12.9.25</title>
 
 <meta name="theme-color" content="#070a12" />
 <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -15,7 +15,7 @@
 
 <script>
 // ==========================================
-// 🌐 نظام بوابة العميل (تشفير آمن 100% للعربية)
+// 🌐 نظام بوابة العميل (آمن 100%)
 // ==========================================
 const _urlParams = new URLSearchParams(window.location.search);
 const _portalData = _urlParams.get('p');
@@ -23,8 +23,8 @@ const _portalData = _urlParams.get('p');
 if (_portalData) {
     window.onload = () => {
         try {
-            // فك التشفير الآمن الذي لا يسبب انهياراً
-            const jsonStr = decodeURIComponent(atob(_portalData));
+            // التشفير المعتمد عالمياً للحروف العربية
+            const jsonStr = decodeURIComponent(escape(atob(_portalData)));
             const d = JSON.parse(jsonStr);
             
             document.body.innerHTML = `
@@ -118,13 +118,13 @@ input[type="checkbox"] { appearance: none; width: 18px; height: 18px; border: 2p
 input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
 input[type="checkbox"]:checked::after { content: "✔"; position: absolute; color: white; font-size: 12px; left: 3px; top: -1px; font-weight: bold; }
 
-/* 🌟 الجدول الكلاسيكي القوي - يعمل بالسحب الأفقي 🌟 */
+/* 🌟 الجدول الكلاسيكي القوي 🌟 */
 .tableWrap { overflow-x: auto; -webkit-overflow-scrolling: touch; width: 100%; border-top: 1px solid var(--line); }
-table { width: 100%; border-collapse: collapse; min-width: 850px; }
-thead th { position: sticky; top: 0; z-index: 5; background: rgba(0,0,0,0.3); color: var(--muted); text-align: right; font-size: 12px; font-weight: 900; padding: 12px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+table { width: 100%; border-collapse: collapse; min-width: 900px; text-align: right; }
+thead th { position: sticky; top: 0; z-index: 5; background: rgba(0,0,0,0.4); color: var(--muted); padding: 14px 12px; border-bottom: 1px solid var(--line); font-size: 12px; font-weight: 900; white-space: nowrap; }
 tbody tr { transition: background 0.2s; border-bottom: 1px solid rgba(255,255,255,0.05); }
-tbody tr:hover { background: rgba(255,255,255,0.02); }
-tbody td { padding: 10px; vertical-align: middle; white-space: nowrap; }
+tbody tr:hover { background: rgba(255,255,255,0.03); }
+tbody td { padding: 12px; vertical-align: middle; white-space: nowrap; }
 
 tr.expired-row{ background: rgba(239,68,68,.08); }
 tr.expiring-row{ background: rgba(245,158,11,.06); }
@@ -216,8 +216,8 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 <body>
 <div class="container" id="adminAppContainer" style="display: none;">
   <div class="header">
-    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.24 PWA</span></h1>
-    <div class="sub">⚡ النسخة الكلاسيكية: جدول مستقر تماماً + بوابة عميل آمنة ومضادة للانهيار.</div>
+    <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.25 PWA</span></h1>
+    <div class="sub">⚡ النسخة المعصومة: جدول آمن، وتوليد روابط محمي عبر نافذة منبثقة.</div>
   </div>
 
   <div class="card">
@@ -353,6 +353,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
         <div id="advancedFields" class="full-width" style="display: none; background: rgba(0,0,0,0.2); padding: 16px; border-radius: 14px; border: 1px solid rgba(255,255,255,0.05); margin-top: 10px;">
           <div class="formGrid">
             <div class="field full-width"><label>🔗 رابط المحادثة (ميسنجر / انستغرام / ويب)</label><input id="messengerLink" type="url" dir="ltr" placeholder="https://..." title="انسخ رابط حساب الزبون أو رابط المحادثة والصقه هنا"></div>
+            
             <div class="field full-width"><label>الإيميل (اختياري)</label><input id="email" placeholder="مثال: name@example.com" inputmode="email"></div>
             <div class="field full-width"><label>الأوسمة / التصنيفات (مفصولة بفاصلة)</label><input id="tags" placeholder="مثال: سنة 4 متوسط, فوج الأحد, VIP..."></div>
             <div class="field"><label>تنبيه قبل (أيام)</label><input id="alertDays" type="number" min="1" step="1" value="7"></div>
@@ -605,7 +606,8 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
         <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px;" onclick="window.actCopyEmailAction()">📋 نسخ Email</button>
         <button class="btn soft" id="btnViewAttendance" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #10b981; border-color: rgba(16,185,129,.3);" onclick="window.openAttendanceLog()">📅 سجل الحضور</button>
         <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #fbbf24; border-color: rgba(251,191,36,.3);" onclick="window.openPaymentModal()">💸 الدفعات والديون</button>
-        <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #c084fc; border-color: rgba(192,132,252,.3); width: 100%; font-weight:bold; background: rgba(192,132,252,0.1);" onclick="window.copyPortalLink()">🌐 نسخ رابط بوابة العميل الذكية</button>
+        
+        <button class="btn soft" style="font-size: 12px; padding: 8px 14px; border-radius: 10px; color: #c084fc; border-color: rgba(192,132,252,.3); width: 100%; font-weight:bold; background: rgba(192,132,252,0.1);" onclick="window.openPortalLinkModal()">🌐 استخراج رابط بوابة العميل</button>
       </div>
 
       <div style="padding-top: 15px; border-top: 1px solid rgba(239,68,68,0.2);">
@@ -614,6 +616,22 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
         </button>
       </div>
 
+    </div>
+  </div>
+</div>
+
+<div class="modal" id="portalLinkModal" aria-hidden="true">
+  <div class="box" style="width: min(400px, 100%)">
+    <div class="modalHeader">
+        <h2>🌐 رابط بوابة العميل</h2>
+        <button class="btn danger btn-close" type="button" onclick="closeModal('portalLinkModal'); openModal('rowActionsModal')">العودة ↩</button>
+    </div>
+    <div class="modalBody" style="text-align: center;">
+      <p style="color: var(--muted); font-size: 13px; margin-bottom: 15px;">تم توليد الرابط بنجاح! يمكنك إرساله للعميل ليتابع حسابه.</p>
+      
+      <input id="generatedPortalLink" type="text" readonly style="width: 100%; padding: 15px; border-radius: 12px; background: rgba(0,0,0,0.5); color: #10b981; font-weight: bold; border: 1px solid rgba(16,185,129,0.3); margin-bottom: 15px; direction: ltr;" onclick="this.select()">
+      
+      <button class="btn primary" style="width: 100%; padding: 14px; font-size: 15px; background: #10b981; border-color: #059669;" onclick="window.copyToClipboardActual()">📋 نسخ الرابط الآن</button>
     </div>
   </div>
 </div>
@@ -696,9 +714,9 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 
 <script>
 // ========================================================
-// دالة نسخ رابط البوابة الذكية (آمنة ومضادة للانهيار 100%) 🚀
+// الخوارزمية الآمنة لإنشاء الرابط بدون انهيار
 // ========================================================
-window.copyPortalLink = () => {
+window.openPortalLinkModal = () => {
     const rec = data.find(x => x.id === currentRowId);
     if(!rec) return;
 
@@ -719,30 +737,38 @@ window.copyPortalLink = () => {
     };
 
     try {
-        // تشفير آمن جداً للغة العربية والرموز يمنع الانهيار
+        // تشفير قوي جداً يدعم العربية والإيموجي
         const jsonStr = JSON.stringify(payload);
-        const encodedStr = encodeURIComponent(jsonStr); 
-        const base64 = btoa(encodedStr);
+        const base64 = window.btoa(unescape(encodeURIComponent(jsonStr)));
         const link = window.location.origin + window.location.pathname + "?p=" + base64;
 
-        // طريقة آمنة لنسخ الرابط في الهاتف
-        const textArea = document.createElement("textarea");
-        textArea.value = link;
-        textArea.style.position = "fixed"; 
-        textArea.style.left = "-9999px"; 
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand("copy");
-        document.body.removeChild(textArea);
-
-        showToast("تم نسخ رابط بوابة العميل بنجاح 🔗");
+        // إظهار النافذة بدلاً من النسخ الصامت المسبب للانهيار
+        document.getElementById('generatedPortalLink').value = link;
         closeModal("rowActionsModal");
+        openModal("portalLinkModal");
+        
     } catch(err) {
-        showToast("حدث خطأ أثناء توليد الرابط", "err");
-        console.error(err);
+        showToast("حدث خطأ أثناء التشفير", "err");
     }
 };
 
+window.copyToClipboardActual = () => {
+    const copyText = document.getElementById("generatedPortalLink");
+    copyText.select();
+    copyText.setSelectionRange(0, 99999); // لدعم الهواتف المحمولة
+    
+    try {
+        document.execCommand("copy");
+        showToast("تم النسخ بنجاح! 📋");
+        setTimeout(() => closeModal("portalLinkModal"), 1000);
+    } catch(e) {
+        showToast("فشل النسخ التلقائي، يرجى النسخ يدوياً", "warn");
+    }
+};
+
+// ========================================================
+// وظائف اللوحة الأساسية
+// ========================================================
 window.openSideMenu = () => { $("sideMenu").classList.add("open"); $("menuBackdrop").classList.add("open"); };
 window.closeSideMenu = () => { $("sideMenu").classList.remove("open"); $("menuBackdrop").classList.remove("open"); };
 
