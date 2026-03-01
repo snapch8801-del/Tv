@@ -207,7 +207,9 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
     <button class="actBtn" style="color:#f59e0b; border-color:rgba(245,158,11,0.4); background:rgba(245,158,11,0.1);" onclick="closeSideMenu(); window.undoDelete()">↩️ التراجع عن آخر حذف</button>
     <button class="actBtn" onclick="closeSideMenu(); window.shareApp()">📤 مشاركة رابط اللوحة</button>
     <button class="actBtn" onclick="closeSideMenu(); window.print()">🖨️ طباعة الجدول</button>
+    
     <button class="actBtn" id="btnInstallApp" style="display:none; color:#10b981; border-color:rgba(16,185,129,0.4); background:rgba(16,185,129,0.1); margin-top:8px;" onclick="window.installPWA()">📲 تثبيت التطبيق على الجهاز</button>
+
     <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(239,68,68,0.2);">
       <button class="actBtn danger" onclick="closeSideMenu(); window.clearAllData()" style="text-align: center;">⚠️ تصفير اللوحة بالكامل</button>
     </div>
@@ -1035,109 +1037,6 @@ window.actMessengerAction = () => {
 
 window.actSMSAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.phone) { closeModal("rowActionsModal"); return showToast("لا يوجد هاتف مسجل لهذا العميل.", "err"); } let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, ''); let endTxt = rec.subType === 'sessions' ? `رصيدك المتبقي: ${rec.sessionsLeft} حصة` : `ينتهي بتاريخ: ${rec.end}`; let msg = `مرحباً ${rec.name}، نود تذكيرك بخصوص اشتراكك الذي ${endTxt}.`; logAction("إرسال SMS", `إلى: ${rec.name}`); window.open(`sms:${cleanPhone}?body=${encodeURIComponent(msg)}`, '_self'); closeModal("rowActionsModal"); };
 
-// ==============================================================
-// 🛡️ دالة استخراج الرابط المتوافقة 100%
-// ==============================================================
-// ==========================================
-// 📲 نظام التثبيت (PWA)
-// ==========================================
-let deferredPrompt;
-window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    const installBtn = document.getElementById('btnInstallApp');
-    if(installBtn) installBtn.style.display = 'block';
-});
-
-window.installPWA = async () => {
-    if (!deferredPrompt) return;
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-        console.log('تم قبول التثبيت');
-    }
-    deferredPrompt = null;
-    document.getElementById('btnInstallApp').style.display = 'none';
-    closeSideMenu();
-};
-
-window.addEventListener('appinstalled', (evt) => {
-    showToast("تم تثبيت التطبيق بنجاح! 🎉", "ok");
-});
-
-// ==============================================================
-// 🛡️ دالة استخراج الرابط والبوابة (مع نافذة QR Code والتحميل)
-// ==============================================================
-window.generatePortalLink = () => {
-    const rec = data.find(x => x.id === currentRowId);
-    if(!rec) return;
-
-    let debt = (parseFloat(rec.price)||0) - (parseFloat(rec.paidAmount)||0);
-    if(debt < 0) debt = 0;
-
-    const payload = {
-        n: rec.name || "عميل", srv: rec.serviceType || "غير محدد", ty: rec.subType || "time",
-        sl: rec.sessionsLeft || 0, st: rec.sessionsTotal || 0, sd: rec.start || "-", ed: rec.end || "-",
-        db: debt, cr: rec.currency || "DZD", sn: storeSettings.name || "المؤسسة"
-    };
-
-    try {
-        const jsonStr = JSON.stringify(payload);
-        const base64 = window.btoa(unescape(encodeURIComponent(jsonStr)));
-        const safeBase64 = encodeURIComponent(base64);
-
-        let currentUrl = window.location.href.split('?')[0];
-        if(currentUrl.endsWith('/')) currentUrl = currentUrl.slice(0, -1);
-        if(currentUrl.endsWith('.html')) currentUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
-        
-        const link = currentUrl + "/portal.html?p=" + safeBase64;
-
-        closeModal("rowActionsModal");
-
-        const safeClientName = (rec.name || "Client").replace(/[^a-zA-Z0-9\u0600-\u06FF\s]/g, '').trim().replace(/\s+/g, '_');
-
-        const overlay = document.createElement('div');
-        overlay.id = "qrOverlayModal";
-        overlay.style.cssText = "position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:10000; display:flex; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(5px);";
-        
-        const box = document.createElement('div');
-        box.style.cssText = "background:#0a0e1a; border:1px solid #c084fc; border-radius:24px; padding:30px 20px; width:100%; max-width:360px; text-align:center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);";
-        
-        box.innerHTML = `
-            <h3 style="color:#c084fc; margin:0 0 5px 0; font-size:20px;">🌐 بوابة المشترك</h3>
-            <p style="color:#94a3b8; font-size:13px; margin-bottom:20px;">حمل الكود أو ارسل الرابط للعميل</p>
-            
-            <div id="tempQrBox" style="background:#fff; padding:15px; border-radius:16px; display:inline-block; margin-bottom:20px;"></div>
-            
-            <input type="text" value="${link}" readonly style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:12px; margin-bottom:20px; text-align:left; direction:ltr; outline:none;" id="tempLinkInput">
-            
-            <div style="display:flex; flex-direction:column; gap:10px;">
-                <button class="btn primary" style="font-size:14px; padding:12px; box-shadow: 0 4px 15px rgba(124,92,255,0.3);" onclick="document.getElementById('tempLinkInput').select(); navigator.clipboard.writeText(document.getElementById('tempLinkInput').value); window.showToast('تم النسخ! 📋');">📋 نسخ الرابط النصي</button>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn soft" id="btnDownloadQR" style="flex:1; font-size:14px; padding:12px; color:#10b981; border-color:rgba(16,185,129,0.4); background:rgba(16,185,129,0.1);">📥 تحميل كصورة</button>
-                    <button class="btn danger" style="flex:1; font-size:14px; padding:12px;" onclick="document.getElementById('qrOverlayModal').remove()">✕ إغلاق</button>
-                </div>
-            </div>
-        `;
-        
-        overlay.appendChild(box);
-        document.body.appendChild(overlay);
-
-        new QRCode(document.getElementById("tempQrBox"), {
-            text: link,
-            width: 180,
-            height: 180,
-            colorDark: "#0f172a",
-            colorLight: "#ffffff",
-            correctLevel: QRCode.CorrectLevel.M
-        });
-
-        document.getElementById("btnDownloadQR").onclick = () => {
-            const qrBox = document.getElementById("tempQrBox");
-            const canvas = qrBox.querySelector("canvas");
-            if(canvas) {
-                const a = document.createElement("a"
-
 window.actDeleteAction = async () => { if(confirm("حذف المشترك نهائياً؟")) { const recToDelete = data.find(x => x.id === currentRowId); logAction("حذف اشتراك", `الاسم: ${recToDelete.name}`); lastDeletedData = data.filter(x => x.id === currentRowId); data = data.filter(x => x.id !== currentRowId); await firebasePush(); window.render(); closeModal("rowActionsModal"); showToast("تم الحذف 🗑️"); } };
 
 window.calcDebt = () => { const p = parseFloat($("price").value) || 0; let valRaw = $("paidAmount").value; let a = valRaw === "" ? p : (parseFloat(valRaw) || 0); let d = p - a; $("debtAmount").value = d > 0 ? d : 0; };
@@ -1282,6 +1181,118 @@ window.clearSearch = () => { $("search").value = ""; window.currentPage = 1; win
 window.pasteSearch = async () => { try { const text = await navigator.clipboard.readText(); $("search").value = text; window.currentPage = 1; window.render(); } catch(e) { showToast("فشل اللصق، يرجى منح صلاحية الحافظة", "warn"); } };
 window.setFilter = (btn, filterType) => { document.querySelectorAll(".filterBtn").forEach(x=>x.classList.remove("active")); btn.classList.add("active"); currentFilter = filterType; window.currentPage = 1; window.render(); };
 
+// ==========================================
+// 📲 نظام التثبيت (PWA)
+// ==========================================
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    const installBtn = document.getElementById('btnInstallApp');
+    if(installBtn) installBtn.style.display = 'block';
+});
+
+window.installPWA = async () => {
+    if (!deferredPrompt) return;
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+        console.log('تم قبول التثبيت');
+    }
+    deferredPrompt = null;
+    document.getElementById('btnInstallApp').style.display = 'none';
+    closeSideMenu();
+};
+
+window.addEventListener('appinstalled', (evt) => {
+    window.showToast("تم تثبيت التطبيق بنجاح! 🎉", "ok");
+});
+
+// ==============================================================
+// 🛡️ دالة استخراج الرابط والبوابة (مع نافذة QR Code والتحميل)
+// ==============================================================
+window.generatePortalLink = () => {
+    const rec = data.find(x => x.id === currentRowId);
+    if(!rec) return;
+
+    let debt = (parseFloat(rec.price)||0) - (parseFloat(rec.paidAmount)||0);
+    if(debt < 0) debt = 0;
+
+    const payload = {
+        n: rec.name || "عميل", srv: rec.serviceType || "غير محدد", ty: rec.subType || "time",
+        sl: rec.sessionsLeft || 0, st: rec.sessionsTotal || 0, sd: rec.start || "-", ed: rec.end || "-",
+        db: debt, cr: rec.currency || "DZD", sn: storeSettings.name || "المؤسسة"
+    };
+
+    try {
+        const jsonStr = JSON.stringify(payload);
+        const base64 = window.btoa(unescape(encodeURIComponent(jsonStr)));
+        const safeBase64 = encodeURIComponent(base64);
+
+        let currentUrl = window.location.href.split('?')[0];
+        if(currentUrl.endsWith('/')) currentUrl = currentUrl.slice(0, -1);
+        if(currentUrl.endsWith('.html')) currentUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
+        
+        const link = currentUrl + "/portal.html?p=" + safeBase64;
+
+        closeModal("rowActionsModal");
+
+        const safeClientName = (rec.name || "Client").replace(/[^a-zA-Z0-9\u0600-\u06FF\s]/g, '').trim().replace(/\s+/g, '_');
+
+        const overlay = document.createElement('div');
+        overlay.id = "qrOverlayModal";
+        overlay.style.cssText = "position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:10000; display:flex; align-items:center; justify-content:center; padding:20px; backdrop-filter:blur(5px);";
+        
+        const box = document.createElement('div');
+        box.style.cssText = "background:#0a0e1a; border:1px solid #c084fc; border-radius:24px; padding:30px 20px; width:100%; max-width:360px; text-align:center; box-shadow: 0 20px 50px rgba(0,0,0,0.5);";
+        
+        box.innerHTML = `
+            <h3 style="color:#c084fc; margin:0 0 5px 0; font-size:20px;">🌐 بوابة المشترك</h3>
+            <p style="color:#94a3b8; font-size:13px; margin-bottom:20px;">حمل الكود أو ارسل الرابط للعميل</p>
+            
+            <div id="tempQrBox" style="background:#fff; padding:15px; border-radius:16px; display:inline-block; margin-bottom:20px;"></div>
+            
+            <input type="text" value="${link}" readonly style="width:100%; padding:12px; background:rgba(0,0,0,0.5); border:1px solid rgba(255,255,255,0.1); color:#fff; border-radius:12px; margin-bottom:20px; text-align:left; direction:ltr; outline:none;" id="tempLinkInput">
+            
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <button class="btn primary" style="font-size:14px; padding:12px; box-shadow: 0 4px 15px rgba(124,92,255,0.3);" onclick="document.getElementById('tempLinkInput').select(); navigator.clipboard.writeText(document.getElementById('tempLinkInput').value); window.showToast('تم النسخ! 📋');">📋 نسخ الرابط النصي</button>
+                <div style="display:flex; gap:10px;">
+                    <button class="btn soft" id="btnDownloadQR" style="flex:1; font-size:14px; padding:12px; color:#10b981; border-color:rgba(16,185,129,0.4); background:rgba(16,185,129,0.1);">📥 تحميل كصورة</button>
+                    <button class="btn danger" style="flex:1; font-size:14px; padding:12px;" onclick="document.getElementById('qrOverlayModal').remove()">✕ إغلاق</button>
+                </div>
+            </div>
+        `;
+        
+        overlay.appendChild(box);
+        document.body.appendChild(overlay);
+
+        new QRCode(document.getElementById("tempQrBox"), {
+            text: link,
+            width: 180,
+            height: 180,
+            colorDark: "#0f172a",
+            colorLight: "#ffffff",
+            correctLevel: QRCode.CorrectLevel.M
+        });
+
+        document.getElementById("btnDownloadQR").onclick = () => {
+            const qrBox = document.getElementById("tempQrBox");
+            const canvas = qrBox.querySelector("canvas");
+            if(canvas) {
+                const a = document.createElement("a");
+                a.href = canvas.toDataURL("image/png");
+                a.download = `QR_Portal_${safeClientName}.png`;
+                a.click();
+                window.showToast("تم تحميل الصورة بنجاح! 📥");
+            } else {
+                window.showToast("حدث خطأ في تجهيز الصورة", "err");
+            }
+        };
+
+    } catch(err) {
+        showToast("حدث خطأ أثناء التشفير", "err");
+    }
+};
 </script>
 </body>
 </html>
