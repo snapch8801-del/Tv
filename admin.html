@@ -1058,8 +1058,29 @@ window.generatePortalLink = () => {
     const payload = {
         n: rec.name || "عميل", srv: rec.serviceType || "غير محدد", ty: rec.subType || "time",
         sl: rec.sessionsLeft || 0, st: rec.sessionsTotal || 0, sd: rec.start || "-", ed: rec.end || "-",
-        db: debt, cr: rec.currency || "DZD", sn: storeSettings.name || "المؤسسة"
+        db: debt, cr: rec.currency || "DZD", sn: "المؤسسة"
     };
+
+    try {
+        const jsonStr = JSON.stringify(payload);
+        const encodedStr = encodeURIComponent(jsonStr); 
+        const base64 = window.btoa(encodedStr);
+        
+        // 🔥 الحل السحري هنا: حماية رموز التشفير داخل الرابط لكي لا يكسرها المتصفح 🔥
+        const safeBase64 = encodeURIComponent(base64);
+        
+        let currentUrl = window.location.href.split('?')[0];
+        if(currentUrl.endsWith('/')) currentUrl = currentUrl.slice(0, -1);
+        if(currentUrl.endsWith('.html')) currentUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
+        
+        const link = currentUrl + "/portal.html?p=" + safeBase64;
+
+        closeModal("rowActionsModal");
+        window.prompt("رابط بوابة العميل جاهز! انسخه من المربع وأرسله له:", link);
+    } catch(err) {
+        showToast("حدث خطأ أثناء التشفير", "err");
+    }
+};
 
     try {
         const jsonStr = JSON.stringify(payload);
