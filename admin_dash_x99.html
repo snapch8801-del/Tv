@@ -3,15 +3,19 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
-<title>لوحة تسيير الاشتراكات - v12.9.18.</title>
-
+<title>لوحة تسيير الاشتراكات - الإدارة</title>
 <meta name="theme-color" content="#070a12" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-<meta name="apple-mobile-web-app-title" content="الاشتراكات" />
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+
+<script>
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) { registration.unregister(); }
+    });
+}
+</script>
 
 <style>
 :root{
@@ -19,7 +23,6 @@
   --text:#eaf0ff; --muted: rgba(234,240,255,.70); --accent:#7c5cff; --warn:#f59e0b;
   --err:#ef4444; --radius:18px; --shadow: 0 18px 45px rgba(0,0,0,.45);
 }
-
 *{box-sizing:border-box}
 body{
   margin:0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial; color: var(--text);
@@ -27,22 +30,17 @@ body{
   padding: 18px; -webkit-user-select: none; user-select: none; overflow-x: hidden;
 }
 input, textarea, table, select { -webkit-user-select: auto; user-select: auto; }
-
 .container{max-width:1200px;margin:0 auto}
-
 .header{margin-bottom:14px}
 .header h1{margin:0;font-size:20px; display: flex; align-items: center; gap: 8px;}
 .header .sub{margin-top:6px;font-size:13px;color:var(--muted);line-height:1.7}
 .version-badge { background: linear-gradient(135deg, var(--accent), #5a3bc2); color: white; padding: 4px 8px; border-radius: 8px; font-weight: 900; font-size: 12px; box-shadow: 0 4px 15px rgba(124,92,255,0.3);}
-
 .card{ background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); backdrop-filter: blur(10px); overflow:hidden; }
-
 .topbar{ padding:14px; border-bottom:1px solid var(--line); display:flex; flex-direction:column; gap:12px; }
 .topbar-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; width: 100%; justify-content: flex-start; }
 .searchWrap{ display: flex; gap: 6px; align-items: center; width: 100%; }
 .searchWrap input { flex:1; width:100%; padding:10px 12px; border-radius:14px; border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); outline:none; transition: all 0.2s; font-size: 14px;}
 .searchWrap input:focus { border-color: rgba(124,92,255,.6); box-shadow: 0 0 0 4px rgba(124,92,255,.14); }
-
 .btn{ border:1px solid var(--line); background: rgba(0,0,0,.18); color: var(--text); padding:10px 12px; border-radius:14px; font-weight:900; cursor:pointer; transition: all .15s ease; font-size:13px; white-space: nowrap; }
 .btn:hover{ background: rgba(255,255,255,.06); }
 .btn:active{ transform: scale(.98); }
@@ -50,42 +48,30 @@ input, textarea, table, select { -webkit-user-select: auto; user-select: auto; }
 .btn.danger{ border-color: rgba(239,68,68,.45); background: linear-gradient(135deg, rgba(239,68,68,.35), rgba(239,68,68,.12)); color: #ff8a8a; }
 .btn.soft{ border-color: rgba(255,255,255,.14); background: rgba(255,255,255,.04); }
 .btn-close { padding: 8px 14px; font-size: 13px; border-radius: 12px; }
-
-input:-webkit-autofill { -webkit-box-shadow: 0 0 0 30px #161b2a inset !important; -webkit-text-fill-color: var(--text) !important; }
-
 .filtersBar{ width: 100%; display: flex; gap: 8px; padding: 10px 14px; flex-wrap: wrap; border-bottom: 1px solid var(--line); background: rgba(0,0,0,0.1); }
 .filterBtn{ padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); background: rgba(0,0,0,.18); color: var(--muted); font-size: 12px; font-weight: 800; cursor: pointer; }
 .filterBtn.active{ background: var(--text); color: var(--bg0); border-color: var(--text); }
-
 .bulkBar{ display: none; align-items: center; gap: 10px; padding: 12px 14px; background: rgba(124,92,255,.15); border-bottom: 1px solid rgba(124,92,255,.3); flex-wrap: wrap; }
 .bulkBar .selCount{ font-weight: 900; color: #fff; background: var(--accent); padding: 4px 10px; border-radius: 99px; font-size: 12px; }
-
 .statChip{ display:inline-flex; align-items:center; gap:8px; padding:8px 10px; border-radius:999px; border:1px solid var(--line); background: rgba(0,0,0,.18); font-size:12px; font-weight:900; color: var(--text); margin-inline-start: auto; }
 .statChip.sync{ border-color: rgba(124,92,255,.45); background: rgba(124,92,255,.10); }
-
 input[type="checkbox"] { appearance: none; width: 18px; height: 18px; border: 2px solid var(--muted); border-radius: 4px; background: rgba(0,0,0,.2); cursor: pointer; position: relative; display: inline-block; vertical-align: middle; }
 input[type="checkbox"]:checked { background: var(--accent); border-color: var(--accent); }
 input[type="checkbox"]:checked::after { content: "✔"; position: absolute; color: white; font-size: 12px; left: 3px; top: -1px; font-weight: bold; }
-
-/* 🌟 الجدول الكلاسيكي القوي والمستقر - خالي من الأخطاء 🌟 */
 .tableWrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
 table { width: 100%; border-collapse: collapse; min-width: 850px; }
 thead th { position: sticky; top: 0; z-index: 5; background: rgba(0,0,0,0.3); color: var(--muted); text-align: right; font-size: 12px; font-weight: 900; padding: 12px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; }
 tbody tr { transition: background 0.2s; }
 tbody tr:hover { background: rgba(255,255,255,0.02); }
 tbody td { padding: 10px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; white-space: nowrap; }
-
 tr.expired-row{ background: rgba(239,68,68,.08); }
 tr.expiring-row{ background: rgba(245,158,11,.06); }
-
 .badge{ display:inline-flex; align-items:center; padding:4px 8px; border-radius:999px; border:1px solid var(--line); font-size:11px; font-weight:900; }
 .badge.ok{ border-color: rgba(34,197,94,.45); color:#c8f7d9; background: rgba(34,197,94,.1); }
 .badge.warn{ border-color: rgba(245,158,11,.45); color:#ffe2b3; background: rgba(245,158,11,.1); }
 .badge.err{ border-color: rgba(239,68,68,.45); color:#ffd0d0; background: rgba(239,68,68,.1); }
-
 .service-badge { background: rgba(124,92,255,0.15); color: #a78bfa; padding: 4px 8px; border-radius: 6px; font-weight: bold; font-size: 11px; border: 1px solid rgba(124,92,255,0.3); display: inline-block; }
 .tag-pill { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid rgba(255,255,255,0.15); padding: 2px 6px; border-radius: 6px; font-size: 10px; margin-inline-end: 4px; display: inline-block; margin-top: 4px;}
-
 .modal{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; background: rgba(0,0,0,.75); z-index:9999; padding: 18px; }
 .modal[aria-hidden="false"]{ display:flex; }
 .modal .box{ width:min(500px, 100%); background: rgba(10,14,26,.96); border: 1px solid rgba(255,255,255,.10); border-radius: 22px; box-shadow: 0 30px 90px rgba(0,0,0,.65); max-height: 90vh; overflow-y: auto; }
@@ -93,32 +79,25 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 .modalHeader h2{margin:0;font-size:18px}
 .modalBody{ padding: 20px; }
 .modalFooter{ padding:16px 20px; border-top:1px solid rgba(255,255,255,.10); display:flex; gap:10px; flex-wrap:wrap; position: sticky; bottom: 0; background: rgba(10,14,26,.96); z-index: 10; }
-
 .formGrid{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px; }
 .full-width { grid-column: 1 / -1 !important; }
 @media (max-width: 768px){ .formGrid{ grid-template-columns: 1fr; } }
-
 .field label{ display:block; font-weight:900; font-size:13px; color: var(--muted); margin-bottom:8px; }
 .field input, .field select, .field textarea { background: rgba(0,0,0,.3); border:1px solid rgba(255,255,255,.15); width:100%; padding:12px 14px; border-radius:14px; color: var(--text); outline:none; transition: all 0.2s; font-size: 14px; font-family:inherit; resize:vertical; }
 .field input:focus, .field select:focus, .field textarea:focus { border-color: rgba(124,92,255,.6); box-shadow: 0 0 0 4px rgba(124,92,255,.14); background:rgba(0,0,0,0.5); }
-
 .actGrid{ display:grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap:12px; }
 @media (max-width: 640px){ .actGrid{ grid-template-columns: 1fr; } }
 .actBtn{ border:1px solid rgba(255,255,255,.12); background: rgba(255,255,255,.04); color: var(--text); padding: 14px; border-radius: 18px; font-weight: 900; cursor:pointer; text-align: right; width: 100%; }
 .actBtn:disabled { opacity: 0.4; cursor: not-allowed; }
-
 .actionPill { padding: 8px 16px; border-radius: 10px; background: linear-gradient(135deg, var(--accent), #5a3bc2); color: white; font-weight: 900; border: none; cursor: pointer; font-size: 13px; box-shadow: 0 4px 15px rgba(124,92,255,0.3); white-space: nowrap; transition: all 0.2s; }
 .actionPill:active { transform: scale(0.95); }
-
 .toast{ position: fixed; left: 50%; bottom: 18px; transform: translateX(-50%) translateY(20px); padding: 12px 14px; border-radius: 16px; background: rgba(10,14,26,.92); border: 1px solid rgba(255,255,255,.12); color: var(--text); display: flex; align-items: center; gap: 10px; opacity: 0; pointer-events: none; transition: all .2s ease; z-index: 10000; box-shadow: 0 10px 30px rgba(0,0,0,0.5); font-weight:bold; }
 .toast.show{ opacity: 1; transform: translateX(-50%) translateY(0); pointer-events: auto;}
-
 .auth-wrap { text-align: center; padding: 10px 15px; }
 .auth-icon-wrap { display:inline-flex; align-items:center; justify-content:center; width:75px; height:75px; background:linear-gradient(135deg, rgba(124,92,255,0.2), rgba(124,92,255,0.05)); border:1px solid rgba(124,92,255,0.3); border-radius:50%; font-size:32px; margin-bottom:15px; box-shadow: 0 10px 25px rgba(124,92,255,0.15); }
 .auth-title { margin:0 0 5px 0; font-size:24px; color:var(--text); font-weight:900; }
 .auth-sub { color:var(--muted); font-size:13px; margin-bottom: 30px; }
 .auth-input { width:100%; padding:15px 18px; background:rgba(0,0,0,0.4); border:1px solid rgba(255,255,255,0.1); border-radius:16px; color:#fff; font-size:15px; outline:none; transition:all 0.2s; text-align: left; direction: ltr; }
-
 @media print {
   body.print-mode-receipt > *:not(#receiptModal) { display: none !important; }
   body.print-mode-idcard > *:not(#idCardModal) { display: none !important; }
@@ -127,16 +106,13 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
   .modal.print-active .box { width: 100% !important; max-width: none !important; box-shadow: none !important; border: none !important; border-radius: 0 !important; padding: 0 !important; margin: 0 !important; }
   .no-print { display: none !important; }
 }
-
 .pagination { display: flex; justify-content: center; align-items: center; gap: 12px; padding: 16px; border-top: 1px solid var(--line); background: rgba(0,0,0,0.1); }
 .page-btn { padding: 8px 16px; border-radius: 12px; border: 1px solid var(--line); background: rgba(255,255,255,.05); color: var(--text); cursor: pointer; transition: all 0.2s; font-size: 13px; font-weight: bold; }
 .page-btn:hover:not(:disabled) { background: var(--accent); border-color: var(--accent); }
 .page-btn:disabled { opacity: 0.4; cursor: not-allowed; background: transparent; }
 .page-info { font-size: 13px; color: var(--muted); font-weight: bold; background: rgba(0,0,0,0.2); padding: 8px 14px; border-radius: 10px; }
-
 .id-card-wrap { border: 2px solid #e2e8f0; border-radius: 16px; padding: 25px; background: linear-gradient(135deg, #ffffff, #f1f5f9); position: relative; overflow: hidden; color: #0f172a; text-align: center; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
 .id-card-wrap::before { content: ""; position: absolute; top: 0; left: 0; right: 0; height: 6px; background: linear-gradient(90deg, var(--accent), #4ade80); }
-
 .side-menu {
   position: fixed; top: 0; right: -320px; width: 300px; height: 100vh;
   background: rgba(10,14,26,.98); border-left: 1px solid rgba(255,255,255,.1);
@@ -155,8 +131,6 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 .side-menu-header h2 { margin: 0; font-size: 18px; color: var(--text); }
 .menu-section-title { font-size: 12px; color: var(--accent); font-weight: bold; margin: 25px 0 10px; padding-inline-start: 5px; }
 .side-menu .actBtn { margin-bottom: 8px; font-size: 13px; padding: 12px 14px; }
-
-/* الفاتورة المرنة - مستقرة تماماً */
 .flex-row-receipt { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed #cbd5e1; flex-wrap: wrap; gap: 5px;}
 .flex-row-receipt span.label { color: #64748b; }
 .flex-row-receipt strong.val, .flex-row-receipt span.val { color: #0f172a; text-align: left; }
@@ -229,23 +203,18 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
     <button class="btn danger btn-close" onclick="closeSideMenu()" style="padding: 6px 12px;">✕</button>
   </div>
   <div style="flex:1; overflow-y:auto; padding-right: 5px;">
-    
     <div class="menu-section-title">إصلاح وحل المشاكل</div>
     <button class="actBtn" style="color:#60a5fa; border-color:rgba(96,165,250,0.4); background:rgba(96,165,250,0.1);" onclick="window.location.reload(true)">🔄 تفريغ الذاكرة وتحديث الصفحة</button>
-
     <div class="menu-section-title">إدارة النظام</div>
     <button class="actBtn" onclick="closeSideMenu(); openModal('authModal')" style="border-color:var(--accent); color:var(--accent); background: rgba(124,92,255,0.1);">👤 إدارة الحسابات والصلاحيات</button>
-    
     <div class="menu-section-title">البيانات والحماية</div>
     <button class="actBtn" style="color:#10b981; border-color:rgba(16,185,129,0.4); background:rgba(16,185,129,0.1);" onclick="closeSideMenu(); window.exportCSV()">📥 تحميل كملف Excel</button>
     <button class="actBtn" onclick="closeSideMenu(); openModal('backupModal')">📦 حفظ واسترجاع البيانات</button>
     <button class="actBtn" onclick="closeSideMenu(); openModal('syncModal')">☁️ المزامنة السحابية</button>
-    
     <div class="menu-section-title">أدوات إضافية</div>
     <button class="actBtn" style="color:#f59e0b; border-color:rgba(245,158,11,0.4); background:rgba(245,158,11,0.1);" onclick="closeSideMenu(); window.undoDelete()">↩️ التراجع عن آخر حذف</button>
     <button class="actBtn" onclick="closeSideMenu(); window.shareApp()">📤 مشاركة رابط اللوحة</button>
     <button class="actBtn" onclick="closeSideMenu(); window.print()">🖨️ طباعة الجدول</button>
-    
     <div style="margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(239,68,68,0.2);">
       <button class="actBtn danger" onclick="closeSideMenu(); window.clearAllData()" style="text-align: center;">⚠️ تصفير اللوحة بالكامل</button>
     </div>
@@ -563,7 +532,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
       </div>
 
       <div style="padding-top: 15px; border-top: 1px solid rgba(239,68,68,0.2);">
-      <button type="button" class="btn soft" style="font-size:12px; padding:12px; color:#c084fc; width:100%; border-color:#c084fc; background: rgba(192,132,252,0.1); margin-bottom: 10px; font-weight:bold;" onclick="window.generatePortalLink()">🌐 استخراج رابط بوابة العميل</button>
+        <button type="button" class="btn soft" style="font-size:12px; padding:12px; color:#c084fc; width:100%; border-color:#c084fc; background: rgba(192,132,252,0.1); margin-bottom: 10px; font-weight:bold;" onclick="window.generatePortalLink()">🌐 استخراج رابط بوابة العميل</button>
         <button class="btn danger" style="width: 100%; padding: 12px; border-radius: 12px; font-size: 13px;" onclick="window.actDeleteAction()">
           🗑️ حذف المشترك نهائياً
         </button>
@@ -1075,6 +1044,10 @@ window.actMessengerAction = () => {
 };
 
 window.actSMSAction = () => { const rec = data.find(x => x.id === currentRowId); if(!rec || !rec.phone) { closeModal("rowActionsModal"); return showToast("لا يوجد هاتف مسجل لهذا العميل.", "err"); } let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, ''); let endTxt = rec.subType === 'sessions' ? `رصيدك المتبقي: ${rec.sessionsLeft} حصة` : `ينتهي بتاريخ: ${rec.end}`; let msg = `مرحباً ${rec.name}، نود تذكيرك بخصوص اشتراكك الذي ${endTxt}.`; logAction("إرسال SMS", `إلى: ${rec.name}`); window.open(`sms:${cleanPhone}?body=${encodeURIComponent(msg)}`, '_self'); closeModal("rowActionsModal"); };
+
+// ==========================================
+// 🛡️ دالة التشفير والنسخ الآمنة 100%
+// ==========================================
 window.generatePortalLink = () => {
     const rec = data.find(x => x.id === currentRowId);
     if(!rec) return;
@@ -1085,7 +1058,7 @@ window.generatePortalLink = () => {
     const payload = {
         n: rec.name || "عميل", srv: rec.serviceType || "غير محدد", ty: rec.subType || "time",
         sl: rec.sessionsLeft || 0, st: rec.sessionsTotal || 0, sd: rec.start || "-", ed: rec.end || "-",
-        db: debt, cr: rec.currency || "DZD", sn: "المؤسسة"
+        db: debt, cr: rec.currency || "DZD", sn: storeSettings.name || "المؤسسة"
     };
 
     try {
@@ -1093,7 +1066,6 @@ window.generatePortalLink = () => {
         const encodedStr = encodeURIComponent(jsonStr); 
         const base64 = window.btoa(encodedStr);
         
-        // توجيه الرابط إلى ملف portal.html الذي أنشأته
         let currentUrl = window.location.href.split('?')[0];
         if(currentUrl.endsWith('/')) currentUrl = currentUrl.slice(0, -1);
         if(currentUrl.endsWith('.html')) currentUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
@@ -1106,6 +1078,7 @@ window.generatePortalLink = () => {
         showToast("حدث خطأ أثناء التشفير", "err");
     }
 };
+
 window.actDeleteAction = async () => { if(confirm("حذف المشترك نهائياً؟")) { const recToDelete = data.find(x => x.id === currentRowId); logAction("حذف اشتراك", `الاسم: ${recToDelete.name}`); lastDeletedData = data.filter(x => x.id === currentRowId); data = data.filter(x => x.id !== currentRowId); await firebasePush(); window.render(); closeModal("rowActionsModal"); showToast("تم الحذف 🗑️"); } };
 
 window.calcDebt = () => { const p = parseFloat($("price").value) || 0; let valRaw = $("paidAmount").value; let a = valRaw === "" ? p : (parseFloat(valRaw) || 0); let d = p - a; $("debtAmount").value = d > 0 ? d : 0; };
