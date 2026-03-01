@@ -32,12 +32,12 @@ window.onload = () => {
     }
 
     try {
-        // فك التشفير الآمن تماماً
+        // فك التشفير المطابق للوحة الإدارة
         const jsonStr = decodeURIComponent(escape(window.atob(pData)));
         const d = JSON.parse(jsonStr);
         
         let detailsHtml = d.ty === 'sessions' 
-            ? `<div style="font-size: 16px; font-weight: bold;">متبقي <span style="color: #10b981; font-size: 26px; font-weight: 900; margin: 0 4px;">${d.sl}</span> من ${d.st} حصة</div>`
+            ? `<div style="font-size: 16px; font-weight: bold;">متبقي <span style="color: #10b981; font-size: 26px; margin: 0 4px;">${d.sl}</span> من ${d.st} حصة</div>`
             : `<div style="font-size: 15px; font-weight: bold; line-height: 1.8;">البداية: <span style="color:#eaf0ff;">${d.sd}</span><br>الانتهاء: <span style="color:#ef4444; font-size:18px;">${d.ed}</span></div>`;
 
         let financeBoxColor = d.db > 0 ? 'rgba(239,68,68,0.1)' : 'rgba(16,185,129,0.1)';
@@ -66,7 +66,8 @@ window.onload = () => {
             </div>
         `;
     } catch(e) {
-        app.innerHTML = `<div class="err-screen">❌<br><br>حدث خطأ في قراءة بيانات الرابط.</div>`;
+        console.error(e);
+        app.innerHTML = `<div class="err-screen">❌<br><br>حدث خطأ في قراءة بيانات الرابط. تأكد من نسخه كاملاً.</div>`;
     }
 };
 </script>
