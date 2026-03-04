@@ -171,6 +171,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
       <button class="filterBtn" data-filter="active" onclick="setFilter(this, 'active')">✅ فعّال (زمني/حصص)</button>
       <button class="filterBtn" data-filter="expiring" onclick="setFilter(this, 'expiring')">⏰ قريب ينتهي</button>
       <button class="filterBtn" data-filter="expired" onclick="setFilter(this, 'expired')">❌ منتهي الرصيد/المدة</button>
+      <button class="filterBtn" data-filter="debt" onclick="setFilter(this, 'debt')" style="color: #ef4444; border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.05); font-weight: 900;">🔴 الديون المعلقة</button>
     </div>
 
     <div class="tableWrap">
@@ -894,7 +895,16 @@ window.render = () => {
         const tagsSearch = (r.tags || "").toString().toLowerCase();
         const match = !q || n.includes(q) || p.includes(q) || e.includes(q) || srv.includes(q) || tagsSearch.includes(q); 
         const st = getStatus(r, alertD); 
-        if(currentFilter !== "all" && currentFilter !== st.key) return false; return match; 
+        
+        // منطق الفلترة الذكي الجديد
+        if (currentFilter === 'debt') {
+            let pStatus = r.paymentStatus || 'paid';
+            if (pStatus === 'paid') return false; // إخفاء من دفعوا بالكامل
+        } else if (currentFilter !== "all" && currentFilter !== st.key) {
+            return false;
+        }
+        
+        return match; 
       });
       
       const totalPages = Math.ceil(filteredRows.length / window.itemsPerPage) || 1;
