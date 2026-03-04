@@ -8,6 +8,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 :root{
@@ -609,7 +610,18 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 <div class="modal" id="backupModal" aria-hidden="true"><div class="box" style="width:min(400px, 100%)"><div class="modalHeader"><h2>📦 النسخ الاحتياطي (JSON)</h2><button class="btn danger btn-close" type="button" onclick="closeModal('backupModal')">✕ إغلاق</button></div><div class="modalBody"><div style="display:grid; gap:10px;"><button class="btn soft" onclick="window.exportJson()" style="text-align: center;">⬇️ تصدير نسخة JSON</button><button class="btn soft" onclick="window.importFile()" style="text-align: center;">⬆️ استيراد نسخة JSON</button><input id="fileInput" type="file" accept=".json" style="display:none" onchange="window.handleFileSelect(event)"><button class="btn soft" onclick="closeModal('backupModal'); openModal('pasteModal')" style="text-align: center;">📋 استيراد باللصق</button></div></div></div></div>
 <div class="modal" id="pasteModal" aria-hidden="true"><div class="box"><div class="modalHeader"><h2>📋 استيراد باللصق</h2><button class="btn danger btn-close" type="button" onclick="closeModal('pasteModal')">✕ إغلاق</button></div><div class="modalBody"><textarea id="pasteArea" rows="10" style="width:100%; background:rgba(0,0,0,0.3); color:white; border:1px solid rgba(255,255,255,0.1); padding:10px; border-radius:10px; outline:none;"></textarea></div><div class="modalFooter"><button class="btn primary" style="text-align: center;" onclick="window.confirmPaste()">استيراد البيانات</button></div></div></div>
 <div class="modal" id="syncModal" aria-hidden="true"><div class="box"><div class="modalHeader"><h2>☁️ المزامنة والنسخ الاحتياطي</h2><button class="btn danger btn-close" type="button" onclick="closeModal('syncModal')">✕ إغلاق</button></div><div class="modalBody">ميزة المزامنة تعمل في الخلفية لحظياً وبشكل تلقائي ✅</div></div></div>
-<div class="modal" id="totalsModal" aria-hidden="true"><div class="box" style="width:min(400px, 100%)"><div class="modalHeader"><h2>💰 المجموع العام</h2><button class="btn danger btn-close" type="button" onclick="closeModal('totalsModal')">✕ إغلاق</button></div><div class="modalBody"><div id="totalsBody" style="text-align:center; padding: 10px 0;"></div></div></div></div>
+<div class="modal" id="totalsModal" aria-hidden="true">
+  <div class="box" style="width:min(700px, 100%)">
+    <div class="modalHeader"><h2>📊 المجموع العام والإحصائيات</h2><button class="btn danger btn-close" type="button" onclick="closeModal('totalsModal')">✕ إغلاق</button></div>
+    <div class="modalBody">
+      <div id="totalsBody" style="text-align:center; padding: 10px 0;"></div>
+      <div class="actGrid" style="margin-top: 20px; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 20px;">
+        <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);"><canvas id="financeChart"></canvas></div>
+        <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);"><canvas id="servicesChart"></canvas></div>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div id="toast" class="toast"></div>
 
@@ -1229,13 +1241,89 @@ window.openReceiptAction = () => {
 window.printReceiptAction = () => { document.body.classList.add("print-mode-receipt"); $("receiptModal").classList.add("print-active"); window.print(); setTimeout(()=>{ document.body.classList.remove("print-mode-receipt"); $("receiptModal").classList.remove("print-active"); }, 500); };
 window.printIdCardAction = () => { document.body.classList.add("print-mode-idcard"); $("idCardModal").classList.add("print-active"); window.print(); setTimeout(()=>{ document.body.classList.remove("print-mode-idcard"); $("idCardModal").classList.remove("print-active"); }, 500); };
 
+let financeChartInstance = null;
+let servicesChartInstance = null;
+
 window.openTotalsReport = () => { 
-  const alertEl = $("alertDays"); const alertD = (alertEl && alertEl.value) ? parseInt(alertEl.value) : 7; const activeData = data.filter(r => getStatus(r, alertD).key !== "expired"); const totalsByCurrency = {}; const debtsByCurrency = {}; const serviceCounts = {};
-  activeData.forEach(r => { const curr = r.currency || "DZD"; const price = parseFloat(r.price) || 0; if(r.paymentStatus === 'unpaid') { debtsByCurrency[curr] = (debtsByCurrency[curr] || 0) + price; } else if(r.paymentStatus === 'partial') { const paid = parseFloat(r.paidAmount) || 0; totalsByCurrency[curr] = (totalsByCurrency[curr] || 0) + paid; debtsByCurrency[curr] = (debtsByCurrency[curr] || 0) + (price - paid); } else { totalsByCurrency[curr] = (totalsByCurrency[curr] || 0) + price; } const srv = r.serviceType || "غير محدد"; serviceCounts[srv] = (serviceCounts[srv] || 0) + 1; });
-  let totalsHtml = ""; if (Object.keys(totalsByCurrency).length === 0) { totalsHtml = `<div style="color:var(--accent); font-size:32px; margin-bottom:10px;">0 <span style="font-size:18px; color:var(--muted);">DZD</span></div>`; } else { for (let curr in totalsByCurrency) { totalsHtml += `<div style="color:var(--accent); font-size:32px; margin-bottom:5px;">${totalsByCurrency[curr].toLocaleString()} <span style="font-size:18px; color:var(--muted);">${curr}</span></div>`; } }
-  let debtsHtml = ""; if (Object.keys(debtsByCurrency).length > 0) { debtsHtml = `<div style="margin-top:10px; padding:10px; background:rgba(239,68,68,0.1); border-radius:12px; border:1px solid rgba(239,68,68,0.3);"><div style="color:#ef4444; font-size:12px; font-weight:bold; margin-bottom:5px;">❗ الديون المعلقة (غير المحصلة):</div>`; for (let curr in debtsByCurrency) { debtsHtml += `<div style="color:#ef4444; font-size:16px; font-weight:900;">${debtsByCurrency[curr].toLocaleString()} ${curr}</div>`; } debtsHtml += `</div>`; }
-  let servicesHtml = `<div style="margin-top:15px; display:flex; flex-wrap:wrap; gap:5px; justify-content:center; padding-top:15px; border-top:1px solid rgba(255,255,255,0.1);">`; for(let s in serviceCounts) { servicesHtml += `<span class="statChip" style="font-size:11px; background:rgba(124,92,255,0.1); border-color:rgba(124,92,255,0.3); color:#eaf0ff;">${s}: ${serviceCounts[s]}</span>`; } servicesHtml += `</div>`;
-  $("totalsBody").innerHTML = `${totalsHtml}<div style="font-size:13px; color:var(--muted);">المداخيل الصافية من الاشتراكات الفعّالة (الزمنية ورصيد الحصص).</div>${debtsHtml}${servicesHtml}`; openModal("totalsModal"); 
+  const alertEl = $("alertDays"); 
+  const alertD = (alertEl && alertEl.value) ? parseInt(alertEl.value) : 7; 
+  const activeData = data.filter(r => getStatus(r, alertD).key !== "expired"); 
+  
+  const totalsByCurrency = {}; 
+  const debtsByCurrency = {}; 
+  const serviceCounts = {};
+
+  let totalPaidForChart = 0;
+  let totalDebtForChart = 0;
+
+  activeData.forEach(r => { 
+    const curr = r.currency || "DZD"; 
+    const price = parseFloat(r.price) || 0; 
+    let paid = 0;
+
+    if(r.paymentStatus === 'unpaid') { 
+      debtsByCurrency[curr] = (debtsByCurrency[curr] || 0) + price; 
+      totalDebtForChart += price;
+    } else if(r.paymentStatus === 'partial') { 
+      paid = parseFloat(r.paidAmount) || 0; 
+      totalsByCurrency[curr] = (totalsByCurrency[curr] || 0) + paid; 
+      debtsByCurrency[curr] = (debtsByCurrency[curr] || 0) + (price - paid); 
+      totalPaidForChart += paid;
+      totalDebtForChart += (price - paid);
+    } else { 
+      totalsByCurrency[curr] = (totalsByCurrency[curr] || 0) + price; 
+      totalPaidForChart += price;
+    } 
+
+    const srv = r.serviceType || "غير محدد"; 
+    serviceCounts[srv] = (serviceCounts[srv] || 0) + 1; 
+  });
+
+  let totalsHtml = ""; 
+  if (Object.keys(totalsByCurrency).length === 0) { totalsHtml = `<div style="color:var(--accent); font-size:32px; margin-bottom:10px;">0 <span style="font-size:18px; color:var(--muted);">DZD</span></div>`; } 
+  else { for (let curr in totalsByCurrency) { totalsHtml += `<div style="color:var(--accent); font-size:32px; margin-bottom:5px;">${totalsByCurrency[curr].toLocaleString()} <span style="font-size:18px; color:var(--muted);">${curr}</span></div>`; } }
+  
+  let debtsHtml = ""; 
+  if (Object.keys(debtsByCurrency).length > 0) { debtsHtml = `<div style="margin-top:10px; padding:10px; background:rgba(239,68,68,0.1); border-radius:12px; border:1px solid rgba(239,68,68,0.3);"><div style="color:#ef4444; font-size:12px; font-weight:bold; margin-bottom:5px;">❗ الديون المعلقة (غير المحصلة):</div>`; for (let curr in debtsByCurrency) { debtsHtml += `<div style="color:#ef4444; font-size:16px; font-weight:900;">${debtsByCurrency[curr].toLocaleString()} ${curr}</div>`; } debtsHtml += `</div>`; }
+  
+  $("totalsBody").innerHTML = `${totalsHtml}<div style="font-size:13px; color:var(--muted);">المداخيل الصافية من الاشتراكات الفعّالة فقط.</div>${debtsHtml}`; 
+  openModal("totalsModal"); 
+
+  setTimeout(() => {
+      const ctxFin = document.getElementById('financeChart');
+      if(ctxFin) {
+          if(financeChartInstance) financeChartInstance.destroy();
+          financeChartInstance = new Chart(ctxFin.getContext('2d'), {
+              type: 'doughnut', 
+              data: {
+                  labels: ['المُحصّل', 'الديون'],
+                  datasets: [{
+                      data: [totalPaidForChart, totalDebtForChart],
+                      backgroundColor: ['#10b981', '#ef4444'],
+                      borderWidth: 0, hoverOffset: 4
+                  }]
+              },
+              options: { plugins: { legend: { labels: { color: '#eaf0ff', font: { family: 'system-ui' } }, position: 'bottom' }, title: { display: true, text: 'الوضع المالي العام', color: '#a78bfa', font: {size: 14} } } }
+          });
+      }
+
+      const ctxSrv = document.getElementById('servicesChart');
+      if(ctxSrv) {
+          if(servicesChartInstance) servicesChartInstance.destroy();
+          servicesChartInstance = new Chart(ctxSrv.getContext('2d'), {
+              type: 'pie', 
+              data: {
+                  labels: Object.keys(serviceCounts),
+                  datasets: [{
+                      data: Object.values(serviceCounts),
+                      backgroundColor: ['#7c5cff', '#0ea5e9', '#f59e0b', '#f43f5e', '#8b5cf6', '#14b8a6', '#64748b'],
+                      borderWidth: 0
+                  }]
+              },
+              options: { plugins: { legend: { labels: { color: '#eaf0ff', font: { family: 'system-ui' } }, position: 'bottom' }, title: { display: true, text: 'توزيع المشتركين حسب الخدمات', color: '#a78bfa', font: {size: 14} } } }
+          });
+      }
+  }, 100); // مهلة صغيرة للتأكد من فتح النافذة قبل الرسم
 };
 
 window.exportCSV = () => { 
