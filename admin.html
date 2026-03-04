@@ -9,7 +9,8 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/dom-to-image/2.6.0/dom-to-image.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
 :root{
@@ -430,9 +431,10 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
         </div>
       </div>
     </div>
-    <div class="modalFooter no-print" style="background: #f8fafc; border-top: 1px solid #e2e8f0; border-radius: 0 0 16px 16px; display:flex; gap:10px;">
-      <button class="btn primary" style="flex:1; padding: 14px; font-size: 14px; border-radius: 12px; background: #0f172a; border-color: #000; text-align: center;" onclick="window.printIdCardAction()">🖨️ طباعة البطاقة</button>
-      <button class="btn primary" style="flex:1; padding: 14px; font-size: 14px; border-radius: 12px; background: #f59e0b; border-color: #d97706; text-align: center;" onclick="window.downloadIdCardPDF()">📥 حفظ كـ PDF</button>
+    <div class="modalFooter no-print" style="background: #f8fafc; border-top: 1px solid #e2e8f0; border-radius: 0 0 16px 16px; display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="btn primary" style="flex:1; min-width:45%; padding: 12px; font-size: 13px; border-radius: 12px; background: #0f172a; border-color: #000; text-align: center;" onclick="window.printIdCardAction()">🖨️ طباعة عادية</button>
+      <button class="btn primary" style="flex:1; min-width:45%; padding: 12px; font-size: 13px; border-radius: 12px; background: #f59e0b; border-color: #d97706; text-align: center;" onclick="window.downloadIdCardPDF()">📥 حفظ كـ PDF</button>
+      <button class="btn primary" style="width: 100%; padding: 12px; font-size: 13px; border-radius: 12px; background: #22c55e; border-color: #16a34a; text-align: center;" onclick="window.sendWhatsAppIdCard()">💬 إرسال واتساب</button>
     </div>
   </div>
 </div>
@@ -1241,36 +1243,79 @@ window.openReceiptAction = () => {
   $("recToday").textContent = `${d.toLocaleDateString('en-GB')} - ${d.toLocaleTimeString('en-GB')}`; logAction("إصدار وصل", `للعميل: ${rec.name}`); openModal("receiptModal"); 
 };
 
-window.printReceiptAction = () => { document.body.classList.add("print-mode-receipt"); $("receiptModal").classList.add("print-active"); window.print(); setTimeout(()=>{ document.body.classList.remove("print-mode-receipt"); $("receiptModal").classList.remove("print-active"); }, 500); };
-window.printIdCardAction = () => { document.body.classList.add("print-mode-idcard"); $("idCardModal").classList.add("print-active"); window.print(); setTimeout(()=>{ document.body.classList.remove("print-mode-idcard"); $("idCardModal").classList.remove("print-active"); }, 500); };
+// وظائف إرسال الفاتورة والبطاقة عبر الواتساب
+window.sendWhatsAppReceipt = () => {
+    const rec = data.find(x => x.id === currentRowId);
+    if(!rec || !rec.phone) return showToast("لا يوجد هاتف مسجل لهذا العميل.", "err");
+    let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, '');
+    let msg = `مرحباً ${rec.name} 📄
+مرفق تفاصيل اشتراكك في (${rec.serviceType}).
+- السعر الإجمالي: ${rec.price||0} ${rec.currency||'DZD'}
+- ما تم دفعه: ${rec.paidAmount||0}
 
-// دوال تصدير الـ PDF الجديدة
+شكراً لثقتكم بنا. (يمكنك إرسال ملف الـ PDF هنا)`;
+    window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+};
+
+window.sendWhatsAppIdCard = () => {
+    const rec = data.find(x => x.id === currentRowId);
+    if(!rec || !rec.phone) return showToast("لا يوجد هاتف مسجل لهذا العميل.", "err");
+    let cleanPhone = ((rec.countryCode||'')+rec.phone).replace(/[^0-9+]/g, '');
+    let msg = `مرحباً ${rec.name} 🪪
+تم إصدار بطاقة الانخراط الرقمية الخاصة بك لخدمة (${rec.serviceType}).
+يرجى إبراز البطاقة عند الدخول.
+
+(يمكنك إرسال ملف الـ PDF هنا)`;
+    window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
+};
+
+// دوال تصدير الـ PDF الداعمة للعربية
 window.downloadReceiptPDF = () => {
     const element = document.querySelector('.receipt-content');
     const clientName = ($("recName").textContent || "Client").replace(/\s+/g, '_');
-    const opt = { 
-        margin: 5, 
-        filename: `Invoice_${clientName}.pdf`, 
-        image: { type: 'jpeg', quality: 0.98 }, 
-        html2canvas: { scale: 2, useCORS: true }, 
-        jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' } 
-    };
     showToast("جاري تجهيز الفاتورة... ⏳", "ok");
-    html2pdf().set(opt).from(element).save().then(() => showToast("تم تحميل الفاتورة بنجاح 📥", "ok"));
+    
+    const scale = 2;
+    domtoimage.toPng(element, {
+        bgcolor: '#ffffff',
+        width: element.clientWidth * scale,
+        height: element.clientHeight * scale,
+        style: { transform: `scale(${scale})`, transformOrigin: 'top left' }
+    }).then(function (dataUrl) {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a5');
+        const imgProps = pdf.getImageProperties(dataUrl);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        
+        pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`Invoice_${clientName}.pdf`);
+        showToast("تم تحميل الفاتورة بنجاح 📥", "ok");
+    }).catch(err => showToast("حدث خطأ أثناء التوليد", "err"));
 };
 
 window.downloadIdCardPDF = () => {
     const element = document.querySelector('.id-card-content');
     const clientName = ($("idCardClientName").textContent || "Client").replace(/\s+/g, '_');
-    const opt = { 
-        margin: 5, 
-        filename: `MembershipCard_${clientName}.pdf`, 
-        image: { type: 'jpeg', quality: 1 }, 
-        html2canvas: { scale: 3, useCORS: true }, // دقة أعلى لضمان وضوح الـ QR Code
-        jsPDF: { unit: 'mm', format: 'a6', orientation: 'portrait' } 
-    };
     showToast("جاري تجهيز البطاقة... ⏳", "ok");
-    html2pdf().set(opt).from(element).save().then(() => showToast("تم تحميل البطاقة بنجاح 📥", "ok"));
+    
+    const scale = 3; 
+    domtoimage.toPng(element, {
+        bgcolor: '#ffffff',
+        width: element.clientWidth * scale,
+        height: element.clientHeight * scale,
+        style: { transform: `scale(${scale})`, transformOrigin: 'top left' }
+    }).then(function (dataUrl) {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF('p', 'mm', 'a6');
+        const imgProps = pdf.getImageProperties(dataUrl);
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+        
+        pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+        pdf.save(`MembershipCard_${clientName}.pdf`);
+        showToast("تم تحميل البطاقة بنجاح 📥", "ok");
+    }).catch(err => showToast("حدث خطأ أثناء التوليد", "err"));
 };
 
 let financeChartInstance = null;
