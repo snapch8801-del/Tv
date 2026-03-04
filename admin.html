@@ -1238,7 +1238,26 @@ window.openReceiptAction = () => {
 
   $("recToday").textContent = `${d.toLocaleDateString('en-GB')} - ${d.toLocaleTimeString('en-GB')}`; logAction("إصدار وصل", `للعميل: ${rec.name}`); openModal("receiptModal"); 
 };
+// وظائف الطباعة المدمجة (تدعم حفظ PDF أصلي ومثالي للعربية)
+window.printReceiptAction = () => { 
+    document.body.classList.add("print-mode-receipt"); 
+    $("receiptModal").classList.add("print-active"); 
+    window.print(); 
+    setTimeout(()=>{ 
+        document.body.classList.remove("print-mode-receipt"); 
+        $("receiptModal").classList.remove("print-active"); 
+    }, 500); 
+};
 
+window.printIdCardAction = () => { 
+    document.body.classList.add("print-mode-idcard"); 
+    $("idCardModal").classList.add("print-active"); 
+    window.print(); 
+    setTimeout(()=>{ 
+        document.body.classList.remove("print-mode-idcard"); 
+        $("idCardModal").classList.remove("print-active"); 
+    }, 500); 
+};
 // وظائف إرسال الفاتورة والبطاقة عبر الواتساب
 window.sendWhatsAppReceipt = () => {
     const rec = data.find(x => x.id === currentRowId);
