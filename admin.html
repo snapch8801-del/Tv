@@ -9,7 +9,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
 <style>
@@ -1269,22 +1269,30 @@ window.sendWhatsAppIdCard = () => {
     window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
 };
 
-// دوال تصدير الـ PDF المستقرة (تدعم العربية والـ QR)
+// دوال تصدير الـ PDF الاحترافية (العربية متصلة + تجاوز أخطاء الـ QR)
 window.downloadReceiptPDF = () => {
     const element = document.querySelector('.receipt-content');
     const clientName = ($("recName").textContent || "Client").replace(/\s+/g, '_');
     showToast("جاري تجهيز الفاتورة... ⏳", "ok");
     
-    html2canvas(element, { scale: 2, useCORS: true, allowTaint: true, backgroundColor: '#ffffff' }).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('p', 'mm', 'a5');
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save(`Invoice_${clientName}.pdf`);
-        showToast("تم تحميل الفاتورة بنجاح 📥", "ok");
-    }).catch(err => { console.error(err); showToast("حدث خطأ أثناء التوليد", "err"); });
+    // تحويل أي Canvas إلى صورة لتفادي الانهيار
+    element.querySelectorAll('canvas').forEach(c => {
+        const img = new Image(); img.src = c.toDataURL(); img.style.cssText = c.style.cssText;
+        c.parentNode.replaceChild(img, c);
+    });
+
+    htmlToImage.toPng(element, { backgroundColor: '#ffffff', pixelRatio: 2 })
+        .then(function (dataUrl) {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a5');
+            const imgProps = pdf.getImageProperties(dataUrl);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.save(`Invoice_${clientName}.pdf`);
+            showToast("تم تحميل الفاتورة بنجاح 📥", "ok");
+        })
+        .catch(err => { console.error(err); showToast("حدث خطأ أثناء التوليد", "err"); });
 };
 
 window.downloadIdCardPDF = () => {
@@ -1292,16 +1300,25 @@ window.downloadIdCardPDF = () => {
     const clientName = ($("idCardClientName").textContent || "Client").replace(/\s+/g, '_');
     showToast("جاري تجهيز البطاقة... ⏳", "ok");
     
-    html2canvas(element, { scale: 3, useCORS: true, allowTaint: true, backgroundColor: '#ffffff' }).then(canvas => {
-        const imgData = canvas.toDataURL('image/png');
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF('p', 'mm', 'a6');
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        pdf.save(`MembershipCard_${clientName}.pdf`);
-        showToast("تم تحميل البطاقة بنجاح 📥", "ok");
-    }).catch(err => { console.error(err); showToast("حدث خطأ أثناء التوليد", "err"); });
+    // تحويل QR Canvas إلى صورة للحفاظ على وضوحه وعدم انهيار المكتبة
+    element.querySelectorAll('canvas').forEach(c => {
+        const img = new Image(); img.src = c.toDataURL(); img.style.cssText = c.style.cssText;
+        img.style.width = "100%"; 
+        c.parentNode.replaceChild(img, c);
+    });
+
+    htmlToImage.toPng(element, { backgroundColor: '#ffffff', pixelRatio: 3 })
+        .then(function (dataUrl) {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a6');
+            const imgProps = pdf.getImageProperties(dataUrl);
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            pdf.addImage(dataUrl, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            pdf.save(`MembershipCard_${clientName}.pdf`);
+            showToast("تم تحميل البطاقة بنجاح 📥", "ok");
+        })
+        .catch(err => { console.error(err); showToast("حدث خطأ أثناء التوليد", "err"); });
 };
 
 let financeChartInstance = null;
