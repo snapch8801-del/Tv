@@ -9,6 +9,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode" type="text/javascript"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <style>
 :root{
@@ -394,9 +395,10 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 
       <div style="text-align: center; margin-top: 35px; font-size: 12px; color: #94a3b8; line-height: 1.6;">نشكركم على ثقتكم بنا 🤍<br><span style="font-size: 10px;">تم الإصدار بتاريخ <span id="recToday"></span></span></div>
     </div>
-    <div class="modalFooter no-print" style="background: #f8fafc; border-top: 1px solid #e2e8f0; border-radius: 0 0 12px 12px; display:flex; gap:10px;">
-      <button class="btn primary" style="flex:1; padding: 14px; font-size: 14px; border-radius: 12px; background: #4f46e5; border-color: #4338ca; text-align: center;" onclick="window.printReceiptAction()">🖨️ طباعة أو PDF</button>
-      <button class="btn primary" style="flex:1; padding: 14px; font-size: 14px; border-radius: 12px; background: #22c55e; border-color: #16a34a; text-align: center;" onclick="window.sendWhatsAppReceipt()">💬 إرسال واتساب</button>
+    <div class="modalFooter no-print" style="background: #f8fafc; border-top: 1px solid #e2e8f0; border-radius: 0 0 12px 12px; display:flex; gap:8px; flex-wrap:wrap;">
+      <button class="btn primary" style="flex:1; min-width:45%; padding: 12px; font-size: 13px; border-radius: 12px; background: #4f46e5; border-color: #4338ca; text-align: center;" onclick="window.printReceiptAction()">🖨️ طباعة عادية</button>
+      <button class="btn primary" style="flex:1; min-width:45%; padding: 12px; font-size: 13px; border-radius: 12px; background: #f59e0b; border-color: #d97706; text-align: center;" onclick="window.downloadReceiptPDF()">📥 تحميل كـ PDF</button>
+      <button class="btn primary" style="width: 100%; padding: 12px; font-size: 13px; border-radius: 12px; background: #22c55e; border-color: #16a34a; text-align: center;" onclick="window.sendWhatsAppReceipt()">💬 إرسال واتساب</button>
     </div>
   </div>
 </div>
@@ -428,8 +430,9 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
         </div>
       </div>
     </div>
-    <div class="modalFooter no-print" style="background: #f8fafc; border-top: 1px solid #e2e8f0; border-radius: 0 0 16px 16px;">
-      <button class="btn primary" style="width: 100%; padding: 14px; font-size: 15px; border-radius: 12px; background: #0f172a; border-color: #000; text-align: center;" onclick="window.printIdCardAction()">🖨️ طباعة البطاقة</button>
+    <div class="modalFooter no-print" style="background: #f8fafc; border-top: 1px solid #e2e8f0; border-radius: 0 0 16px 16px; display:flex; gap:10px;">
+      <button class="btn primary" style="flex:1; padding: 14px; font-size: 14px; border-radius: 12px; background: #0f172a; border-color: #000; text-align: center;" onclick="window.printIdCardAction()">🖨️ طباعة البطاقة</button>
+      <button class="btn primary" style="flex:1; padding: 14px; font-size: 14px; border-radius: 12px; background: #f59e0b; border-color: #d97706; text-align: center;" onclick="window.downloadIdCardPDF()">📥 حفظ كـ PDF</button>
     </div>
   </div>
 </div>
@@ -1240,6 +1243,35 @@ window.openReceiptAction = () => {
 
 window.printReceiptAction = () => { document.body.classList.add("print-mode-receipt"); $("receiptModal").classList.add("print-active"); window.print(); setTimeout(()=>{ document.body.classList.remove("print-mode-receipt"); $("receiptModal").classList.remove("print-active"); }, 500); };
 window.printIdCardAction = () => { document.body.classList.add("print-mode-idcard"); $("idCardModal").classList.add("print-active"); window.print(); setTimeout(()=>{ document.body.classList.remove("print-mode-idcard"); $("idCardModal").classList.remove("print-active"); }, 500); };
+
+// دوال تصدير الـ PDF الجديدة
+window.downloadReceiptPDF = () => {
+    const element = document.querySelector('.receipt-content');
+    const clientName = ($("recName").textContent || "Client").replace(/\s+/g, '_');
+    const opt = { 
+        margin: 5, 
+        filename: `Invoice_${clientName}.pdf`, 
+        image: { type: 'jpeg', quality: 0.98 }, 
+        html2canvas: { scale: 2, useCORS: true }, 
+        jsPDF: { unit: 'mm', format: 'a5', orientation: 'portrait' } 
+    };
+    showToast("جاري تجهيز الفاتورة... ⏳", "ok");
+    html2pdf().set(opt).from(element).save().then(() => showToast("تم تحميل الفاتورة بنجاح 📥", "ok"));
+};
+
+window.downloadIdCardPDF = () => {
+    const element = document.querySelector('.id-card-content');
+    const clientName = ($("idCardClientName").textContent || "Client").replace(/\s+/g, '_');
+    const opt = { 
+        margin: 5, 
+        filename: `MembershipCard_${clientName}.pdf`, 
+        image: { type: 'jpeg', quality: 1 }, 
+        html2canvas: { scale: 3, useCORS: true }, // دقة أعلى لضمان وضوح الـ QR Code
+        jsPDF: { unit: 'mm', format: 'a6', orientation: 'portrait' } 
+    };
+    showToast("جاري تجهيز البطاقة... ⏳", "ok");
+    html2pdf().set(opt).from(element).save().then(() => showToast("تم تحميل البطاقة بنجاح 📥", "ok"));
+};
 
 let financeChartInstance = null;
 let servicesChartInstance = null;
