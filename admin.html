@@ -138,7 +138,7 @@ tr.expiring-row{ background: rgba(245,158,11,.06); }
 <div class="container">
   <div class="header">
     <h1>🧾 لوحة تسيير الاشتراكات <span class="version-badge">v12.9.18</span></h1>
-    <div class="sub">⚡ النسخة النقية والمضمونة 100%: جداول كلاسيكية سريعة ومستقرة بدون أي انهيار.</div>
+    <div class="sub">⚡ developed by HAMID .</div>
   </div>
 
   <div class="card">
@@ -693,7 +693,7 @@ try {
 window.openModal = (id) => { const el = $(id); if(el) el.setAttribute("aria-hidden","false"); };
 window.closeModal = (id) => { const el = $(id); if(el) el.setAttribute("aria-hidden","true"); if(id === 'receiptModal' || id === 'idCardModal') document.title = BASE_APP_TITLE; };
 window.showToast = (m, type="ok") => { const t=$("toast"); t.textContent=m; t.style.borderColor = type==="err"?"#ef4444":"#22c55e"; t.classList.add("show"); setTimeout(()=>t.classList.remove("show"), 3000); };
-function todayISO(){ const d=new Date(); d.setHours(0,0,0,0); return d.toISOString().slice(0,10); }
+function todayISO(){ const d=new Date(); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,'0'); const day=String(d.getDate()).padStart(2,'0'); return `${y}-${m}-${day}`; }
 
 function toDate(iso){ 
     if(!iso) return new Date();
