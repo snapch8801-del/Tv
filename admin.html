@@ -1067,7 +1067,7 @@ window.confirmExtend = async () => {
   else { const recToExtend = data.find(x => x.id === currentRowId); logAction("تجديد اشتراك", `الاسم: ${recToExtend.name}، إضافة: ${val} ${unit}`); } 
   const processRecord = (rec) => { 
     if(rec.subType === 'sessions') { rec.sessionsLeft = (parseInt(rec.sessionsLeft)||0) + val; rec.sessionsTotal = (parseInt(rec.sessionsTotal)||0) + val; } 
-    else { const endD = new Date(rec.end); if(unit === "months") { endD.setMonth(endD.getMonth() + val); rec.months = (parseInt(rec.months)||0) + val; } else { endD.setDate(endD.getDate() + val); } rec.end = endD.toISOString().split('T')[0]; } return rec; 
+    else { const endD = new Date(rec.end); if(unit === "months") { endD.setDate(endD.getDate() + (val * 30)); rec.months = (parseInt(rec.months)||0) + val; } else { endD.setDate(endD.getDate() + val); } rec.end = endD.toISOString().split('T')[0]; } return rec; 
   }; 
   if(extendMode === "bulk") { data = data.map(x => selectedIds.has(x.id) ? processRecord(x) : x); selectedIds.clear(); window.updateBulkUI(); } 
   else { data = data.map(x => x.id === currentRowId ? processRecord(x) : x); } await firebasePush(); window.render(); closeModal("extendModal"); showToast("تم التجديد 🔁"); 
@@ -1201,7 +1201,7 @@ window.saveSubscription = async () => {
   const priceInput = $("price").value; const priceFloat = parseFloat(priceInput) || 0; const paidInput = $("paidAmount").value; const paidFloat = paidInput === "" ? priceFloat : (parseFloat(paidInput) || 0);
   let pStatus = 'paid'; if(paidFloat === 0 && priceFloat > 0) pStatus = 'unpaid'; else if(paidFloat < priceFloat) pStatus = 'partial';
   const actionName = editingId ? "تعديل اشتراك" : "إضافة اشتراك"; logAction(actionName, `الاسم: ${nameVal} - الخدمة: ${serviceVal}`); 
-  let endISO = ""; if(subType === 'time') { const endD = new Date(start); endD.setMonth(endD.getMonth() + months); endISO = endD.toISOString().split('T')[0]; } if(subType === 'sessions' && isNaN(sessionsLft)) sessionsLft = sessionsTot; 
+  let endISO = ""; if(subType === 'time') { const endD = new Date(start); endD.setDate(endD.getDate() + (months * 30)); endISO = endD.toISOString().split('T')[0]; } if(subType === 'sessions' && isNaN(sessionsLft)) sessionsLft = sessionsTot; 
   const alertEl = $("alertDays");
   const rec = { id: editingId || Date.now().toString(), subType, name: nameVal, email: emailVal, messengerLink: messengerLinkVal, tags: $("tags").value, phone: $("phone").value, countryCode: $("countryCode").value, serviceType: serviceVal, alertDays: (alertEl && alertEl.value)?alertEl.value:7, price: priceInput, currency: $("currency").value, paymentStatus: pStatus, paidAmount: paidFloat, notes: $("notes").value };
   if(subType === 'time') { rec.start = start; rec.months = months; rec.end = endISO; } else { rec.sessionsTotal = sessionsTot; rec.sessionsLeft = sessionsLft; }
